@@ -1,0 +1,94 @@
+
+
+import ply.yacc as yacc
+
+
+from .lexer import *
+
+from .theory.trs import *
+from .theory.dirac_syntax import *
+
+from .components import py_cscalar
+from .components import str_abase, wolfram_abase
+
+precedence = (
+)
+
+def p_term(p):
+    '''
+    trs-term    : trs-var
+                | diracbase
+                | diracscalar
+    '''
+    p[0] = p[1]
+
+def p_trs_var(p):
+    '''
+    trs-var     : ID
+    '''
+    p[0] = TRSVar(p[1])
+
+def p_diracbase(p):
+    '''
+    diracbase : diracbase-atom
+              | diracbase-pair
+              | diracbase-fst
+              | diracbase-snd
+    '''
+    p[0] = p[1]
+
+def p_diracbase_atom(p):
+    '''
+    diracbase-atom : ATOMICBASE_EXPR
+    '''
+    p[0] = DiracBaseAtom(wolfram_abase.WolframABase(p[1]))
+
+def p_diracbase_pair(p):
+    '''
+    diracbase-pair : '(' trs-term ',' trs-term ')'
+    '''
+    p[0] = DiracBasePair(p[2], p[4])
+
+def p_diracbase_fst(p):
+    '''
+    diracbase-fst : FST '(' trs-term ')'
+    '''
+    p[0] = DiracBaseFst(p[3])
+
+def p_diracbase_snd(p):
+    '''
+    diracbase-snd : SND '(' trs-term ')'
+    '''
+    p[0] = DiracBaseSnd(p[3])
+
+
+def p_diracscalar(p):
+    '''
+    diracscalar : diracscalar-c
+                | diracscalar-delta
+    '''
+    p[0] = p[1]
+
+def p_diracscalar_c(p):
+    '''
+    diracscalar-c : COMPLEXSCALAR_EXPR
+    '''
+    p[0] = DiracScalarC(py_cscalar.PyCScalar(complex(p[1])))
+
+def p_diracscalar_delta(p):
+    '''
+    diracscalar-delta   : DELTA '(' trs-term ',' trs-term ')'
+    '''
+    p[0] = DiracScalarDelta(p[3], p[5])
+
+
+def p_error(p):
+    if p is None:
+        raise RuntimeError("Syntax error: unexpected end of file.")
+    raise RuntimeError("Syntax error in input: '" + str(p.value) + "'.")
+
+# Build the lexer
+parser = yacc.yacc()
+
+def parse(s: str) -> TRSTerm:
+    return parser.parse(s)
