@@ -40,7 +40,7 @@ class TRSVar(TRSTerm):
         return self.name
     
     def __repr__(self) -> str:
-        return f"Var({self.name})"
+        return self.name
     
     def __eq__(self, other: TRSVar) -> bool:
         return isinstance(other, TRSVar) and self.name == other.name

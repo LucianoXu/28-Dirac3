@@ -2,33 +2,58 @@
 from ply import lex
 
 reserved = {
-    'fst'        : 'FST',
-    'snd'        : 'SND',
+    'PAIR'       : 'PAIR',
+    'FST'        : 'FST',
+    'SND'        : 'SND',
+    
+    # note: the symbol "C" for complex scalars is ommited
+    'DELTA'      : 'DELTA',
+    'ADDS'       : 'ADDS',      # infix binary
+    'MLTS'       : 'MLTS',      # infix binary
+    'CONJS'      : 'CONJS',
+    'DOT'        : 'DOT',       # infix binary
+
+    'ZEROK'      : 'ZEROK',
+    'KET'        : 'KET',
+    'ADJK'       : 'ADJK',
+    'SCRK'       : 'SCRK',      # infix binary
+    'ADDK'       : 'ADDK',      # infix binary
+    'MLTK'       : 'MLTK',      # infix binary
+    'TSRK'       : 'TSRK',      # infix binary
+
+    'ZEROB'      : 'ZEROB',
+    'BRA'        : 'BRA',
+    'ADJB'       : 'ADJB',
+    'SCRB'       : 'SCRB',      # infix binary
+    'ADDB'       : 'ADDB',      # infix binary
+    'MLTB'       : 'MLTB',      # infix binary
+    'TSRB'       : 'TSRB',      # infix binary
+
+    'ZEROO'      : 'ZEROO',
+    'ONEO'       : 'ONEO', 
+    'OUTER'      : 'OUTER',     # infix binary
+    'ADJO'       : 'ADJO',
+    'SCRO'       : 'SCRO',      # infix binary
+    'ADDO'       : 'ADDO',      # infix binary
+    'MLTO'       : 'MLTO',      # infix binary
+    'TSRO'       : 'TSRO',      # infix binary
+    
 }
 
 tokens = [
     # 'INT', 
-    'ID', 
-    'ADDS',
-    'MLTS',
-    'CONJS',
-    # 'ZERO',
-    # 'ONE',
-    'DELTA',
-    # 'KET_PARENTHESES',
-    # 'BRA_PARENTHESES',
-    # 'CDOT',
-    # 'OTIMES', 
+    'ID',
+
+    # escape to complex scalar
     'COMPLEXSCALAR_EXPR',
+
+    # escape to atomic base
     'ATOMICBASE_EXPR',
+
     ] + list(reserved.values())
 
-literals = ['(', ')', ',', '+']
+literals = ['(', ')', ',']
 
-t_DELTA = r'δ|\\delta'
-t_ADDS = r'\\ADDS'
-t_MLTS = r'\\MLTS'
-t_CONJS = r'\^\*'
 
 def t_ID(t):
     r'[a-zA-Z\_][a-zA-Z0-9\_]*'
