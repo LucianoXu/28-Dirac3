@@ -8,13 +8,5 @@
 from diracdec import *
 
 if __name__ == "__main__":
-    try:
-        print(parse(''' snd((fst(("1.1", _b_)) , 'ss')) ''' ))
-        a = parse(''' 'ss + ss' ''')
-        b = parse(''' '2 ss' ''')
-        print(a == b)
-        print(hash(a))
-        print(hash(b))
-
-    finally:
-        wolfram_backend.wolfram_terminate()
+    with wolfram_backend.wolfram_session():
+        pass

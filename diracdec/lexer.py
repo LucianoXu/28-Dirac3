@@ -9,8 +9,9 @@ reserved = {
 tokens = [
     # 'INT', 
     'ID', 
-    # 'Z_TYPE', 
-    # 'C_TYPE', 
+    'ADDS',
+    'MLTS',
+    'CONJS',
     # 'ZERO',
     # 'ONE',
     'DELTA',
@@ -22,9 +23,12 @@ tokens = [
     'ATOMICBASE_EXPR',
     ] + list(reserved.values())
 
-literals = ['(', ')', ',']
+literals = ['(', ')', ',', '+']
 
 t_DELTA = r'δ|\\delta'
+t_ADDS = r'\\ADDS'
+t_MLTS = r'\\MLTS'
+t_CONJS = r'\^\*'
 
 def t_ID(t):
     r'[a-zA-Z\_][a-zA-Z0-9\_]*'
