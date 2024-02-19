@@ -11,3 +11,5 @@ from .atomic_base import *
 from .trs import *
 
 from .dirac_syntax import *
+
+from .dirac_trs import diractrs

@@ -4,6 +4,8 @@ from abc import ABC, abstractmethod
 
 from typing import Tuple, List, Type
 
+from diracdec.theory.trs import Subst
+
 from .atomic_base import AtomicBase
 from .complex_scalar import ComplexScalar
 
@@ -12,7 +14,8 @@ from .trs import TRSTerm, TRSVar, TRS_AC, TRSCommBinary, TRSInfixBinary
 
 
 class DiracSyntax(TRSTerm):
-    ...
+    def substitute(self, sigma: Subst) -> TRSTerm:
+        return super().substitute(sigma)
 
 ############################################
 # DiracBase
@@ -76,7 +79,7 @@ class ScalarC(DiracScalar):
     fsymbol_print = "ScalarC"
     fsymbol = "ScalarC"
 
-    def __init__(self, c : ComplexScalar):
+    def __init__(self, c : ComplexScalar|TRSVar):
         super().__init__(c)
 
     def __str__(self) -> str:
