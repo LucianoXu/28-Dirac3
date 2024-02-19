@@ -101,20 +101,20 @@ class ScalarAdd(DiracScalar, TRS_AC):
     fsymbol_print = '+'
     fsymbol = 'ADDS'
 
-    def __init__(self, tup : Tuple[DiracScalar | TRSVar, ...]):
-        TRS_AC.__init__(self, tup)
+    def __init__(self, *tup : DiracScalar | TRSVar):
+        TRS_AC.__init__(self, *tup)
 
     
 class ScalarMlt(DiracScalar, TRS_AC):
     fsymbol_print = '×'
     fsymbol = 'MLTS'
 
-    def __init__(self, tup : Tuple[DiracScalar | TRSVar, ...]):
-        TRS_AC.__init__(self, tup)
+    def __init__(self, *tup : DiracScalar | TRSVar):
+        TRS_AC.__init__(self, *tup)
 
 
 class ScalarConj(DiracScalar):
-    fsymbol_print = "CONJs"
+    fsymbol_print = "CONJS"
     fsymbol = "CONJS"
 
     def __init__(self, s : DiracScalar | TRSVar):
@@ -186,8 +186,8 @@ class KetAdd(DiracKet, TRS_AC):
     fsymbol_print = '+'
     fsymbol = 'ADDK'
 
-    def __init__(self, tup : Tuple[DiracKet|TRSVar, ...]):
-        TRS_AC.__init__(self, tup)
+    def __init__(self, *tup : DiracKet|TRSVar):
+        TRS_AC.__init__(self, *tup)
     
 class KetApply(DiracKet, TRSInfixBinary):
     fsymbol_print = "·"
@@ -259,8 +259,8 @@ class BraAdd(DiracBra, TRS_AC):
     fsymbol_print = '+'
     fsymbol = 'ADDB'
 
-    def __init__(self, tup : Tuple[DiracBra|TRSVar, ...]):
-        TRS_AC.__init__(self, tup)
+    def __init__(self, *tup : DiracBra|TRSVar):
+        TRS_AC.__init__(self, *tup)
     
 
 class BraApply(DiracBra, TRSInfixBinary):
@@ -347,8 +347,8 @@ class OpAdd(DiracOp, TRS_AC):
     fsymbol_print = '+'
     fsymbol = 'ADDO'
 
-    def __init__(self, tup : Tuple[DiracOp|TRSVar, ...]):
-        TRS_AC.__init__(self, tup)
+    def __init__(self, *tup : DiracOp|TRSVar):
+        TRS_AC.__init__(self, *tup)
 
     
 class OpApply(DiracOp, TRSInfixBinary):

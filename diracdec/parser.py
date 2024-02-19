@@ -80,13 +80,13 @@ def p_diracscalar3(p):
     '''
     diracscalar : trs-term ADDS trs-term
     '''
-    p[0] = ScalarAdd((p[1], p[3]))
+    p[0] = ScalarAdd(p[1], p[3])
 
 def p_diracscalar4(p):
     '''
     diracscalar : trs-term MLTS trs-term
     '''
-    p[0] = ScalarMlt((p[1], p[3]))
+    p[0] = ScalarMlt(p[1], p[3])
 
 def p_diracscalar5(p):
     '''
@@ -131,7 +131,7 @@ def p_diracket5(p):
     '''
     diracket    : trs-term ADDK trs-term
     '''
-    p[0] = KetAdd((p[1], p[3]))
+    p[0] = KetAdd(p[1], p[3])
 
 def p_diracket6(p):
     '''
@@ -174,7 +174,7 @@ def p_diracbra5(p):
     '''
     diracbra    : trs-term ADDB trs-term
     '''
-    p[0] = BraAdd((p[1], p[3]))
+    p[0] = BraAdd(p[1], p[3])
 
 def p_diracbra6(p):
     '''
@@ -222,7 +222,7 @@ def p_diracop6(p):
     '''
     diracop     : trs-term ADDO trs-term
     '''
-    p[0] = OpAdd((p[1], p[3]))
+    p[0] = OpAdd(p[1], p[3])
 
 def p_diracop7(p):
     '''

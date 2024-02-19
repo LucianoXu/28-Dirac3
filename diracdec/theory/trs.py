@@ -46,7 +46,7 @@ class TRSTerm(ABC):
     def __hash__(self) -> int:
         h = hashlib.md5(self.fsymbol.encode())
         for arg in self.args:
-            h.update(hash(arg).to_bytes(16, 'big'))
+            h.update(abs(hash(arg)).to_bytes(16, 'big'))
 
         return int(h.hexdigest(), 16)
     
@@ -297,7 +297,7 @@ class TRSCommBinary(TRSTerm):
         return super().substitute(sigma)
     
 class TRS_AC(TRSTerm):
-    def __init__(self, tup: Tuple):
+    def __init__(self, *tup: Any):
         '''
         The method of flatten the tuple of arguments for the ac_symbol.
         Assume that the items in tup are already flattened.
@@ -441,18 +441,12 @@ class TRS:
             new_term = rule.rewrite_method(rule, term)
             if new_term is not None:
                 return new_term
-            
-        if isinstance(term, TRSVar):
-            return None
-        
-        elif isinstance(term, TRSTerm):
-            # try to rewrite the subterms
-            for i in range(len(term.args)):
-                new_subterm = self.rewrite(term.args[i])
-                if new_subterm is not None:
-                    return type(term)(*term.args[:i], new_subterm, *term.args[i+1:])
+                        
+            elif isinstance(term, TRSTerm):
+                # try to rewrite the subterms
+                for i in range(len(term.args)):
+                    new_subterm = self.rewrite(term.args[i])
+                    if new_subterm is not None:
+                        return type(term)(*term.args[:i], new_subterm, *term.args[i+1:])
 
-            return None
-        
-        else:
-            return None
+        return None

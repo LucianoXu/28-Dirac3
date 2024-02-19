@@ -34,7 +34,7 @@ class PyCScalar(ComplexScalar):
         return f'{str(self.c)}'
     
     def __repr__(self) -> str:
-        return f'PyCScalar({self.c}))'
+        return f'PyCScalar({self.c})'
     
     def __eq__(self, other: PyCScalar) -> bool:
         return isinstance(other, PyCScalar) and self.c == other.c

@@ -22,11 +22,11 @@ def test_basic_S():
         assert a == b
 
         a = parse(r''' A ADDS B ''')
-        b = ScalarAdd((TRSVar('A'), TRSVar('B')))
+        b = ScalarAdd(TRSVar('A'), TRSVar('B'))
         assert a == b
 
         a = parse(r''' A MLTS B MLTS A ''')
-        b = ScalarMlt((TRSVar('A'), TRSVar('A'), TRSVar('B')))
+        b = ScalarMlt(TRSVar('A'), TRSVar('A'), TRSVar('B'))
         assert a == b
         
         a = parse(r''' CONJS(A) ''')
@@ -56,7 +56,7 @@ def test_basic_K():
         assert a == b
 
         a = parse(r''' K1 ADDK K2 ADDK K3 ''')
-        b = KetAdd((TRSVar('K1'), TRSVar('K2'), TRSVar('K3')))
+        b = KetAdd(TRSVar('K1'), TRSVar('K2'), TRSVar('K3'))
         assert a == b
 
         a = parse(r''' O MLTK K ''')
@@ -86,7 +86,7 @@ def test_basic_B():
         assert a == b
 
         a = parse(r''' B1 ADDB B2 ADDB B3 ''')
-        b = BraAdd((TRSVar('B1'), TRSVar('B2'), TRSVar('B3')))
+        b = BraAdd(TRSVar('B1'), TRSVar('B2'), TRSVar('B3'))
         assert a == b
 
         a = parse(r''' B MLTB O ''')
@@ -120,7 +120,7 @@ def test_basic_O():
         assert a == b
 
         a = parse(r''' O1 ADDO O2 ADDO O3 ''')
-        b = OpAdd((TRSVar('O1'), TRSVar('O2'), TRSVar('O3')))
+        b = OpAdd(TRSVar('O1'), TRSVar('O2'), TRSVar('O3'))
         assert a == b
 
         a = parse(r''' O1 MLTO O2 ''')
