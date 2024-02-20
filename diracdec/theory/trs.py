@@ -348,7 +348,7 @@ class TRS_AC(TRSTerm):
         return f'({f" {self.fsymbol} ".join(map(repr, self.args))})'
     
     def substitute(self, sigma: Subst) -> TRSTerm:
-        return type(self)(tuple(arg.substitute(sigma) for arg in self.args))
+        return type(self)(*tuple(arg.substitute(sigma) for arg in self.args))
     
     def remained_terms(self, *idx: int):
         '''
@@ -371,7 +371,7 @@ def check_special_symbol(term : TRSTerm) -> bool:
         return True
     else:
         if isinstance(term, TRSVar):
-            return True
+            return False
         else:
             for arg in term.args:
                 if check_special_symbol(arg):
@@ -395,12 +395,15 @@ class TRSRule:
     def __init__(self, 
                  lhs: TRSTerm|str, 
                  rhs: TRSTerm|str,
-                 rewrite_method : Callable[[TRSRule, TRSTerm], TRSTerm|None] = normal_rewrite,
-):
+                 rewrite_method : Callable[[TRSRule, TRSTerm], TRSTerm|None] = normal_rewrite):
         '''
         note: the rewrite_method checks whether the current rule can rewrite the given term (not including subterms)
         '''
         self.rewrite_method = rewrite_method
+
+        if isinstance(lhs, TRSTerm) and check_special_symbol(lhs):
+            raise ValueError(f"The rule {{{lhs}->{rhs}}} should not contain special symbols in the LHS.")
+
         self.lhs = lhs
         self.rhs = rhs
 
@@ -410,29 +413,6 @@ class TRSRule:
     def __repr__(self) -> str:
         return f'{repr(self.lhs)} -> {repr(self.rhs)}'
 
-
-class NormalRule:
-    def __init__(self, lhs : TRSTerm, rhs : TRSTerm):
-        if not check_special_symbol(lhs) or not check_special_symbol(rhs):
-            raise ValueError("The rule should not contain special symbols.")
-        self.lhs = lhs
-        self.rhs = rhs
-
-    def __str__(self) -> str:
-        return f'{self.lhs} → {self.rhs}'
-    
-    def __repr__(self) -> str:
-        return f'{repr(self.lhs)} -> {repr(self.rhs)}'
-    
-    def rewrite(self, term : TRSTerm) -> TRSTerm | None:
-        '''
-        try rewriting the term using this rule. Return the result if successful, otherwise return None.
-        '''
-        subst = Matching.single_match(self.lhs, term)
-        if subst is None:
-            return None
-        else:
-            return subst(self.rhs)
         
 # define rule for AC symbols by defining new class
         

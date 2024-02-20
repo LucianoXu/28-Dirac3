@@ -329,25 +329,16 @@ SCR_DOT_2 = TRSRule(
 )
 rules.append(SCR_DOT_2)
 
-def scr_dot_3(rule, term):
-    if isinstance(term, ScalarDot):
-        if isinstance(term.args[0], BraScal):
-            return ScalarMlt(term.args[0].args[0], ScalarDot(term.args[0].args[1], term.args[1]))
 SCR_DOT_3 = TRSRule(
-    lhs = "(S0 SCRB B0) DOT K0",
-    rhs = "S0 MLTS (B0 DOT K0)",
-    rewrite_method=scr_dot_3
+    lhs = parse(r'''(S0 SCRB B0) DOT K0'''),
+    rhs = parse(r'''S0 MLTS (B0 DOT K0)''')
 )
 rules.append(SCR_DOT_3)
 
-def scr_dot_4(rule, term):
-    if isinstance(term, ScalarDot):
-        if isinstance(term.args[1], KetScal):
-            return ScalarMlt(term.args[1].args[0], ScalarDot(term.args[0], term.args[1].args[1]))
+
 SCR_DOT_4 = TRSRule(
-    lhs = "B0 DOT (S0 SCRK K0)",
-    rhs = "S0 MLTS (B0 DOT K0)",
-    rewrite_method=scr_dot_4
+    lhs = parse(r'''B0 DOT (S0 SCRK K0)'''),
+    rhs = parse(r'''S0 MLTS (B0 DOT K0)''')
 )
 rules.append(SCR_DOT_4)
 
@@ -383,43 +374,23 @@ SCR_DOT_7 = TRSRule(
 rules.append(SCR_DOT_7)
 
 
-def scr_dot_8(rule, term):
-    if isinstance(term, ScalarDot):
-        if isinstance(term.args[0], BraTensor) and isinstance(term.args[1], KetBase):
-            term1 = ScalarDot(term.args[0].args[0], KetBase(BaseFst(term.args[1].args[0])))
-            term2 = ScalarDot(term.args[0].args[1], KetBase(BaseSnd(term.args[1].args[0])))
-            return ScalarMlt(term1, term2)
 SCR_DOT_8 = TRSRule(
-    lhs = "(B1 TSRB B2) DOT ket(t)",
-    rhs = "(B1 DOT ket(fst(t))) MLTS (B2 DOT ket(snd(t)))",
-    rewrite_method=scr_dot_8
+    lhs = parse(r'''(B1 TSRB B2) DOT KET(t)'''),
+    rhs = parse(r'''(B1 DOT KET(FST(t))) MLTS (B2 DOT KET(SND(t)))''')
 )
 rules.append(SCR_DOT_8)
 
-def scr_dot_9(rule, term):
-    if isinstance(term, ScalarDot):
-        if isinstance(term.args[0], BraBase) and isinstance(term.args[1], KetTensor):
-            term1 = ScalarDot(BraBase(BaseFst(term.args[0].args[0])), term.args[1].args[0])
-            term2 = ScalarDot(BraBase(BaseSnd(term.args[0].args[0])), term.args[1].args[1])
-            return ScalarMlt(term1, term2)
         
 SCR_DOT_9 = TRSRule(
-    lhs = "bra(s) DOT (K1 TSRK K2)",
-    rhs = "(bra(fst(s)) DOT K1) MLTS (bra(snd(s)) DOT K2)",
-    rewrite_method=scr_dot_9
+    lhs = parse(r'''BRA(s) DOT (K1 TSRK K2)'''),
+    rhs = parse(r'''(BRA(FST(s)) DOT K1) MLTS (BRA(SND(s)) DOT K2)''')
 )
 rules.append(SCR_DOT_9)
 
-def scr_dot_10(rule, term):
-    if isinstance(term, ScalarDot):
-        if isinstance(term.args[0], BraTensor) and isinstance(term.args[1], KetTensor):
-            term1 = ScalarDot(term.args[0].args[0], term.args[1].args[0])
-            term2 = ScalarDot(term.args[0].args[1], term.args[1].args[1])
-            return ScalarMlt(term1, term2)
+        
 SCR_DOT_10 = TRSRule(
-    lhs = "(B1 TSRB B2) DOT (K1 TSRK K2)",
-    rhs = "(B1 DOT K1) MLTS (B2 DOT K2)",
-    rewrite_method=scr_dot_10
+    lhs = parse(r'''(B1 TSRB B2) DOT (K1 TSRK K2)'''),
+    rhs = parse(r'''(B1 DOT K1) MLTS (B2 DOT K2)'''),
 )
 rules.append(SCR_DOT_10)
 
@@ -442,4 +413,110 @@ SCR_SORT_3 = TRSRule(
 rules.append(SCR_SORT_3)
 
 
+
+
+#######################################
+# Ket
+
+KET_ADJ_1 = TRSRule(
+    lhs = parse(r'''ADJK(ZEROB)'''),
+    rhs = parse(r'''ZEROK''')
+)
+rules.append(KET_ADJ_1)
+
+KET_ADJ_2 = TRSRule(
+    lhs = parse(r'''ADJK(BRA(s))'''),
+    rhs = parse(r'''KET(s)''')
+)
+rules.append(KET_ADJ_2)
+
+KET_ADJ_3 = TRSRule(
+    lhs = parse(r'''ADJK(ADJB(K0))'''),
+    rhs = parse(r'''K0''')
+)
+rules.append(KET_ADJ_3)
+
+KET_ADJ_4 = TRSRule(
+    lhs = parse(r'''ADJK(S0 SCRB B0)'''),
+    rhs = parse(r'''CONJS(S0) SCRK ADJK(K0)'''),
+)
+rules.append(KET_ADJ_4)
+
+def ket_adj_5_rewrite(rule, term):
+    if isinstance(term, KetAdj):
+        if isinstance(term.args[0], BraAdd):
+            new_args = tuple(KetAdj(arg) for arg in term.args[0].args)
+            return KetAdd(*new_args)
+KET_ADJ_5 = TRSRule(
+    lhs = "ADJK(B1 ADDB B2)",
+    rhs = "ADJK(B1) ADDB ADJK(B2)",
+    rewrite_method=ket_adj_5_rewrite
+)
+rules.append(KET_ADJ_5)
+
+KET_ADJ_6 = TRSRule(
+    lhs = parse(r'''ADJK(B MLTB O)'''),
+    rhs = parse(r'''ADJO(O) MLTK ADJK(B)''')
+)
+rules.append(KET_ADJ_6)
+
+KET_ADJ_7 = TRSRule(
+    lhs = parse(r''' ADJK(B1 TSRB B2) '''),
+    rhs = parse(r''' ADJK(B1) TSRK ADJK(B2) ''')
+)
+rules.append(KET_ADJ_7)
+
+
+def ket_scal_1(rule, term):
+    if isinstance(term, KetScal):
+        if term.args[0] == C0:
+            return KetZero()
+        
+KET_SCAL_1 = TRSRule(
+    lhs = "C(0) SCRK K0",
+    rhs = "0K",
+    rewrite_method=ket_scal_1
+)
+rules.append(KET_SCAL_1)
+
+def ket_scal_2(rule, term):
+    if isinstance(term, KetScal):
+        if term.args[0] == C1:
+            return term.args[1]
+KET_SCAL_2 = TRSRule(
+    lhs = "C(1) SCRK K0",
+    rhs = "K0",
+    rewrite_method=ket_scal_2
+)
+rules.append(KET_SCAL_2)
+
+KET_SCAL_3 = TRSRule(
+    lhs = parse(r'''S0 SCRK ZEROK'''),
+    rhs = parse(r''' ZEROK ''')
+)
+rules.append(KET_SCAL_3)
+
+    
+KET_SCAL_4 = TRSRule(
+    lhs = parse(r'''S1 SCRK (S2 SCRK K0)'''),
+    rhs = parse(r'''(S1 MLTS S2) SCRK K0'''),
+)
+rules.append(KET_SCAL_4)
+
+
+def ket_scal_5_rewrite(rule, term):
+    if isinstance(term, KetScal):
+        if isinstance(term.args[1], KetAdd):
+            new_args = tuple(KetScal(term.args[0], arg) for arg in term.args[1].args)
+            return KetAdd(*new_args)
+        
+KET_SCAL_5 = TRSRule(
+    lhs = "S0 SCRK (K1 ADDK K2)",
+    rhs = "(S0 SCRK K1) ADDK (S0 SCRK K2)",
+    rewrite_method=ket_scal_5_rewrite
+)
+rules.append(KET_SCAL_5)
+
+
+# build the trs
 diractrs = TRS(rules)

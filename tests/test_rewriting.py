@@ -203,3 +203,83 @@ def test_SCR_SORT_3():
         a = parse(r''' (B1 TSRB B2) DOT ((O1 TSRO O2) MLTK K0) ''')
         b = parse(r''' ((B1 MLTB O1) TSRB (B2 MLTB O2)) DOT K0''')
         assert diractrs.normalize(a) == diractrs.normalize(b)
+
+def test_KET_ADJ_1():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' ADJK(ZEROB) ''')
+        b = parse(r''' ZEROK ''')
+        assert diractrs.normalize(a) == diractrs.normalize(b)
+
+def test_KET_ADJ_2():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' ADJK(BRA(s)) ''')
+        b = parse(r''' KET(s) ''')
+        assert diractrs.normalize(a) == diractrs.normalize(b)
+
+        a = parse(r''' ADJK(BRA('1 + 1')) ''')
+        b = parse(r''' KET('2') ''')
+        assert diractrs.normalize(a) == diractrs.normalize(b)
+
+def test_KET_ADJ_3():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' ADJK(ADJB(K))''')
+        b = parse(r''' K ''')
+        assert diractrs.normalize(a) == diractrs.normalize(b)
+
+def test_KET_ADJ_4():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' ADJK(S0 SCRB B0)''')
+        b = parse(r''' CONJS(S0) SCRK ADJK(K0) ''')
+        assert diractrs.normalize(a) == diractrs.normalize(b)
+
+def test_KET_ADJ_5():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' ADJK(B1 ADDB B2 ADDB B3) ''')
+        b = parse(r''' ADJK(B1) ADDK ADJK(B2) ADDK ADJK(B3)''')
+        assert diractrs.normalize(a) == diractrs.normalize(b)
+
+def test_KET_ADJ_6():
+    with wolfram_backend.wolfram_session():
+        a = parse(r'''ADJK(B MLTB O)''')
+        b = parse(r'''ADJO(O) MLTK ADJK(B)''')
+        assert diractrs.normalize(a) == diractrs.normalize(b)
+
+def test_KET_ADJ_7():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' ADJK(B1 TSRB B2) ''')
+        b = parse(r''' ADJK(B1) TSRK ADJK(B2) ''')
+        assert diractrs.normalize(a) == diractrs.normalize(b)
+
+def test_KET_SCAL_1():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' "0" SCRK K0 ''')
+        b = parse(r''' ZEROK ''')
+        assert diractrs.normalize(a) == diractrs.normalize(b)
+
+def test_KET_SCAL_2():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' "1" SCRK K0 ''')
+        b = parse(r''' K0 ''')
+        assert diractrs.normalize(a) == diractrs.normalize(b)
+
+def test_KET_SCAL_3():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' a SCRK ZEROK ''')
+        b = parse(r''' ZEROK ''')
+        assert diractrs.normalize(a) == diractrs.normalize(b)
+
+def test_KET_SCAL_4():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' a SCRK (b SCRK K) ''')
+        b = parse(r''' (a MLTS b) SCRK K ''')
+        assert diractrs.normalize(a) == diractrs.normalize(b)
+
+        a = parse(r''' "a" SCRK ("b" SCRK K) ''')
+        b = parse(r''' "a b" SCRK K ''')
+        assert diractrs.normalize(a) == diractrs.normalize(b)
+
+def test_KET_SCAL_5():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' S0 SCRK (K1 ADDK K2 ADDK K3) ''')
+        b = parse(r''' (S0 SCRK K1) ADDK (S0 SCRK K2) ADDK (S0 SCRK K3) ''')
+        assert diractrs.normalize(a) == diractrs.normalize(b)
