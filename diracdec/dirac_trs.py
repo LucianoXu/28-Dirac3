@@ -518,5 +518,201 @@ KET_SCAL_5 = TRSRule(
 rules.append(KET_SCAL_5)
 
 
+def ket_add_1(rule, term):
+    if isinstance(term, KetAdd):
+        for i in range(len(term.args)):
+            if term.args[i] == KetZero():
+                return KetAdd(*term.remained_terms(i))
+KET_ADD_1 = TRSRule(
+    lhs = "0K ADDK K0",
+    rhs = "K0",
+    rewrite_method=ket_add_1
+)
+rules.append(KET_ADD_1)
+
+def ket_add_2(rule, term):
+    if isinstance(term, KetAdd):
+        for i in range(len(term.args)):
+            for j in range(i+1, len(term.args)):
+                if term.args[i] == term.args[j]:
+                    new_args = (KetScal(C2, term.args[i]),) + term.remained_terms(i, j)
+                    return KetAdd(*new_args)
+KET_ADD_2 = TRSRule(
+    lhs = "K0 ADDK K0",
+    rhs = "C(1 + 1) SCRK K0",
+    rewrite_method=ket_add_2
+)
+rules.append(KET_ADD_2)
+
+def ket_add_3(rule, term):
+    if isinstance(term, KetAdd):
+        for i in range(len(term.args)):
+            if isinstance(term.args[i], KetScal):
+                for j in range(len(term.args)):
+                    if term.args[i].args[1] == term.args[j]:
+                        new_args = (
+                            KetScal(ScalarAdd(term.args[i].args[0], C1), term.args[j]),) + term.remained_terms(i, j)
+                        return KetAdd(*new_args)
+KET_ADD_3 = TRSRule(
+    lhs = "(S0 SCRK K0) ADDK K0",
+    rhs = "C(1 + S0) SCRK K0",
+    rewrite_method=ket_add_3
+)
+rules.append(KET_ADD_3)
+
+def ket_add_4(rule, term):
+    if isinstance(term, KetAdd):
+        for i in range(len(term.args)):
+            if isinstance(term.args[i], KetScal):
+                for j in range(i+1, len(term.args)):
+                    if isinstance(term.args[j], KetScal):
+                        if term.args[i].args[1] == term.args[j].args[1]:
+                            new_args = (KetScal(ScalarAdd(term.args[i].args[0], term.args[j].args[0]), term.args[i].args[1]),) + term.remained_terms(i, j)
+                            return KetAdd(*new_args)
+KET_ADD_4 = TRSRule(
+    lhs = "(S1 SCRK K0) ADDK (S2 SCRK K0)",
+    rhs = "(S1 ADDS S2) SCRK K0",
+    rewrite_method=ket_add_4
+)
+rules.append(KET_ADD_4)
+
+
+KET_MUL_1 = TRSRule(
+    lhs = parse(r'''ZEROO MLTK K0'''),
+    rhs = parse(r'''ZEROK''')
+)
+rules.append(KET_MUL_1)
+
+KET_MUL_2 = TRSRule(
+    lhs = parse(r'''O0 MLTK ZEROK'''),
+    rhs = parse(r'''ZEROK''')
+)
+rules.append(KET_MUL_2)
+
+KET_MUL_3 = TRSRule(
+    lhs = parse(r'''ONEO MLTK K0'''),
+    rhs = parse(r'''K0''')
+)
+rules.append(KET_MUL_3)
+
+KET_MUL_4 = TRSRule(
+    lhs = parse(r'''(S0 SCRO O0) MLTK K0'''),
+    rhs = parse(r'''S0 SCRK (O0 MLTK K0)''')
+)
+rules.append(KET_MUL_4)
+
+KET_MUL_5 = TRSRule(
+    lhs = parse(r'''O0 MLTK (S0 SCRK K0)'''),
+    rhs = parse(r'''S0 SCRK (O0 MLTK K0)''')
+)
+rules.append(KET_MUL_5)
+
+
+def ket_mul_6_rewrite(rule, term):
+    if isinstance(term, KetApply) and isinstance(term[0], OpAdd):
+        new_args = tuple(KetApply(arg, term[1]) for arg in term[0].args)
+        return KetAdd(*new_args)
+KET_MUL_6 = TRSRule(
+    lhs = "(O1 ADDO O2) MLTK K0",
+    rhs = "(O1 MLTK K0) ADDK (O2 MLTK K0)",
+    rewrite_method=ket_mul_6_rewrite
+)
+rules.append(KET_MUL_6)
+
+
+def ket_mul_7_rewrite(rule, term):
+    if isinstance(term, KetApply) and isinstance(term[1], KetAdd):
+        new_args = tuple(KetApply(term[0], arg) for arg in term[1].args)
+        return KetAdd(*new_args)
+KET_MUL_7 = TRSRule(
+    lhs = "O0 MLTK (K1 ADDK K2)",
+    rhs = "(O0 MLTK K1) ADDK (O0 MLTK K2)",
+    rewrite_method=ket_mul_7_rewrite
+)
+rules.append(KET_MUL_7)
+
+KET_MUL_8 = TRSRule(
+    lhs = parse(r'''(K1 OUTER B0) MLTK K2'''),
+    rhs = parse(r'''(B0 DOT K2) SCRK K1''')
+)
+rules.append(KET_MUL_8)
+
+KET_MUL_9 = TRSRule(
+    lhs = parse(r'''(O1 MLTO O2) MLTK K0'''),
+    rhs = parse(r'''O1 MLTK (O2 MLTK K0)''')
+)
+rules.append(KET_MUL_9)
+
+
+KET_MUL_10 = TRSRule(
+    lhs = parse(r'''(O1 TSRO O2) MLTK ((O1_ TSRO O2_) MLTK K0)'''),
+    rhs = parse(r'''((O1 MLTO O1_) TSRO (O2 MLTO O2_)) MLTK K0''')
+)
+rules.append(KET_MUL_10)
+
+KET_MUL_11 = TRSRule(
+    lhs = parse(r'''(O1 TSRO O2) MLTK KET(t)'''),
+    rhs = parse(r'''(O1 MLTK KET(FST(t))) TSRK (O2 MLTK KET(SND(T)))''')
+)
+rules.append(KET_MUL_11)
+
+KET_MUL_12 = TRSRule(
+    lhs = parse(r'''(O1 TSRO O2) MLTK (K1 TSRK K2)'''),
+    rhs = parse(r'''(O1 MLTK K1) TSRK (O2 MLTK K2)''')
+)
+rules.append(KET_MUL_12)
+
+KET_TSR_1 = TRSRule(
+    lhs = parse(r'''ZEROK TSRK K0'''),
+    rhs = parse(r'''ZEROK''')
+)
+rules.append(KET_TSR_1)
+
+KET_TSR_2 = TRSRule(
+    lhs = parse(r'''K0 TSRK ZEROK'''),
+    rhs = parse(r'''ZEROK''')
+)
+rules.append(KET_TSR_2)
+
+KET_TSR_3 = TRSRule(
+    lhs = parse(r'''KET(s) TSRK KET(t)'''),
+    rhs = parse(r'''KET(PAIR(s, t))''')
+)
+rules.append(KET_TSR_3)
+
+KET_TSR_4 = TRSRule(
+    lhs = parse(r'''(S0 SCRK K1) TSRK K2'''),
+    rhs = parse(r'''S0 SCRK (K1 TSRK K2)''')
+)
+rules.append(KET_TSR_4)
+
+KET_TSR_5 = TRSRule(
+    lhs = parse(r'''K1 TSRK (S0 SCRK K2)'''),
+    rhs = parse(r'''S0 SCRK (K1 TSRK K2)''')
+)
+rules.append(KET_TSR_5)
+
+def ket_tsr_6_rewrite(rule, term):
+    if isinstance(term, KetTensor) and isinstance(term[0], KetAdd):
+        new_args = tuple(KetTensor(arg, term[1]) for arg in term[0].args)
+        return KetAdd(*new_args)
+KET_TSR_6 = TRSRule(
+    lhs = "(K1 ADDK K2) TSRK K0",
+    rhs = "(K1 TSRK K0) ADDK (K2 TSRK K0)",
+    rewrite_method=ket_tsr_6_rewrite
+)
+rules.append(KET_TSR_6)
+
+def ket_tsr_7_rewrite(rule, term):
+    if isinstance(term, KetTensor) and isinstance(term[1], KetAdd):
+        new_args = tuple(KetTensor(term[0], arg) for arg in term[1].args)
+        return KetAdd(*new_args)
+KET_TSR_7 = TRSRule(
+    lhs = "K0 TSRK (K1 ADDK K2)",
+    rhs = "(K0 TSRK K1) ADDK (K0 TSRK K2)",
+    rewrite_method=ket_tsr_7_rewrite
+)
+rules.append(KET_TSR_7)
+
 # build the trs
 diractrs = TRS(rules)
