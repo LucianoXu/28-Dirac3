@@ -11,10 +11,10 @@ import contextlib
 # the only session
 session = WolframLanguageSession()
 
-def wolfram_start():
+def session_start():
     session.start()
 
-def wolfram_terminate():
+def session_terminate():
     session.terminate()
 
 def wolfram_parser(code : str):

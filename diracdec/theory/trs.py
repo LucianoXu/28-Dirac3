@@ -50,6 +50,9 @@ class TRSTerm(ABC):
 
         return int(h.hexdigest(), 16)
     
+    def __getitem__(self, index) -> TRSTerm:
+        return self.args[index]
+    
     @property
     def size(self) -> int:
         '''
@@ -297,6 +300,20 @@ class TRSCommBinary(TRSTerm):
         return super().substitute(sigma)
     
 class TRS_AC(TRSTerm):
+
+    def __new__(cls, *tup: Any):
+        '''
+        return the element directly when tuple has only one element
+        '''
+        if len(tup) == 0:
+            raise ValueError("The tuple lengh should be at least 1.")
+        elif len(tup) == 1:
+            return tup[0]
+        else:
+            obj = object.__new__(cls)
+            TRS_AC.__init__(obj, *tup)
+            return obj
+        
     def __init__(self, *tup: Any):
         '''
         The method of flatten the tuple of arguments for the ac_symbol.
@@ -322,7 +339,12 @@ class TRS_AC(TRSTerm):
     
     def substitute(self, sigma: Subst) -> TRSTerm:
         return type(self)(tuple(arg.substitute(sigma) for arg in self.args))
-
+    
+    def remained_terms(self, *idx: int):
+        '''
+        collect the terms that are not in the idx, and return as a new tuple.
+        '''
+        return tuple(self.args[i] for i in range(len(self.args)) if i not in idx)
 
 ############################################################################
 # term rewriting rules
@@ -361,8 +383,8 @@ def normal_rewrite(self, term : TRSTerm) -> TRSTerm | None:
 
 class TRSRule:
     def __init__(self, 
-                 lhs: TRSTerm, 
-                 rhs: TRSTerm,
+                 lhs: TRSTerm|str, 
+                 rhs: TRSTerm|str,
                  rewrite_method : Callable[[TRSRule, TRSTerm], TRSTerm|None] = normal_rewrite,
 ):
         '''
@@ -442,7 +464,7 @@ class TRS:
             if new_term is not None:
                 return new_term
                         
-            elif isinstance(term, TRSTerm):
+            elif isinstance(term, TRSTerm) and not isinstance(term, TRSVar):
                 # try to rewrite the subterms
                 for i in range(len(term.args)):
                     new_subterm = self.rewrite(term.args[i])
