@@ -93,7 +93,7 @@ class ScalarDelta(DiracScalar, TRSCommBinary):
     fsymbol_print = "δ"
     fsymbol = "DELTA"
 
-    def __init__(self, b1 : AtomicBase | TRSVar, b2 : AtomicBase | TRSVar):
+    def __init__(self, b1 : DiracBase | TRSVar, b2 : DiracBase | TRSVar):
         TRSCommBinary.__init__(self, b1, b2)
 
 
@@ -124,7 +124,7 @@ class ScalarConj(DiracScalar):
         return f"({self.args[0]}^*)"
     
     
-class ScalarDot(DiracScalar):
+class ScalarDot(DiracScalar, TRSInfixBinary):
     fsymbol_print = "·"
     fsymbol = "DOT"
 

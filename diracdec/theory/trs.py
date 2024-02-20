@@ -9,6 +9,15 @@ from abc import ABC, abstractmethod
 
 import hashlib
 
+def var_rename(vars: set[str], prefix: str) -> str:
+    '''
+    return the new variable name that is not in the vars.
+    '''
+    i = 0
+    while prefix + "_" + str(i) in vars:
+        i += 1
+    return prefix + "_" + str(i)
+
 class TRSTerm(ABC):
     fsymbol_print : str
     fsymbol : str
@@ -50,7 +59,7 @@ class TRSTerm(ABC):
 
         return int(h.hexdigest(), 16)
     
-    def __getitem__(self, index) -> TRSTerm:
+    def __getitem__(self, index) -> Any:
         return self.args[index]
     
     @property
@@ -66,7 +75,8 @@ class TRSTerm(ABC):
         '''
         res = set()
         for arg in self.args:
-            res |= arg.variables()
+            if isinstance(arg, TRSTerm):
+                res |= arg.variables()
         return res
 
     @property
@@ -435,19 +445,66 @@ class TRS:
     def __init__(self, rules : List[TRSRule]):
         self.rules : List[TRSRule] = rules
 
-    def normalize(self, term : TRSTerm, verbose: bool = False) -> TRSTerm:
-        current_term = term
+    def variables(self) -> set[str]:
+        '''
+        Return a set of all free variables in the rules.
+        '''
+        res = set()
+        for rule in self.rules:
+            if isinstance(rule.lhs, TRSTerm) and isinstance(rule.rhs, TRSTerm):
+                res |= rule.lhs.variables() | rule.rhs.variables()
+        return res
+    
+    def substitute(self, sigma : Subst) -> TRS:
+        '''
+        Apply the substitution on the TRS. Return the result.
+        '''
+        new_rules = []
+        for rule in self.rules:
+            new_lhs = rule.lhs.substitute(sigma) if isinstance(rule.lhs, TRSTerm) else rule.lhs
+            new_rhs = rule.rhs.substitute(sigma) if isinstance(rule.rhs, TRSTerm) else rule.rhs
+            new_rules.append(TRSRule(new_lhs, new_rhs, rule.rewrite_method))
+
+        return TRS(new_rules)
+
+    def normalize(self, term : TRSTerm, verbose: bool = False, step_limit : int | None = None) -> TRSTerm:
+
+        # check the variable conincidence
+        overlap = term.variables() & self.variables()
+        if len(overlap) > 0:
+            if verbose:
+                print("Renaming rule variables...")
+
+            subst = {}
+            for var in overlap:
+                subst[var] = TRSVar(var_rename(overlap|set(subst.keys()), var))
+            
+            renamed_trs = self.substitute(Subst(subst))
+
+        else:
+            renamed_trs = self
+
+
+
+        current_term = term            
 
         while True:
+            
             if verbose:
                 print("--> ", current_term)
 
-            new_term = self.rewrite(current_term)
+            # check whether rewrite rules are applicable
+            new_term = renamed_trs.rewrite(current_term)
             if new_term is None:
                 return current_term
             
             current_term = new_term
         
+            # check whether the step limit is reached
+            if step_limit is not None:
+                step_limit -= 1
+                if step_limit <= 0:
+                    return current_term
 
             
     
@@ -464,11 +521,11 @@ class TRS:
             if new_term is not None:
                 return new_term
                         
-            elif isinstance(term, TRSTerm) and not isinstance(term, TRSVar):
-                # try to rewrite the subterms
-                for i in range(len(term.args)):
-                    new_subterm = self.rewrite(term.args[i])
-                    if new_subterm is not None:
-                        return type(term)(*term.args[:i], new_subterm, *term.args[i+1:])
+        if isinstance(term, TRSTerm) and not isinstance(term, TRSVar):
+            # try to rewrite the subterms
+            for i in range(len(term.args)):
+                new_subterm = self.rewrite(term.args[i])
+                if new_subterm is not None:
+                    return type(term)(*term.args[:i], new_subterm, *term.args[i+1:])
 
         return None

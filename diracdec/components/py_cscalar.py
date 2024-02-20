@@ -7,7 +7,9 @@ from __future__ import annotations
 from ..theory.complex_scalar import ComplexScalar
 
 class PyCScalar(ComplexScalar):
-    def __init__(self, c : complex):
+    def __init__(self, c : complex | str):
+        if isinstance(c, str):
+            c = complex(c)
         self.c = c
 
     @staticmethod

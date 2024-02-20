@@ -9,10 +9,13 @@ from .theory.trs import *
 from .theory.dirac_syntax import *
 
 from .components import py_cscalar
-from .components import str_abase, wolfram_abase
+from .components import str_abase, wolfram_abase, wolfram_cscalar
 
 precedence = (
 )
+
+# CScalar = py_cscalar.PyCScalar
+CScalar = wolfram_cscalar.WolframCScalar
 
 def p_term(p):
     '''
@@ -68,7 +71,7 @@ def p_diracscalar1(p):
     '''
     diracscalar : COMPLEXSCALAR_EXPR
     '''
-    p[0] = ScalarC(py_cscalar.PyCScalar(complex(p[1])))
+    p[0] = ScalarC(CScalar(p[1]))
 
 def p_diracscalar2(p):
     '''
