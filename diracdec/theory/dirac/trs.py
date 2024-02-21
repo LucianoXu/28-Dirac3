@@ -321,13 +321,13 @@ def construct_trs(
 
 
     SCR_DOT_1 = TRSRule(
-        lhs = parse(r''' ZEROB DOT K0 '''),
+        lhs = parse(r''' 0B DOT K0 '''),
         rhs = parse(r''' "0" '''),
     )
     rules.append(SCR_DOT_1)
 
     SCR_DOT_2 = TRSRule(
-        lhs = parse(r''' B0 DOT ZEROK '''),
+        lhs = parse(r''' B0 DOT 0K '''),
         rhs = parse(r''' "0" '''),
     )
     rules.append(SCR_DOT_2)
@@ -422,8 +422,8 @@ def construct_trs(
     # Ket
 
     KET_ADJ_1 = TRSRule(
-        lhs = parse(r'''ADJK(ZEROB)'''),
-        rhs = parse(r'''ZEROK''')
+        lhs = parse(r'''ADJK(0B)'''),
+        rhs = parse(r'''0K''')
     )
     rules.append(KET_ADJ_1)
 
@@ -472,7 +472,7 @@ def construct_trs(
 
     KET_SCAL_1 = TRSRule(
         lhs = parse(r''' "0" SCRK K0 '''),
-        rhs = parse(r''' ZEROK ''')
+        rhs = parse(r''' 0K ''')
     )
     rules.append(KET_SCAL_1)
 
@@ -484,8 +484,8 @@ def construct_trs(
     rules.append(KET_SCAL_2)
 
     KET_SCAL_3 = TRSRule(
-        lhs = parse(r'''S0 SCRK ZEROK'''),
-        rhs = parse(r''' ZEROK ''')
+        lhs = parse(r'''S0 SCRK 0K'''),
+        rhs = parse(r''' 0K ''')
     )
     rules.append(KET_SCAL_3)
 
@@ -571,19 +571,19 @@ def construct_trs(
 
 
     KET_MUL_1 = TRSRule(
-        lhs = parse(r'''ZEROO MLTK K0'''),
-        rhs = parse(r'''ZEROK''')
+        lhs = parse(r'''0O MLTK K0'''),
+        rhs = parse(r'''0K''')
     )
     rules.append(KET_MUL_1)
 
     KET_MUL_2 = TRSRule(
-        lhs = parse(r'''O0 MLTK ZEROK'''),
-        rhs = parse(r'''ZEROK''')
+        lhs = parse(r'''O0 MLTK 0K'''),
+        rhs = parse(r'''0K''')
     )
     rules.append(KET_MUL_2)
 
     KET_MUL_3 = TRSRule(
-        lhs = parse(r'''ONEO MLTK K0'''),
+        lhs = parse(r'''1O MLTK K0'''),
         rhs = parse(r'''K0''')
     )
     rules.append(KET_MUL_3)
@@ -656,14 +656,14 @@ def construct_trs(
     rules.append(KET_MUL_12)
 
     KET_TSR_1 = TRSRule(
-        lhs = parse(r'''ZEROK TSRK K0'''),
-        rhs = parse(r'''ZEROK''')
+        lhs = parse(r'''0K TSRK K0'''),
+        rhs = parse(r'''0K''')
     )
     rules.append(KET_TSR_1)
 
     KET_TSR_2 = TRSRule(
-        lhs = parse(r'''K0 TSRK ZEROK'''),
-        rhs = parse(r'''ZEROK''')
+        lhs = parse(r'''K0 TSRK 0K'''),
+        rhs = parse(r'''0K''')
     )
     rules.append(KET_TSR_2)
 
@@ -713,8 +713,8 @@ def construct_trs(
 
 
     BRA_ADJ_1 = TRSRule(
-        lhs = parse(r'''ADJB(ZEROK)'''),
-        rhs = parse(r'''ZEROB''')
+        lhs = parse(r'''ADJB(0K)'''),
+        rhs = parse(r'''0B''')
     )
     rules.append(BRA_ADJ_1)
 
@@ -764,7 +764,7 @@ def construct_trs(
 
     BRA_SCAL_1 = TRSRule(
         lhs = parse(r''' "0" SCRB B0 '''),
-        rhs = parse(r''' ZEROB ''')
+        rhs = parse(r''' 0B ''')
     )
     rules.append(BRA_SCAL_1)
 
@@ -775,8 +775,8 @@ def construct_trs(
     rules.append(BRA_SCAL_2)
 
     BRA_SCAL_3 = TRSRule(
-        lhs = parse(r'''S0 SCRB ZEROB'''),
-        rhs = parse(r''' ZEROB ''')
+        lhs = parse(r'''S0 SCRB 0B'''),
+        rhs = parse(r''' 0B ''')
     )
     rules.append(BRA_SCAL_3)
 
@@ -864,19 +864,19 @@ def construct_trs(
 
 
     BRA_MUL_1 = TRSRule(
-        lhs = parse(r'''B0 MLTB ZEROO'''),
-        rhs = parse(r'''ZEROB''')
+        lhs = parse(r'''B0 MLTB 0O'''),
+        rhs = parse(r'''0B''')
     )
     rules.append(BRA_MUL_1)
 
     BRA_MUL_2 = TRSRule(
-        lhs = parse(r'''ZEROB MLTB O0'''),
-        rhs = parse(r'''ZEROB''')
+        lhs = parse(r'''0B MLTB O0'''),
+        rhs = parse(r'''0B''')
     )
     rules.append(BRA_MUL_2)
 
     BRA_MUL_3 = TRSRule(
-        lhs = parse(r'''B0 MLTB ONEO'''),
+        lhs = parse(r'''B0 MLTB 1O'''),
         rhs = parse(r'''B0''')
     )
     rules.append(BRA_MUL_3)
@@ -953,14 +953,14 @@ def construct_trs(
 
 
     BRA_TSR_1 = TRSRule(
-        lhs = parse(r'''ZEROB TSRB B0'''),
-        rhs = parse(r'''ZEROB''')
+        lhs = parse(r'''0B TSRB B0'''),
+        rhs = parse(r'''0B''')
     )
     rules.append(BRA_TSR_1)
 
     BRA_TSR_2 = TRSRule(
-        lhs = parse(r'''B0 TSRB ZEROB'''),
-        rhs = parse(r'''ZEROB''')
+        lhs = parse(r'''B0 TSRB 0B'''),
+        rhs = parse(r'''0B''')
     )
     rules.append(BRA_TSR_2)
 
@@ -1009,14 +1009,14 @@ def construct_trs(
     # Operators
 
     OPT_OUTER_1 = TRSRule(
-        lhs = parse(r'''ZEROK OUTER B0 '''),
-        rhs = parse(r'''ZEROO''')
+        lhs = parse(r'''0K OUTER B0 '''),
+        rhs = parse(r'''0O''')
     )
     rules.append(OPT_OUTER_1)
 
     OPT_OUTER_2 = TRSRule(
-        lhs = parse(r'''K0 OUTER ZEROB'''),
-        rhs = parse(r'''ZEROO''')
+        lhs = parse(r'''K0 OUTER 0B'''),
+        rhs = parse(r'''0O''')
     )
     rules.append(OPT_OUTER_2)
 
@@ -1056,14 +1056,14 @@ def construct_trs(
 
 
     OPT_ADJ_1 = TRSRule(
-        lhs = parse(r'''ADJO(ZEROO)'''),
-        rhs = parse(r'''ZEROO''')
+        lhs = parse(r'''ADJO(0O)'''),
+        rhs = parse(r'''0O''')
     )
     rules.append(OPT_ADJ_1)
 
     OPT_ADJ_2 = TRSRule(
-        lhs = parse(r'''ADJO(ONEO)'''),
-        rhs = parse(r'''ONEO''')
+        lhs = parse(r'''ADJO(1O)'''),
+        rhs = parse(r'''1O''')
     )
     rules.append(OPT_ADJ_2)
 
@@ -1113,7 +1113,7 @@ def construct_trs(
 
     OPT_SCAL_1 = TRSRule(
         lhs = parse(r''' "0" SCRO O0'''),
-        rhs = parse(r'''ZEROO''')
+        rhs = parse(r'''0O''')
     )
     rules.append(OPT_SCAL_1)
 
@@ -1124,8 +1124,8 @@ def construct_trs(
     rules.append(OPT_SCAL_2)
 
     OPT_SCAL_3 = TRSRule(
-        lhs = parse(r'''S0 SCRO ZEROO'''),
-        rhs = parse(r'''ZEROO''')
+        lhs = parse(r'''S0 SCRO 0O'''),
+        rhs = parse(r'''0O''')
     )
     rules.append(OPT_SCAL_3)
 
@@ -1209,25 +1209,25 @@ def construct_trs(
 
 
     OPT_MUL_1 = TRSRule(
-        lhs = parse(r'''ZEROO MLTO O0'''),
-        rhs = parse(r'''ZEROO''')
+        lhs = parse(r'''0O MLTO O0'''),
+        rhs = parse(r'''0O''')
     )
     rules.append(OPT_MUL_1)
 
     OPT_MUL_2 = TRSRule(
-        lhs = parse(r'''O0 MLTO ZEROO'''),
-        rhs = parse(r'''ZEROO''')
+        lhs = parse(r'''O0 MLTO 0O'''),
+        rhs = parse(r'''0O''')
     )
     rules.append(OPT_MUL_2)
 
     OPT_MUL_3 = TRSRule(
-        lhs = parse(r'''ONEO MLTO O0'''),
+        lhs = parse(r'''1O MLTO O0'''),
         rhs = parse(r'''O0''')
     )
     rules.append(OPT_MUL_3)
 
     OPT_MUL_4 = TRSRule(
-        lhs = parse(r'''O0 MLTO ONEO'''),
+        lhs = parse(r'''O0 MLTO 1O'''),
         rhs = parse(r'''O0''')
     )
     rules.append(OPT_MUL_4)
@@ -1298,14 +1298,14 @@ def construct_trs(
 
 
     OPT_TSR_1 = TRSRule(
-        lhs = parse(r'''ZEROO TSRO O0'''),
-        rhs = parse(r'''ZEROO''')
+        lhs = parse(r'''0O TSRO O0'''),
+        rhs = parse(r'''0O''')
     )
     rules.append(OPT_TSR_1)
 
     OPT_TSR_2 = TRSRule(
-        lhs = parse(r'''O0 TSRO ZEROO'''),
-        rhs = parse(r'''ZEROO''')
+        lhs = parse(r'''O0 TSRO 0O'''),
+        rhs = parse(r'''0O''')
     )
     rules.append(OPT_TSR_2)
 

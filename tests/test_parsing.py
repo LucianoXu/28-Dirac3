@@ -40,7 +40,7 @@ def test_basic_S():
 
 def test_basic_K():
     with wolfram_backend.wolfram_session():
-        a = parse(r'''ZEROK''')
+        a = parse(r'''0K''')
         b = KetZero()
         assert a == b
 
@@ -70,7 +70,7 @@ def test_basic_K():
 
 def test_basic_B():
     with wolfram_backend.wolfram_session():
-        a = parse(r'''ZEROB''')
+        a = parse(r'''0B''')
         b = BraZero()
         assert a == b
 
@@ -100,11 +100,11 @@ def test_basic_B():
 
 def test_basic_O():
     with wolfram_backend.wolfram_session():
-        a = parse(r'''ZEROO''')
+        a = parse(r'''0O''')
         b = OpZero()
         assert a == b
 
-        a = parse(r''' ONEO ''')
+        a = parse(r''' 1O ''')
         b = OpOne()
         assert a == b
 

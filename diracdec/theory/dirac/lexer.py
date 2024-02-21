@@ -13,7 +13,7 @@ reserved = {
     'CONJS'      : 'CONJS',
     'DOT'        : 'DOT',       # infix binary
 
-    'ZEROK'      : 'ZEROK',
+    '0K'         : 'ZEROK',
     'KET'        : 'KET',
     'ADJK'       : 'ADJK',
     'SCRK'       : 'SCRK',      # infix binary
@@ -21,7 +21,7 @@ reserved = {
     'MLTK'       : 'MLTK',      # infix binary
     'TSRK'       : 'TSRK',      # infix binary
 
-    'ZEROB'      : 'ZEROB',
+    '0B'         : 'ZEROB',
     'BRA'        : 'BRA',
     'ADJB'       : 'ADJB',
     'SCRB'       : 'SCRB',      # infix binary
@@ -29,8 +29,8 @@ reserved = {
     'MLTB'       : 'MLTB',      # infix binary
     'TSRB'       : 'TSRB',      # infix binary
 
-    'ZEROO'      : 'ZEROO',
-    'ONEO'       : 'ONEO', 
+    '0O'         : 'ZEROO',
+    '1O'         : 'ONEO', 
     'OUTER'      : 'OUTER',     # infix binary
     'ADJO'       : 'ADJO',
     'SCRO'       : 'SCRO',      # infix binary
@@ -56,7 +56,7 @@ literals = ['(', ')', ',']
 
 
 def t_ID(t):
-    r'[a-zA-Z\_][a-zA-Z0-9\_]*'
+    r'[a-zA-Z0-9\_][a-zA-Z0-9\_]*'
     t.type = reserved.get(t.value, 'ID')
     return t
 
