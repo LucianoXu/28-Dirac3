@@ -4,13 +4,9 @@ from .backends import wolfram_backend
 # avoid the block from wolfram session
 try:
 
-    from . import components
+    from . import backends, components, theory
 
-    from .theory import *
-
-    from .parser import parse
-
-    from .dirac_trs import diractrs
+    from .factory import dirac_parser, dirac_parse, dirac_trs
 
 except Exception as e:
     raise e

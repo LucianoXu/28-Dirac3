@@ -1,5 +1,7 @@
 from diracdec import *
 
+from diracdec import dirac_parse as parse
+
 from diracdec.components.wolfram_cscalar import WolframCScalar
 
 def test_atomic_base():

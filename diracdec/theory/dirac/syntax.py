@@ -1,15 +1,10 @@
 
 from __future__ import annotations
-from abc import ABC, abstractmethod
 
-from typing import Tuple, List, Type
+from ..atomic_base import AtomicBase
+from ..complex_scalar import ComplexScalar
 
-from diracdec.theory.trs import Subst
-
-from .atomic_base import AtomicBase
-from .complex_scalar import ComplexScalar
-
-from .trs import TRSTerm, TRSVar, TRS_AC, TRSCommBinary, TRSInfixBinary
+from ..trs import TRSTerm, TRSVar, TRS_AC, TRSCommBinary, TRSInfixBinary, Subst
 
 
 

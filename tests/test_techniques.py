@@ -1,6 +1,6 @@
 
 from diracdec import *
-
+from diracdec.theory.dirac import *
 
 def test_1():
     with wolfram_backend.wolfram_session():
