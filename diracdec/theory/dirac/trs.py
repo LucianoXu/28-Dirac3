@@ -7,16 +7,21 @@ from __future__ import annotations
 
 from typing import Type
 
+from ply import yacc
+
 from ..trs import *
 from .syntax import *
 
 from .parser import construct_parser
 
-
-def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
+def construct_trs(
+        CScalar: Type[ComplexScalar], 
+        ABase: Type[AtomicBase], 
+        parser: yacc.LRParser|None = None) -> TRS:
 
     # construct the parser
-    parser = construct_parser(CScalar, ABase)
+    if parser is None:
+        parser = construct_parser(CScalar, ABase)
 
     def parse(s: str) -> TRSTerm:
         return parser.parse(s)
@@ -54,7 +59,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
 
     #################################################
     # Delta
-    def delta_1_rewrite(rule, term):
+    def delta_1_rewrite(rule, term, side_info):
         if isinstance(term, ScalarDelta):
             if isinstance(term.args[0], BasePair):
                 return ScalarMlt(
@@ -74,7 +79,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     rules.append(DELTA_1)
 
 
-    def delta_2_rewrite(rule, term):
+    def delta_2_rewrite(rule, term, side_info):
         if isinstance(term, ScalarMlt):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], ScalarDelta) \
@@ -101,7 +106,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     #################################################
     # Scalar
 
-    def scr_complex_1_rewrite(rule, term):
+    def scr_complex_1_rewrite(rule, term, side_info):
         if isinstance(term, ScalarAdd):
             for i in range(len(term.args)):
                 if term.args[i] == C0:
@@ -115,7 +120,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     rules.append(SCR_COMPLEX_1)
 
 
-    def scr_complex_2_rewrite(rule, term):
+    def scr_complex_2_rewrite(rule, term, side_info):
         if isinstance(term, ScalarAdd):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], ScalarC):
@@ -133,7 +138,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     )
     rules.append(SCR_COMPLEX_2)
 
-    def scr_complex_3_rewrite(rule, term):
+    def scr_complex_3_rewrite(rule, term, side_info):
         if isinstance(term, ScalarAdd):
             for i in range(len(term.args)):
                 for j in range(i+1, len(term.args)):
@@ -148,7 +153,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     )
     rules.append(SCR_COMPLEX_3)
 
-    def scr_complex_4_rewrite(rule, term):
+    def scr_complex_4_rewrite(rule, term, side_info):
         if isinstance(term, ScalarAdd):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], ScalarMlt):
@@ -168,7 +173,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     )
     rules.append(SCR_COMPLEX_4)
 
-    def scr_complex_5_rewrite(rule, term):
+    def scr_complex_5_rewrite(rule, term, side_info):
         if isinstance(term, ScalarAdd):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], ScalarMlt):
@@ -192,7 +197,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     )
     rules.append(SCR_COMPLEX_5)
 
-    def scr_complex_6_rewrite(rule, term):
+    def scr_complex_6_rewrite(rule, term, side_info):
         if isinstance(term, ScalarMlt):
             for i in range(len(term.args)):
                 if term.args[i] == C0:
@@ -205,7 +210,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     )
     rules.append(SCR_COMPLEX_6)
 
-    def scr_complex_7_rewrite(rule, term):
+    def scr_complex_7_rewrite(rule, term, side_info):
         if isinstance(term, ScalarMlt):
             for i in range(len(term.args)):
                 if term.args[i] == C1:
@@ -218,7 +223,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     rules.append(SCR_COMPLEX_7)
 
 
-    def scr_complex_8_rewrite(rule, term):
+    def scr_complex_8_rewrite(rule, term, side_info):
         if isinstance(term, ScalarMlt):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], ScalarC):
@@ -236,7 +241,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     )
     rules.append(SCR_COMPLEX_8)
 
-    def scr_complex_9_rewrite(rule, term):
+    def scr_complex_9_rewrite(rule, term, side_info):
         if isinstance(term, ScalarMlt):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], ScalarAdd):
@@ -251,7 +256,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     rules.append(SCR_COMPLEX_9)
 
 
-    def scr_complex_10_rewrite(rule, term):
+    def scr_complex_10_rewrite(rule, term, side_info):
         if isinstance(term, ScalarConj):
             if isinstance(term.args[0], ScalarC):
                 return ScalarC(CScalar.conj(term.args[0].args[0]))
@@ -263,7 +268,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     rules.append(SCR_COMPLEX_10)
         
 
-    def scr_complex_11_rewrite(rule, term):
+    def scr_complex_11_rewrite(rule, term, side_info):
         if isinstance(term, ScalarConj):
             if isinstance(term.args[0], ScalarDelta):
                 return term.args[0]
@@ -276,7 +281,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     rules.append(SCR_COMPLEX_11)
 
 
-    def scr_complex_12_rewrite(rule, term):
+    def scr_complex_12_rewrite(rule, term, side_info):
         if isinstance(term, ScalarConj):
             if isinstance(term.args[0], ScalarAdd):
                 new_args = tuple(ScalarConj(arg) for arg in term.args[0].args)
@@ -289,7 +294,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     rules.append(SCR_COMPLEX_12)
 
 
-    def scr_complex_13_rewrite(rule, term):
+    def scr_complex_13_rewrite(rule, term, side_info):
         if isinstance(term, ScalarConj):
             if isinstance(term.args[0], ScalarMlt):
                 new_args = tuple(ScalarConj(arg) for arg in term.args[0].args)
@@ -340,7 +345,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     )
     rules.append(SCR_DOT_4)
 
-    def scr_dot_5(rule, term):
+    def scr_dot_5(rule, term, side_info):
         if isinstance(term, ScalarDot):
             if isinstance(term.args[0], BraAdd):
                 new_args = tuple(ScalarDot(arg, term.args[1]) for arg in term.args[0].args)
@@ -352,7 +357,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     )
     rules.append(SCR_DOT_5)
 
-    def scr_dot_6(rule, term):
+    def scr_dot_6(rule, term, side_info):
         if isinstance(term, ScalarDot):
             if isinstance(term.args[1], KetAdd):
                 new_args = tuple(ScalarDot(term.args[0], arg) for arg in term.args[1].args)
@@ -440,7 +445,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     )
     rules.append(KET_ADJ_4)
 
-    def ket_adj_5_rewrite(rule, term):
+    def ket_adj_5_rewrite(rule, term, side_info):
         if isinstance(term, KetAdj):
             if isinstance(term.args[0], BraAdd):
                 new_args = tuple(KetAdj(arg) for arg in term.args[0].args)
@@ -492,7 +497,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     rules.append(KET_SCAL_4)
 
 
-    def ket_scal_5_rewrite(rule, term):
+    def ket_scal_5_rewrite(rule, term, side_info):
         if isinstance(term, KetScal):
             if isinstance(term.args[1], KetAdd):
                 new_args = tuple(KetScal(term.args[0], arg) for arg in term.args[1].args)
@@ -506,7 +511,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     rules.append(KET_SCAL_5)
 
 
-    def ket_add_1(rule, term):
+    def ket_add_1(rule, term, side_info):
         if isinstance(term, KetAdd):
             for i in range(len(term.args)):
                 if term.args[i] == KetZero():
@@ -518,7 +523,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     )
     rules.append(KET_ADD_1)
 
-    def ket_add_2(rule, term):
+    def ket_add_2(rule, term, side_info):
         if isinstance(term, KetAdd):
             for i in range(len(term.args)):
                 for j in range(i+1, len(term.args)):
@@ -532,7 +537,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     )
     rules.append(KET_ADD_2)
 
-    def ket_add_3(rule, term):
+    def ket_add_3(rule, term, side_info):
         if isinstance(term, KetAdd):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], KetScal):
@@ -548,7 +553,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     )
     rules.append(KET_ADD_3)
 
-    def ket_add_4(rule, term):
+    def ket_add_4(rule, term, side_info):
         if isinstance(term, KetAdd):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], KetScal):
@@ -596,7 +601,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     rules.append(KET_MUL_5)
 
 
-    def ket_mul_6_rewrite(rule, term):
+    def ket_mul_6_rewrite(rule, term, side_info):
         if isinstance(term, KetApply) and isinstance(term[0], OpAdd):
             new_args = tuple(KetApply(arg, term[1]) for arg in term[0].args)
             return KetAdd(*new_args)
@@ -608,7 +613,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     rules.append(KET_MUL_6)
 
 
-    def ket_mul_7_rewrite(rule, term):
+    def ket_mul_7_rewrite(rule, term, side_info):
         if isinstance(term, KetApply) and isinstance(term[1], KetAdd):
             new_args = tuple(KetApply(term[0], arg) for arg in term[1].args)
             return KetAdd(*new_args)
@@ -680,7 +685,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     )
     rules.append(KET_TSR_5)
 
-    def ket_tsr_6_rewrite(rule, term):
+    def ket_tsr_6_rewrite(rule, term, side_info):
         if isinstance(term, KetTensor) and isinstance(term[0], KetAdd):
             new_args = tuple(KetTensor(arg, term[1]) for arg in term[0].args)
             return KetAdd(*new_args)
@@ -691,7 +696,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     )
     rules.append(KET_TSR_6)
 
-    def ket_tsr_7_rewrite(rule, term):
+    def ket_tsr_7_rewrite(rule, term, side_info):
         if isinstance(term, KetTensor) and isinstance(term[1], KetAdd):
             new_args = tuple(KetTensor(term[0], arg) for arg in term[1].args)
             return KetAdd(*new_args)
@@ -731,7 +736,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     )
     rules.append(BRA_ADJ_4)
 
-    def bra_adj_5_rewrite(rule, term):
+    def bra_adj_5_rewrite(rule, term, side_info):
         if isinstance(term, BraAdj):
             if isinstance(term.args[0], KetAdd):
                 new_args = tuple(BraAdj(arg) for arg in term.args[0].args)
@@ -783,7 +788,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     rules.append(BRA_SCAL_4)
 
 
-    def bra_scal_5_rewrite(rule, term):
+    def bra_scal_5_rewrite(rule, term, side_info):
         if isinstance(term, BraScal):
             if isinstance(term.args[1], BraAdd):
                 new_args = tuple(BraScal(term.args[0], arg) for arg in term.args[1].args)
@@ -798,7 +803,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
 
 
 
-    def bra_add_1(rule, term):
+    def bra_add_1(rule, term, side_info):
         if isinstance(term, BraAdd):
             for i in range(len(term.args)):
                 if term.args[i] == BraZero():
@@ -810,7 +815,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     )
     rules.append(BRA_ADD_1)
 
-    def bra_add_2(rule, term):
+    def bra_add_2(rule, term, side_info):
         if isinstance(term, BraAdd):
             for i in range(len(term.args)):
                 for j in range(i+1, len(term.args)):
@@ -824,7 +829,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     )
     rules.append(BRA_ADD_2)
 
-    def bra_add_3(rule, term):
+    def bra_add_3(rule, term, side_info):
         if isinstance(term, BraAdd):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], BraScal):
@@ -841,7 +846,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     rules.append(BRA_ADD_3)
 
 
-    def bra_add_4(rule, term):
+    def bra_add_4(rule, term, side_info):
         if isinstance(term, BraAdd):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], BraScal):
@@ -889,7 +894,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     rules.append(BRA_MUL_5)
 
 
-    def bra_mul_6_rewrite(rule, term):
+    def bra_mul_6_rewrite(rule, term, side_info):
         if isinstance(term, BraApply) and isinstance(term[1], OpAdd):
             new_args = tuple(BraApply(term[0], arg) for arg in term[1].args)
             return BraAdd(*new_args)
@@ -903,7 +908,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     rules.append(BRA_MUL_6)
 
 
-    def bra_mul_7_rewrite(rule, term):
+    def bra_mul_7_rewrite(rule, term, side_info):
         if isinstance(term, BraApply) and isinstance(term[0], BraAdd):
             new_args = tuple(BraApply(arg, term[1]) for arg in term[0].args)
             return BraAdd(*new_args)
@@ -977,7 +982,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     )
     rules.append(BRA_TSR_5)
 
-    def bra_tsr_6_rewrite(rule, term):
+    def bra_tsr_6_rewrite(rule, term, side_info):
         if isinstance(term, BraTensor) and isinstance(term[0], BraAdd):
             new_args = tuple(BraTensor(arg, term[1]) for arg in term[0].args)
             return BraAdd(*new_args)
@@ -988,7 +993,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     )
     rules.append(BRA_TSR_6)
 
-    def bra_tsr_7_rewrite(rule, term):
+    def bra_tsr_7_rewrite(rule, term, side_info):
         if isinstance(term, BraTensor) and isinstance(term[1], BraAdd):
             new_args = tuple(BraTensor(term[0], arg) for arg in term[1].args)
             return BraAdd(*new_args)
@@ -1027,7 +1032,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     )
     rules.append(OPT_OUTER_4)
 
-    def opt_outer_5_rewrite(rule, term):
+    def opt_outer_5_rewrite(rule, term, side_info):
         if isinstance(term, OpOuter) and isinstance(term[0], KetAdd):
             new_args = tuple(OpOuter(arg, term[1]) for arg in term[0].args)
             return OpAdd(*new_args)
@@ -1038,7 +1043,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     )
     rules.append(OPT_OUTER_5)
 
-    def opt_outer_6_rewrite(rule, term):
+    def opt_outer_6_rewrite(rule, term, side_info):
         if isinstance(term, OpOuter) and isinstance(term[1], BraAdd):
             new_args = tuple(OpOuter(term[0], arg) for arg in term[1].args)
             return OpAdd(*new_args)
@@ -1080,7 +1085,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     )
     rules.append(OPT_ADJ_5)
 
-    def opt_adj_6_rewrite(rule, term):
+    def opt_adj_6_rewrite(rule, term, side_info):
         if isinstance(term, OpAdj):
             if isinstance(term.args[0], OpAdd):
                 new_args = tuple(OpAdj(arg) for arg in term.args[0].args)
@@ -1130,7 +1135,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     )
     rules.append(OPT_SCAL_4)
 
-    def opt_scal_5_rewrite(rule, term):
+    def opt_scal_5_rewrite(rule, term, side_info):
         if isinstance(term, OpScal):
             if isinstance(term.args[1], OpAdd):
                 new_args = tuple(OpScal(term.args[0], arg) for arg in term.args[1].args)
@@ -1143,7 +1148,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     rules.append(OPT_SCAL_5)
 
 
-    def opt_add_1_rewrite(rule, term):
+    def opt_add_1_rewrite(rule, term, side_info):
         if isinstance(term, OpAdd):
             for i in range(len(term.args)):
                 if term.args[i] == OpZero():
@@ -1156,7 +1161,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     rules.append(OPT_ADD_1)
 
 
-    def opt_add_2_rewrite(rule, term):
+    def opt_add_2_rewrite(rule, term, side_info):
         if isinstance(term, OpAdd):
             for i in range(len(term.args)):
                 for j in range(i+1, len(term.args)):
@@ -1170,7 +1175,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     )
     rules.append(OPT_ADD_2)
 
-    def opt_add_3_rewrite(rule, term):
+    def opt_add_3_rewrite(rule, term, side_info):
         if isinstance(term, OpAdd):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], OpScal):
@@ -1186,7 +1191,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     )
     rules.append(OPT_ADD_3)
 
-    def opt_add_4_rewrite(rule, term):
+    def opt_add_4_rewrite(rule, term, side_info):
         if isinstance(term, OpAdd):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], OpScal):
@@ -1251,7 +1256,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     )
     rules.append(OPT_MUL_8)
 
-    def opt_mul_9_rewrite(rule, term):
+    def opt_mul_9_rewrite(rule, term, side_info):
         if isinstance(term, OpApply) and isinstance(term[0], OpAdd):
             new_args = tuple(OpApply(arg, term[1]) for arg in term[0].args)
             return OpAdd(*new_args)
@@ -1262,7 +1267,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     )
     rules.append(OPT_MUL_9)
 
-    def opt_mul_10_rewrite(rule, term):
+    def opt_mul_10_rewrite(rule, term, side_info):
         if isinstance(term, OpApply) and isinstance(term[1], OpAdd):
             new_args = tuple(OpApply(term[0], arg) for arg in term[1].args)
             return OpAdd(*new_args)
@@ -1322,7 +1327,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     )
     rules.append(OPT_TSR_5)
 
-    def opt_tsr_6_rewrite(rule, term):
+    def opt_tsr_6_rewrite(rule, term, side_info):
         if isinstance(term, OpTensor) and isinstance(term[0], OpAdd):
             new_args = tuple(OpTensor(arg, term[1]) for arg in term[0].args)
             return OpAdd(*new_args)
@@ -1333,7 +1338,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
     )
     rules.append(OPT_TSR_6)
 
-    def opt_tsr_7_rewrite(rule, term):
+    def opt_tsr_7_rewrite(rule, term, side_info):
         if isinstance(term, OpTensor) and isinstance(term[1], OpAdd):
             new_args = tuple(OpTensor(term[0], arg) for arg in term[1].args)
             return OpAdd(*new_args)
@@ -1343,6 +1348,7 @@ def construct_trs(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> TRS:
         rewrite_method=opt_tsr_7_rewrite
     )
     rules.append(OPT_TSR_7)
+
 
 
     # build the trs

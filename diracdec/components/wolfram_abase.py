@@ -25,3 +25,11 @@ class WolframABase(AtomicBase):
     
     def __hash__(self) -> int:
         return hash(self.simp_expr)
+
+    def eq_satisfiable(self, other, vars) -> bool:
+        '''
+        check whether e1 == e2 is satisfiable with variables of [vars]
+        vars is the MMA list of variables
+        '''
+        res = session.evaluate(wl.FindInstance(wl.Equal(self.simp_expr, other.simp_expr), vars))
+        return res != ()

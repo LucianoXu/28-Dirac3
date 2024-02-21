@@ -5,7 +5,7 @@ The script to construct rewriting systems and corresponding parsers with differe
 #########################
 # prepare the theories (functors)
 
-from .theory import dirac
+from .theory import dirac, delta_ext
 
 from .theory.trs import TRSTerm, TRSVar
 
@@ -22,6 +22,21 @@ dirac_parser = dirac.construct_parser(wolfram_cscalar.WolframCScalar, wolfram_ab
 def dirac_parse(s: str) -> TRSTerm:
     return dirac_parser.parse(s)
 
-dirac_trs = dirac.construct_trs(wolfram_cscalar.WolframCScalar, wolfram_abase.WolframABase)
+dirac_trs = dirac.construct_trs(
+    wolfram_cscalar.WolframCScalar, 
+    wolfram_abase.WolframABase, 
+    dirac_parser
+    )
     
-###
+### with delta extensions
+
+dirac_delta_parser = dirac_parser
+
+def dirac_delta_parse(s: str) -> TRSTerm:
+    return dirac_delta_parser.parse(s)
+
+dirac_delta_trs = delta_ext.modify_trs(
+    dirac_trs, 
+    wolfram_cscalar.WolframCScalar, 
+    wolfram_abase.WolframABase
+    )

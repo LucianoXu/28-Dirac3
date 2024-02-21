@@ -383,7 +383,7 @@ def check_special_symbol(term : TRSTerm) -> bool:
             return False
 
 
-def normal_rewrite(self, term : TRSTerm) -> TRSTerm | None:
+def normal_rewrite(self, term : TRSTerm, side_info : dict[str, Any]) -> TRSTerm | None:
         '''
         The rewrite method for normal rules.
 
@@ -399,7 +399,7 @@ class TRSRule:
     def __init__(self, 
                  lhs: TRSTerm|str, 
                  rhs: TRSTerm|str,
-                 rewrite_method : Callable[[TRSRule, TRSTerm], TRSTerm|None] = normal_rewrite):
+                 rewrite_method : Callable[[TRSRule, TRSTerm, Dict[str, Any]], TRSTerm|None] = normal_rewrite):
         '''
         note: the rewrite_method checks whether the current rule can rewrite the given term (not including subterms)
         '''
@@ -426,8 +426,14 @@ class TRSRule:
         
 class TRS:
 
-    def __init__(self, rules : List[TRSRule]):
+    def __init__(self, 
+                 rules: List[TRSRule], 
+                 side_info_procs: Tuple[Callable[[Dict[str, Any]], Dict[str, Any]],...] = ()):
+        '''
+        side_info_procs provides methods to preprocess side informations (executed in sequence)
+        '''
         self.rules : List[TRSRule] = rules
+        self.side_info_procs = side_info_procs
 
     def variables(self) -> set[str]:
         '''
@@ -451,7 +457,11 @@ class TRS:
 
         return TRS(new_rules)
 
-    def normalize(self, term : TRSTerm, verbose: bool = False, step_limit : int | None = None) -> TRSTerm:
+    def normalize(self, 
+            term : TRSTerm, 
+            side_info : dict[str, Any] = {},
+            verbose: bool = False, 
+            step_limit : int | None = None) -> TRSTerm:
 
         # check the variable conincidence
         overlap = term.variables() & self.variables()
@@ -468,7 +478,9 @@ class TRS:
         else:
             renamed_trs = self
 
-
+        # execute the preprocess of side information
+        for proc in self.side_info_procs:
+            side_info = proc(side_info)
 
         current_term = term            
 
@@ -478,7 +490,7 @@ class TRS:
                 print("--> ", current_term)
 
             # check whether rewrite rules are applicable
-            new_term = renamed_trs.rewrite(current_term)
+            new_term = renamed_trs.rewrite(current_term, side_info)
             if new_term is None:
                 return current_term
             
@@ -493,7 +505,7 @@ class TRS:
             
     
 
-    def rewrite(self, term : TRSTerm) -> TRSTerm | None:
+    def rewrite(self, term : TRSTerm, side_info: dict[str, Any]) -> TRSTerm | None:
         '''
         rewrite the term using the rules. Return the result.
         return None when no rewriting is applicable
@@ -501,14 +513,14 @@ class TRS:
 
         # try to rewrite the term using the rules
         for rule in self.rules:
-            new_term = rule.rewrite_method(rule, term)
+            new_term = rule.rewrite_method(rule, term, side_info)
             if new_term is not None:
                 return new_term
                         
         if isinstance(term, TRSTerm) and not isinstance(term, TRSVar):
             # try to rewrite the subterms
             for i in range(len(term.args)):
-                new_subterm = self.rewrite(term.args[i])
+                new_subterm = self.rewrite(term.args[i], side_info)
                 if new_subterm is not None:
                     return type(term)(*term.args[:i], new_subterm, *term.args[i+1:])
 

@@ -4,6 +4,8 @@ A lightweight wrapping of Wolfram Engine.
 providing the unique 'session'.
 '''
 
+from typing import Sequence
+
 from wolframclient.evaluation import WolframLanguageSession
 from wolframclient.language import wl, wlexpr
 import contextlib

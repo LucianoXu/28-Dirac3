@@ -39,3 +39,10 @@ class AtomicBase(ABC):
         Returns the hash of the atomic base
         '''
         pass
+
+    @abstractmethod
+    def eq_satisfiable(self, other, vars) -> bool:
+        '''
+        check whether e1 == e2 is satisfiable with variables of [vars]
+        '''
+        pass
