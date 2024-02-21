@@ -86,7 +86,9 @@ class TRSTerm(ABC):
     @abstractmethod
     def substitute(self, sigma : Subst) -> TRSTerm:
         
-        new_args = tuple(arg.substitute(sigma) for arg in self.args)
+        new_args = tuple(
+            arg.substitute(sigma) if isinstance(arg, TRSTerm) else arg for arg in self.args
+        )
         return type(self)(*new_args)
         
 
@@ -372,10 +374,12 @@ def check_special_symbol(term : TRSTerm) -> bool:
     else:
         if isinstance(term, TRSVar):
             return False
-        else:
+        elif isinstance(term, TRSTerm):
             for arg in term.args:
                 if check_special_symbol(arg):
                     return True
+            return False
+        else:
             return False
 
 
