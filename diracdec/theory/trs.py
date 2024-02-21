@@ -141,7 +141,7 @@ class Subst:
         return self.data[idx]
     
     def __str__(self):
-        return "{" + ", ".join(f"{key} ↦ {self.data[key]}" for key in self.data) + "}"
+        return "{\n\t" + ", \n\t".join(f"{key} ↦ {self.data[key]}" for key in self.data) + "\n}"
     
     def __eq__(self, other) -> bool:
         if self is other:
@@ -193,6 +193,16 @@ class Subst:
         '''
         # This is the equivalent condition for idempotent
         return len(self.domain & self.vrange) == 0
+    
+    def get_idempotent(self) -> Subst:
+        '''
+        Return the equivalent substitution to rewrite the term repeatedly until it's fixed
+        '''
+        res = self
+        while not res.is_idempotent:
+            res = self.composite(res)
+
+        return res
 
 ##################################################################
 # matching

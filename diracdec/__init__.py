@@ -6,6 +6,8 @@ try:
 
     from . import backends, components, theory
 
+    from .theory import TRSTerm, TRSVar, Subst
+
     from .factory import dirac_parser, dirac_parse, dirac_trs, dirac_cime2_file
 
     from .factory import dirac_delta_parser, dirac_delta_parse, dirac_delta_trs
