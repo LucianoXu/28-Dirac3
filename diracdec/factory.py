@@ -27,6 +27,9 @@ dirac_trs = dirac.construct_trs(
     wolfram_abase.WolframABase, 
     dirac_parser
     )
+
+def dirac_cime2_file(path: str):
+    dirac.dirac_cime2_file(dirac_trs, path)
     
 ### with delta extensions
 

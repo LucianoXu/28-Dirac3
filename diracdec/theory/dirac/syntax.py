@@ -135,7 +135,7 @@ class DiracKet(DiracSyntax):
 
 class KetZero(DiracKet):
     fsymbol_print = "0K"
-    fsymbol = "ZEROK"
+    fsymbol = "0K"
 
     def __init__(self) :
         super().__init__()
@@ -144,7 +144,7 @@ class KetZero(DiracKet):
         return "0K"
     
     def __repr__(self) -> str:
-        return "ZEROK"
+        return "0K"
     
     
 class KetBase(DiracKet):
@@ -208,7 +208,7 @@ class DiracBra(DiracSyntax):
 
 class BraZero(DiracBra):
     fsymbol_print = "0B"
-    fsymbol = "ZEROB"
+    fsymbol = "0B"
 
     def __init__(self) :
         super().__init__()
@@ -217,7 +217,7 @@ class BraZero(DiracBra):
         return "0B"
     
     def __repr__(self) -> str:
-        return "ZEROB"
+        return "0B"
     
 class BraBase(DiracBra):
     fsymbol_print = "bra"
@@ -283,7 +283,7 @@ class DiracOp(DiracSyntax):
 
 class OpZero(DiracOp):
     fsymbol_print = "0O"
-    fsymbol = "ZEROO"
+    fsymbol = "0O"
 
     def __init__(self) :
         super().__init__()
@@ -292,12 +292,12 @@ class OpZero(DiracOp):
         return "0O"
     
     def __repr__(self) -> str:
-        return "ZEROO"
+        return "0O"
     
 
 class OpOne(DiracOp):
     fsymbol_print = "1O"
-    fsymbol = "ONEO"
+    fsymbol = "1O"
 
     def __init__(self) :
         super().__init__()
@@ -306,7 +306,7 @@ class OpOne(DiracOp):
         return "1O"
     
     def __repr__(self) -> str:
-        return "ONEO"
+        return "1O"
     
     
 class OpOuter(DiracOp, TRSInfixBinary):

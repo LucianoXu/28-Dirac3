@@ -374,7 +374,7 @@ def test_KET_MUL_10():
 def test_KET_MUL_11():
     with wolfram_backend.wolfram_session():
         a = parse(r'''(O1 TSRO O2) MLTK KET(t)''')
-        b = parse(r'''(O1 MLTK KET(FST(t))) TSRK (O2 MLTK KET(SND(T)))''')
+        b = parse(r'''(O1 MLTK KET(FST(t))) TSRK (O2 MLTK KET(SND(t)))''')
         assert trs.normalize(a) == trs.normalize(b)
 
 def test_KET_MUL_12():
@@ -603,7 +603,7 @@ def test_BRA_MUL_10():
 def test_BRA_MUL_11():
     with wolfram_backend.wolfram_session():
         a = parse(r'''BRA(t) MLTB (O1 TSRO O2)''')
-        b = parse(r'''(BRA(FST(t)) MLTB O1) TSRB (BRA(SND(T)) MLTB O2)''')
+        b = parse(r'''(BRA(FST(t)) MLTB O1) TSRB (BRA(SND(t)) MLTB O2)''')
         assert trs.normalize(a) == trs.normalize(b)
 
 def test_BRA_MUL_12():

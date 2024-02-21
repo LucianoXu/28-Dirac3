@@ -9,3 +9,7 @@
 - In the trs, every term is considered as immutable.
 
 - We write special functions for each rule involving AC symbols, and many obvious optimizations are considered.
+
+- About extra rules for Delta: 
+    - now we analysis every individual delta-operator only
+    - the implementation with Wolfram Base backend relies on `FindInstance` method and requies the hint of variables, which is provided through `side_info` arguments in the trs.

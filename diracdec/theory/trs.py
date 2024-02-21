@@ -399,7 +399,8 @@ class TRSRule:
     def __init__(self, 
                  lhs: TRSTerm|str, 
                  rhs: TRSTerm|str,
-                 rewrite_method : Callable[[TRSRule, TRSTerm, Dict[str, Any]], TRSTerm|None] = normal_rewrite):
+                 rewrite_method : Callable[[TRSRule, TRSTerm, Dict[str, Any]], TRSTerm|None] = normal_rewrite,
+                 rule_repr: str|None = None):
         '''
         note: the rewrite_method checks whether the current rule can rewrite the given term (not including subterms)
         '''
@@ -410,12 +411,18 @@ class TRSRule:
 
         self.lhs = lhs
         self.rhs = rhs
+        self.rule_repr = rule_repr
 
     def __str__(self) -> str:
         return f'{self.lhs} → {self.rhs}'
 
     def __repr__(self) -> str:
-        return f'{repr(self.lhs)} -> {repr(self.rhs)}'
+        if self.rule_repr is not None:
+            return self.rule_repr
+        
+        str_lhs = self.lhs if isinstance(self.lhs, str) else repr(self.lhs)
+        str_rhs = self.rhs if isinstance(self.rhs, str) else repr(self.rhs)
+        return f'{str_lhs} -> {str_rhs}'
 
         
 # define rule for AC symbols by defining new class
@@ -428,7 +435,8 @@ class TRS:
 
     def __init__(self, 
                  rules: List[TRSRule], 
-                 side_info_procs: Tuple[Callable[[Dict[str, Any]], Dict[str, Any]],...] = ()):
+                 side_info_procs: Tuple[Callable[[Dict[str, Any]], Dict[str, Any]],...] = (),
+                 ):
         '''
         side_info_procs provides methods to preprocess side informations (executed in sequence)
         '''
@@ -443,6 +451,17 @@ class TRS:
         for rule in self.rules:
             if isinstance(rule.lhs, TRSTerm) and isinstance(rule.rhs, TRSTerm):
                 res |= rule.lhs.variables() | rule.rhs.variables()
+        return res
+    
+    def CiME2_rules(self) -> str:
+        '''
+        output the TRS rules for CiME2 as a string
+        '''
+        res = ""
+
+        # print the rules
+        for rule in self.rules:
+            res += repr(rule) + " ;\n"
         return res
     
     def substitute(self, sigma : Subst) -> TRS:
