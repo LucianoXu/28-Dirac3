@@ -31,4 +31,3 @@
 ## TODO
 - consider the case of teleportation after we have indices
 - refine the string output
-- consider latex output

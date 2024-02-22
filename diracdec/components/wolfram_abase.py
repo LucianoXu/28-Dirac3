@@ -36,7 +36,7 @@ class WolframABase(AtomicBase):
     
 
     def variables(self) -> set[str]:
-        return set(session.evaluate(wl.Cases(self.simp_expr, wl._Symbol, wl.Infinity)))
+        return set(v.name for v in session.evaluate(wl.Cases(self.simp_expr, wl.Blank(wl.Symbol), wl.Infinity)))
 
     def eq_satisfiable(self, other) -> bool:
         '''

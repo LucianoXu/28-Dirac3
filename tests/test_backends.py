@@ -28,6 +28,14 @@ def test_wolfram_cscalar():
         assert a == b
         assert hash(a) == hash(b)
 
+def test_wolfram_variables():
+    with wolfram_backend.wolfram_session():
+        a = parse(''' "Sum[(1/2)^x, {x, 1, m}]" ''')
+        assert a.variables() == set(["Global`m"])
+
+        a = parse(''' 'Sum[(1/2)^x, {x, 1, m}]' ''')
+        assert a.variables() == set(["Global`m"])
+
 def test_wolfram_substitute():
     with wolfram_backend.wolfram_session():
         sub = Subst({

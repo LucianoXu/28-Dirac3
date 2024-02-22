@@ -61,7 +61,7 @@ class WolframCScalar(ComplexScalar):
         return int(h.hexdigest(), 16)
     
     def variables(self) -> set[str]:
-        return set(session.evaluate(wl.Cases(self.simp_expr, wl._Symbol, wl.Infinity)))
+        return set(v.name for v in session.evaluate(wl.Cases(self.simp_expr, wl.Blank(wl.Symbol), wl.Infinity)))
 
     def substitute(self, sigma: Subst) -> TRSTerm:
         # create the substitution in Wolfram Language
