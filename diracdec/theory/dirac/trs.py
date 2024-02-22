@@ -32,9 +32,9 @@ def construct_trs(
     rules = []
 
 
-    C0 = ScalarC(CScalar.zero())
-    C1 = ScalarC(CScalar.one())
-    C2 = ScalarC(CScalar.add(CScalar.one(), CScalar.one()))
+    C0 = CScalar.zero()
+    C1 = CScalar.one()
+    C2 = CScalar.add(CScalar.one(), CScalar.one())
 
 
 
@@ -124,11 +124,11 @@ def construct_trs(
     def scr_complex_2_rewrite(rule, term, side_info):
         if isinstance(term, ScalarAdd):
             for i in range(len(term.args)):
-                if isinstance(term.args[i], ScalarC):
+                if isinstance(term.args[i], ComplexScalar):
                     for j in range(i+1, len(term.args)):
-                        if isinstance(term.args[j], ScalarC):
+                        if isinstance(term.args[j], ComplexScalar):
 
-                            new_args = (ScalarC(CScalar.add(term.args[i].args[0], term.args[j].args[0])),) + term.remained_terms(i, j)
+                            new_args = (CScalar.add(term.args[i], term.args[j]),) + term.remained_terms(i, j)
 
                             return ScalarAdd(*new_args)
 
@@ -159,11 +159,11 @@ def construct_trs(
             for i in range(len(term.args)):
                 if isinstance(term.args[i], ScalarMlt):
                     for j in range(len(term.args[i].args)):
-                        if isinstance(term[i][j], ScalarC):
+                        if isinstance(term[i][j], ComplexScalar):
                             S0 = ScalarMlt(*term[i].args[:j], *term[i].args[j+1:])
                             for k in range(len(term.args)):
                                 if S0 == term.args[k]:
-                                    new_args = (ScalarMlt(ScalarC(CScalar.add(term[i][j].args[0], CScalar.one())), term[k]),)
+                                    new_args = (ScalarMlt(CScalar.add(term[i][j], CScalar.one()), term[k]),)
                                     new_args += term.remained_terms(i, k)
                                     return ScalarAdd(*new_args)
                                 
@@ -179,15 +179,15 @@ def construct_trs(
             for i in range(len(term.args)):
                 if isinstance(term.args[i], ScalarMlt):
                     for j in range(len(term.args[i].args)):
-                        if isinstance(term[i][j], ScalarC):
+                        if isinstance(term[i][j], ComplexScalar):
                             S0 = ScalarMlt(*term[i].args[:j], *term[i].args[j+1:])
                             for k in range(i+1, len(term.args)):
                                 if isinstance(term.args[k], ScalarMlt):
                                     for l in range(len(term.args[k].args)):
-                                        if isinstance(term[k][l], ScalarC):
+                                        if isinstance(term[k][l], ComplexScalar):
                                             S1 = ScalarMlt(*term[k].args[:l], *term[k].args[l+1:])
                                             if S0 == S1:
-                                                new_args = (ScalarMlt(ScalarC(CScalar.add(term[i][j].args[0], term[k][l].args[0])), S0),)
+                                                new_args = (ScalarMlt(CScalar.add(term[i][j], term[k][l]), S0),)
                                                 new_args += term.remained_terms(i, k)
                                                 return ScalarAdd(*new_args)
 
@@ -227,11 +227,11 @@ def construct_trs(
     def scr_complex_8_rewrite(rule, term, side_info):
         if isinstance(term, ScalarMlt):
             for i in range(len(term.args)):
-                if isinstance(term.args[i], ScalarC):
+                if isinstance(term.args[i], ComplexScalar):
                     for j in range(i+1, len(term.args)):
-                        if isinstance(term.args[j], ScalarC):
+                        if isinstance(term.args[j], ComplexScalar):
 
-                            new_args = (ScalarC(CScalar.mlt(term.args[i].args[0], term.args[j].args[0])),) + term.remained_terms(i, j)
+                            new_args = (CScalar.mlt(term.args[i], term.args[j]),) + term.remained_terms(i, j)
 
                             return ScalarMlt(*new_args)
 
@@ -259,8 +259,8 @@ def construct_trs(
 
     def scr_complex_10_rewrite(rule, term, side_info):
         if isinstance(term, ScalarConj):
-            if isinstance(term.args[0], ScalarC):
-                return ScalarC(CScalar.conj(term.args[0].args[0]))
+            if isinstance(term.args[0], ComplexScalar):
+                return CScalar.conj(term.args[0])
     SCR_COMPLEX_10 = TRSRule(
         lhs="CONJS(C(a))",
         rhs="C(a ^*)",

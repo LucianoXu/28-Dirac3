@@ -19,26 +19,6 @@ class DiracBase(DiracSyntax):
     ...
     
     
-class BaseAtom(DiracBase):
-    fsymbol_print = "BATOM"
-    fsymbol = "BATOM"
-
-    def __init__(self, b : TRSTerm):
-        '''
-        b is the atomic base
-        '''
-        super().__init__(b)
-    
-    def __str__(self) -> str:
-        return f"'{str(self.args[0])}'"
-    
-    def __repr__(self) -> str:
-        return f"'{repr(self.args[0])}'"
-    
-    def tex(self) -> str:
-        return self.args[0].tex()
-    
-    
 class BasePair(DiracBase):
     fsymbol_print = "pair"
     fsymbol = "PAIR"
@@ -80,23 +60,6 @@ class BaseSnd(DiracBase):
 
 class DiracScalar(DiracSyntax):
     ...
-
-
-class ScalarC(DiracScalar):
-    fsymbol_print = "ScalarC"
-    fsymbol = "ScalarC"
-
-    def __init__(self, c : TRSTerm):
-        super().__init__(c)
-
-    def __str__(self) -> str:
-        return f'"{self.args[0]}"'
-    
-    def __repr__(self) -> str:
-        return f'"{repr(self.args[0])}"'
-    
-    def tex(self) -> str:
-        return self.args[0].tex()
 
 
 class ScalarDelta(DiracScalar, TRSCommBinary):

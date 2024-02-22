@@ -23,8 +23,8 @@ def modify_trs(
     (the original trs is not modified)
     '''
 
-    C0 = ScalarC(CScalar.zero())
-    C1 = ScalarC(CScalar.one())
+    C0 = CScalar.zero()
+    C1 = CScalar.one()
 
     rules = trs.rules.copy()
 
@@ -44,9 +44,12 @@ def modify_trs(
 
 
     def delta_ast_2_rewrite(rule, term, side_info):
-        if isinstance(term, ScalarDelta) and isinstance(term[0], BaseAtom) and isinstance(term[1], BaseAtom):
-            if not term.args[0][0].eq_satisfiable(term.args[1][0]): # type: ignore
-                return C0
+        if isinstance(term, ScalarDelta):
+            t0 = term[0]
+            t1 = term[1]
+            if isinstance(t0, AtomicBase) and isinstance(t1, AtomicBase):
+                if not t0.eq_satisfiable(t1):
+                    return C0
     
     DELTA_AST_2 = TRSRule(
         lhs = "DELTA(s, t) && s, t are base atoms && s = t is not satisfiable",

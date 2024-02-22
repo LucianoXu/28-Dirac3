@@ -42,7 +42,7 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
         '''
         diracbase   : ATOMICBASE_EXPR
         '''
-        p[0] = BaseAtom(ABase(p[1]))
+        p[0] = ABase(p[1])
 
     def p_diracbase2(p):
         '''
@@ -67,7 +67,7 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
         '''
         diracscalar : COMPLEXSCALAR_EXPR
         '''
-        p[0] = ScalarC(CScalar(p[1]))
+        p[0] = CScalar(p[1])
 
     def p_diracscalar2(p):
         '''

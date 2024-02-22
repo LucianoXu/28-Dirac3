@@ -31,8 +31,8 @@ def test_wolfram_cscalar():
 def test_wolfram_substitute():
     with wolfram_backend.wolfram_session():
         sub = Subst({
-            "a" : WolframCScalar("1"),
-            "b" : WolframABase("a + a"),
+            "a" : parse(''' "1" '''),
+            "b" : parse(''' 'a + a' '''),
         })
         a = parse(''' "a" ''')
         b = parse(''' "1" ''')

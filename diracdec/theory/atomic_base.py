@@ -16,7 +16,7 @@ class AtomicBase(TRSSpec):
     '''
 
     @abstractmethod
-    def eq_satisfiable(self, other, vars) -> bool:
+    def eq_satisfiable(self, other) -> bool:
         '''
         check whether e1 == e2 is satisfiable with variables of [vars]
         '''
