@@ -7,6 +7,10 @@ from typing import Callable, Tuple, Any, Dict, List
 
 from abc import ABC, abstractmethod
 
+from IPython.core.display import Image
+
+from ..backends import render_tex, render_tex_to_svg
+
 import hashlib
 
 def var_rename(vars: set[str], prefix: str) -> str:
@@ -96,6 +100,20 @@ class TRSTerm(ABC):
             arg.substitute(sigma) for arg in self.args
         )
         return type(self)(*new_args)
+    
+    #############################################
+    # utilities
+    def render_tex(self, filename:str|None = None, dpi:int = 300) -> Image:
+        '''
+        render the term into latex image
+        '''
+        return render_tex(self.tex(), filename, dpi)
+    
+    def render_tex_to_svg(self, filename:str) -> None:
+        '''
+        render the term into latex image as a svg file
+        '''
+        return render_tex_to_svg(self.tex(), filename)
         
 
 class TRSVar(TRSTerm):
@@ -111,7 +129,7 @@ class TRSVar(TRSTerm):
     
     def tex(self) -> str:
         new_name = self.name.replace('_',r'\_')
-        return rf"\mathop{{{new_name}}}"
+        return rf" \mathop{{{new_name}}}"
     
     def __eq__(self, other: TRSVar) -> bool:
         return isinstance(other, TRSVar) and self.name == other.name
@@ -393,7 +411,7 @@ class TRS_AC(TRSTerm):
         return f'({f" {self.fsymbol} ".join(map(repr, self.args))})'
     
     def tex(self) -> str:
-        return f'({f" {self.fsymbol_print} ".join(map(lambda x: x.tex(), self.args))})'
+        return rf' \left ({f" {self.fsymbol_print} ".join(map(lambda x: x.tex(), self.args))} \right )'
     
     def substitute(self, sigma: Subst) -> TRSTerm:
         return type(self)(*tuple(arg.substitute(sigma) for arg in self.args))

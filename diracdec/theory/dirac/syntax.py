@@ -42,7 +42,7 @@ class BaseFst(DiracBase):
         super().__init__(p)
 
     def tex(self) -> str:
-        return rf"\mathrm{{fst}} {self.args[0].tex()}"
+        return rf" \mathrm{{fst}} {self.args[0].tex()}"
     
 class BaseSnd(DiracBase):
     fsymbol_print = "snd"
@@ -52,7 +52,7 @@ class BaseSnd(DiracBase):
         super().__init__(p)
 
     def tex(self) -> str:
-        return rf"\mathrm{{snd}} {self.args[0].tex()}"
+        return rf" \mathrm{{snd}} {self.args[0].tex()}"
     
 
 ############################################
@@ -70,7 +70,7 @@ class ScalarDelta(DiracScalar, TRSCommBinary):
         TRSCommBinary.__init__(self, b1, b2)
 
     def tex(self) -> str:
-        return rf"\delta_{{{self.args[0].tex()}, {self.args[1].tex()}}}"
+        return rf" \delta_{{{self.args[0].tex()}, {self.args[1].tex()}}}"
 
 
 class ScalarAdd(DiracScalar, TRS_AC):
@@ -102,7 +102,7 @@ class ScalarConj(DiracScalar):
         return f"({self.args[0]}^*)"
     
     def tex(self) -> str:
-        return f"{self.args[0].tex()}^*"
+        return f" {self.args[0].tex()}^*"
     
     
 class ScalarDot(DiracScalar, TRSInfixBinary):
@@ -115,9 +115,9 @@ class ScalarDot(DiracScalar, TRSInfixBinary):
     def tex(self) -> str:
         # special printing for <b|k>
         if isinstance(self.args[0], BraBase) and isinstance(self.args[1], KetBase):
-            return rf"\langle {self.args[0].args[0].tex()} | {self.args[1].args[0].tex()} \rangle"
+            return rf" \langle {self.args[0].args[0].tex()} | {self.args[1].args[0].tex()} \rangle"
         
-        return rf"{self.args[0].tex()} \cdot {self.args[1].tex()}"
+        return rf" {self.args[0].tex()} \cdot {self.args[1].tex()}"
 
 
 ############################################
@@ -140,7 +140,7 @@ class KetZero(DiracKet):
         return "0K"
     
     def tex(self) -> str:
-        return r"\mathbf{0}_\mathcal{K}"
+        return r" \mathbf{0}_\mathcal{K}"
     
     
 class KetBase(DiracKet):
@@ -154,7 +154,7 @@ class KetBase(DiracKet):
         return f"|{self.args[0]}>"
     
     def tex(self) -> str:
-        return f"|{self.args[0].tex()} \rangle"
+        return rf" |{self.args[0].tex()} \rangle"
     
     
 class KetAdj(DiracKet):
@@ -168,7 +168,7 @@ class KetAdj(DiracKet):
         return f"({self.args[0]}†)"
     
     def tex(self) -> str:
-        return rf"{self.args[0].tex()}^\dagger"
+        return rf" {self.args[0].tex()}^\dagger"
     
 
 class KetScal(DiracKet, TRSInfixBinary):
@@ -179,7 +179,7 @@ class KetScal(DiracKet, TRSInfixBinary):
         TRSInfixBinary.__init__(self, S, K)
 
     def tex(self) -> str:
-        return rf"{self.args[0].tex()} {self.args[1].tex()}"
+        return rf" {self.args[0].tex()} {self.args[1].tex()}"
 
     
 class KetAdd(DiracKet, TRS_AC):
@@ -197,7 +197,7 @@ class KetApply(DiracKet, TRSInfixBinary):
         TRSInfixBinary.__init__(self, O, K)
 
     def tex(self) -> str:
-        return rf"({self.args[0].tex()} {self.args[1].tex()})"
+        return rf" {self.args[0].tex()} {self.args[1].tex()}"
 
 
 class KetTensor(DiracKet, TRSInfixBinary):
@@ -208,7 +208,7 @@ class KetTensor(DiracKet, TRSInfixBinary):
         TRSInfixBinary.__init__(self, K1, K2)
 
     def tex(self) -> str:
-        return rf"({self.args[0].tex()} \otimes {self.args[1].tex()})"
+        return rf" \left ({self.args[0].tex()} \otimes {self.args[1].tex()} \right)"
     
 
 ############################################
@@ -231,7 +231,7 @@ class BraZero(DiracBra):
         return "0B"
     
     def tex(self) -> str:
-        return r"\mathbf{0}_\mathcal{B}"
+        return r" \mathbf{0}_\mathcal{B}"
     
 class BraBase(DiracBra):
     fsymbol_print = "bra"
@@ -244,7 +244,7 @@ class BraBase(DiracBra):
         return f"<{self.args[0]}|"
     
     def tex(self) -> str:
-        return rf"\langle {self.args[0].tex()} |"
+        return rf" \langle {self.args[0].tex()} |"
     
 
 
@@ -259,7 +259,7 @@ class BraAdj(DiracBra):
         return f"({self.args[0]}†)"
     
     def tex(self) -> str:
-        return rf"{self.args[0].tex()}^\dagger"
+        return rf" {self.args[0].tex()}^\dagger"
     
 
 class BraScal(DiracBra, TRSInfixBinary):
@@ -270,7 +270,7 @@ class BraScal(DiracBra, TRSInfixBinary):
         TRSInfixBinary.__init__(self, S, B)
 
     def tex(self) -> str:
-        return rf"{self.args[0].tex()} {self.args[1].tex()}"
+        return rf" {self.args[0].tex()} {self.args[1].tex()}"
 
     
 class BraAdd(DiracBra, TRS_AC):
@@ -289,7 +289,7 @@ class BraApply(DiracBra, TRSInfixBinary):
         TRSInfixBinary.__init__(self, B, O)
 
     def tex(self) -> str:
-        return rf"({self.args[0].tex()} {self.args[1].tex()})"
+        return rf" {self.args[0].tex()} {self.args[1].tex()}"
 
     
 
@@ -301,7 +301,7 @@ class BraTensor(DiracBra, TRSInfixBinary):
         TRSInfixBinary.__init__(self, B1, B2)
 
     def tex(self) -> str:
-        return rf"({self.args[0].tex()} \otimes {self.args[1].tex()})"
+        return rf" \left ( {self.args[0].tex()} \otimes {self.args[1].tex()} \right )"
 
 ############################################
 # DiracOp
@@ -324,7 +324,7 @@ class OpZero(DiracOp):
         return "0O"
     
     def tex(self) -> str:
-        return r"\mathbf{0}_\mathcal{O}"
+        return r" \mathbf{0}_\mathcal{O}"
 
 class OpOne(DiracOp):
     fsymbol_print = "1O"
@@ -340,7 +340,7 @@ class OpOne(DiracOp):
         return "1O"
     
     def tex(self) -> str:
-        return r"\mathbf{1}_\mathcal{O}"
+        return r" \mathbf{1}_\mathcal{O}"
     
     
 class OpOuter(DiracOp, TRSInfixBinary):
@@ -352,9 +352,9 @@ class OpOuter(DiracOp, TRSInfixBinary):
 
     def tex(self) -> str:
         if isinstance(self.args[0], KetBase) and isinstance(self.args[1], BraBase):
-            return rf"{self.args[0].tex()}{self.args[1].tex()}"
+            return rf" {self.args[0].tex()} {self.args[1].tex()}"
         
-        return rf"{self.args[0].tex()} \otimes {self.args[1].tex()}"
+        return rf" {self.args[0].tex()} \otimes {self.args[1].tex()}"
     
 class OpAdj(DiracOp):
     fsymbol_print = "ADJO"
@@ -370,7 +370,7 @@ class OpAdj(DiracOp):
         return f"ADJO({repr(self.args[0])})"
     
     def tex(self) -> str:
-        return rf"{self.args[0].tex()}^\dagger"
+        return rf" {self.args[0].tex()}^\dagger"
     
     
 class OpScal(DiracOp, TRSInfixBinary):
@@ -381,7 +381,7 @@ class OpScal(DiracOp, TRSInfixBinary):
         TRSInfixBinary.__init__(self, S, O)
 
     def tex(self) -> str:
-        return rf"{self.args[0].tex()} {self.args[1].tex()}"
+        return rf" {self.args[0].tex()} {self.args[1].tex()}"
 
     
 class OpAdd(DiracOp, TRS_AC):
@@ -400,7 +400,7 @@ class OpApply(DiracOp, TRSInfixBinary):
         TRSInfixBinary.__init__(self, O1, O2)
 
     def tex(self) -> str:
-        return rf"({self.args[0].tex()} {self.args[1].tex()})"
+        return rf" {self.args[0].tex()} {self.args[1].tex()}"
 
 
 class OpTensor(DiracOp, TRSInfixBinary):
@@ -411,4 +411,4 @@ class OpTensor(DiracOp, TRSInfixBinary):
         TRSInfixBinary.__init__(self, O1, O2)
 
     def tex(self) -> str:
-        return rf"({self.args[0].tex()} \otimes {self.args[1].tex()})"
+        return rf" \left ( {self.args[0].tex()} \otimes {self.args[1].tex()} \right ) "

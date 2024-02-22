@@ -51,7 +51,7 @@ class WolframCScalar(ComplexScalar):
         return f'WolframCScalar({self.simp_expr})'
     
     def tex(self) -> str:
-        return session.evaluate(wl.ToString(self.simp_expr, wl.TeXForm))
+        return r"\left (" + session.evaluate(wl.ToString(self.simp_expr, wl.TeXForm)) + r"\right )"
     
     def __eq__(self, other: WolframCScalar) -> bool:
         return isinstance(other, WolframCScalar) and self.simp_expr == other.simp_expr

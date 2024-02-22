@@ -1,6 +1,8 @@
 
 from .backends import wolfram_backend
 
+from .backends import render_tex, render_tex_to_svg
+
 # avoid the block from wolfram session
 try:
 
