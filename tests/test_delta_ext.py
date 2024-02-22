@@ -24,5 +24,5 @@ def test_DELTA_AST_2():
         
         a = parse(r''' DELTA('x', 'x+1') ''')
         b = parse(r''' "0" ''')
-        print(trs.normalize(a, {"mma_vars": "{x, y}"}))
+        print(trs.normalize(a))
         print(trs.normalize(b))

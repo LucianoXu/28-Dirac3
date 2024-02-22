@@ -8,6 +8,8 @@ from typing import Any
 
 from ..theory.complex_scalar import ComplexScalar
 
+from ..theory import TRSTerm, Subst
+
 from ..backends.wolfram_backend import *
 
 import hashlib
@@ -19,6 +21,8 @@ class WolframCScalar(ComplexScalar):
             expr = wlexpr(expr)
 
         self.simp_expr = session.evaluate(wl.FullSimplify(expr))
+
+        TRSTerm.__init__(self)
 
     @staticmethod
     def zero() -> WolframCScalar:
@@ -41,14 +45,32 @@ class WolframCScalar(ComplexScalar):
         return WolframCScalar(wl.Times(c1.simp_expr, c2.simp_expr))
     
     def __str__(self) -> str:
-        return f'{str(self.simp_expr)}'
+        return f'\n{str(session.evaluate(wl.ToString(self.simp_expr)))}\n'
     
     def __repr__(self) -> str:
         return f'WolframCScalar({self.simp_expr})'
+    
+    def tex(self) -> str:
+        return session.evaluate(wl.ToString(self.simp_expr, wl.TeXForm))
     
     def __eq__(self, other: WolframCScalar) -> bool:
         return isinstance(other, WolframCScalar) and self.simp_expr == other.simp_expr
     
     def __hash__(self) -> int:
-        h = hashlib.md5(str(self).encode())
+        h = hashlib.md5(str(self.simp_expr).encode())
         return int(h.hexdigest(), 16)
+    
+    def variables(self) -> set[str]:
+        return set(session.evaluate(wl.Cases(self.simp_expr, wl._Symbol, wl.Infinity)))
+
+    def substitute(self, sigma: Subst) -> TRSTerm:
+        # create the substitution in Wolfram Language
+        wolfram_sub = []
+        for k, v in sigma.data.items():
+            if isinstance(v, WolframCScalar):
+                wolfram_sub.append(wl.Rule(wl.Symbol(k), v.simp_expr))
+        if len(wolfram_sub) == 0:
+            return self
+
+        # substitute
+        return WolframCScalar(session.evaluate(wl.ReplaceAll(self.simp_expr, tuple(wolfram_sub))))

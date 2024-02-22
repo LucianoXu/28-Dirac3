@@ -13,7 +13,7 @@ reserved = {
     'CONJS'      : 'CONJS',
     'DOT'        : 'DOT',       # infix binary
 
-    '0K'         : 'ZEROK',
+    # '0K'         : 'ZEROK',
     'KET'        : 'KET',
     'ADJK'       : 'ADJK',
     'SCRK'       : 'SCRK',      # infix binary
@@ -21,7 +21,7 @@ reserved = {
     'MLTK'       : 'MLTK',      # infix binary
     'TSRK'       : 'TSRK',      # infix binary
 
-    '0B'         : 'ZEROB',
+    # '0B'         : 'ZEROB',
     'BRA'        : 'BRA',
     'ADJB'       : 'ADJB',
     'SCRB'       : 'SCRB',      # infix binary
@@ -29,8 +29,8 @@ reserved = {
     'MLTB'       : 'MLTB',      # infix binary
     'TSRB'       : 'TSRB',      # infix binary
 
-    '0O'         : 'ZEROO',
-    '1O'         : 'ONEO', 
+    # '0O'         : 'ZEROO',
+    # '1O'         : 'ONEO', 
     'OUTER'      : 'OUTER',     # infix binary
     'ADJO'       : 'ADJO',
     'SCRO'       : 'SCRO',      # infix binary
@@ -43,6 +43,10 @@ reserved = {
 tokens = [
     # 'INT', 
     'ID',
+    'ZEROK',
+    'ZEROB',
+    'ZEROO',
+    'ONEO',
 
     # escape to complex scalar
     'COMPLEXSCALAR_EXPR',
@@ -54,9 +58,14 @@ tokens = [
 
 literals = ['(', ')', ',']
 
+t_ZEROK = '0K'
+t_ZEROB = '0B'
+t_ZEROO = '0O'
+t_ONEO = '1O'
+
 
 def t_ID(t):
-    r'[a-zA-Z0-9\_][a-zA-Z0-9\_]*'
+    r'[a-zA-Z\_][a-zA-Z0-9\_]*'
     t.type = reserved.get(t.value, 'ID')
     return t
 

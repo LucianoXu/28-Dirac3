@@ -22,7 +22,7 @@ class TRSTerm(ABC):
     fsymbol_print : str
     fsymbol : str
 
-    def __init__(self, *args: Any):
+    def __init__(self, *args: TRSTerm):
         self.args = args
 
     def __str__(self) -> str:
@@ -33,6 +33,13 @@ class TRSTerm(ABC):
         It is required that equivalence of the repr of two terms is equivalent to that of the terms.
         '''
         return f'{self.fsymbol}({", ".join(map(repr, self.args))})'
+    
+    @abstractmethod
+    def tex(self) -> str:
+        '''
+        return the texcode of the term.
+        '''
+        pass
 
     def __eq__(self, other: TRSTerm) -> bool:
         '''
@@ -59,7 +66,7 @@ class TRSTerm(ABC):
 
         return int(h.hexdigest(), 16)
     
-    def __getitem__(self, index) -> Any:
+    def __getitem__(self, index) -> TRSTerm:
         return self.args[index]
     
     @property
@@ -75,8 +82,7 @@ class TRSTerm(ABC):
         '''
         res = set()
         for arg in self.args:
-            if isinstance(arg, TRSTerm):
-                res |= arg.variables()
+            res |= arg.variables()
         return res
 
     @property
@@ -87,7 +93,7 @@ class TRSTerm(ABC):
     def substitute(self, sigma : Subst) -> TRSTerm:
         
         new_args = tuple(
-            arg.substitute(sigma) if isinstance(arg, TRSTerm) else arg for arg in self.args
+            arg.substitute(sigma) for arg in self.args
         )
         return type(self)(*new_args)
         
@@ -102,6 +108,10 @@ class TRSVar(TRSTerm):
     
     def __repr__(self) -> str:
         return self.name
+    
+    def tex(self) -> str:
+        new_name = self.name.replace('_',r'\_')
+        return rf"\mathop{{{new_name}}}"
     
     def __eq__(self, other: TRSVar) -> bool:
         return isinstance(other, TRSVar) and self.name == other.name
@@ -119,6 +129,29 @@ class TRSVar(TRSTerm):
     def substitute(self, sigma: Subst) -> TRSTerm:
         return self if self.name not in sigma else sigma[self.name]
     
+class TRSSpec(TRSTerm):
+    '''
+    Special TRS terms have to redefine these methods
+    '''
+    @abstractmethod
+    def __str__(self) -> str:
+        pass
+
+    @abstractmethod
+    def __repr__(self) -> str:
+        pass
+
+    @abstractmethod
+    def __eq__(self, other: Any) -> bool:
+        pass
+
+    @abstractmethod
+    def __hash__(self) -> int:
+        pass
+    
+    @abstractmethod
+    def variables(self) -> set[str]:
+        pass
 
 ################################################################################
 # universal algebra methods
@@ -254,11 +287,11 @@ class Matching:
                     continue
 
             # being function constructions
-            elif isinstance(lhs, TRSTerm):
+            elif not isinstance(lhs, TRSSpec):
                 if isinstance(rhs, TRSVar):
                     return None
             
-                elif isinstance(rhs, TRSTerm):
+                elif not isinstance(rhs, TRSSpec):
                     if lhs.fsymbol == rhs.fsymbol:
                         ineqs = ineqs[1:]
                         for i in range(len(lhs.args)):
@@ -359,6 +392,9 @@ class TRS_AC(TRSTerm):
     def __repr__(self) -> str:
         return f'({f" {self.fsymbol} ".join(map(repr, self.args))})'
     
+    def tex(self) -> str:
+        return f'({f" {self.fsymbol_print} ".join(map(lambda x: x.tex(), self.args))})'
+    
     def substitute(self, sigma: Subst) -> TRSTerm:
         return type(self)(*tuple(arg.substitute(sigma) for arg in self.args))
     
@@ -384,12 +420,10 @@ def check_special_symbol(term : TRSTerm) -> bool:
     else:
         if isinstance(term, TRSVar):
             return False
-        elif isinstance(term, TRSTerm):
+        else:
             for arg in term.args:
                 if check_special_symbol(arg):
                     return True
-            return False
-        else:
             return False
 
 
@@ -456,6 +490,7 @@ class TRS:
     def variables(self) -> set[str]:
         '''
         Return a set of all free variables in the rules.
+        (This method is not that rigorous, and only acts as a hint.)
         '''
         res = set()
         for rule in self.rules:

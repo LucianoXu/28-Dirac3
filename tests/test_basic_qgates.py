@@ -108,7 +108,7 @@ def test_QCQI_Theorem_4_1():
         b = new_sub(parse(''' ("Exp[I (a - beta/2 - delta/2)] Cos[gamma/2]" SCRO (ket0 OUTER bra0))
             ADDO ("- Exp[I (a - beta/2 + delta/2)] Sin[gamma/2]" SCRO (ket0 OUTER bra1)) ADDO ("Exp[I (a + beta/2 - delta/2)] Sin[gamma/2]" SCRO (ket1 OUTER bra0))
             ADDO ("Exp[I (a + beta/2 + delta/2)] Cos[gamma/2]" SCRO (ket1 OUTER bra1))'''))
-        norm_a = trs.normalize(sub(a), {"mma_vars": "{a, beta, gamma, delta}"})
-        norm_b = trs.normalize(sub(b), {"mma_vars": "{a, beta, gamma, delta}"})
+        norm_a = trs.normalize(sub(a))
+        norm_b = trs.normalize(sub(b))
 
         assert norm_a == norm_b

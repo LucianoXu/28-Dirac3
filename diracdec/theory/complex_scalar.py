@@ -5,11 +5,12 @@ Defining the interfaces of a complex scalar system.
 
 from __future__ import annotations
 
-from typing import Any
 
-from abc import ABC, abstractmethod
+from .trs import TRSTerm, TRSSpec
 
-class ComplexScalar(ABC):
+from abc import abstractmethod
+
+class ComplexScalar(TRSSpec):
     @staticmethod
     @abstractmethod
     def zero() -> ComplexScalar:
@@ -22,31 +23,15 @@ class ComplexScalar(ABC):
 
     @staticmethod
     @abstractmethod
-    def conj(c : ComplexScalar) -> ComplexScalar:
+    def conj(c : TRSTerm) -> ComplexScalar:
         pass
 
     @staticmethod
     @abstractmethod
-    def add(c1 : ComplexScalar, c2 : ComplexScalar) -> ComplexScalar:
+    def add(c1 : TRSTerm, c2 : TRSTerm) -> ComplexScalar:
         pass
 
     @staticmethod
     @abstractmethod
-    def mlt(c1 : ComplexScalar, c2 : ComplexScalar) -> ComplexScalar:
-        pass
-
-    @abstractmethod
-    def __str__(self) -> str:
-        pass
-
-    @abstractmethod
-    def __repr__(self) -> str:
-        pass
-
-    @abstractmethod
-    def __eq__(self, other: ComplexScalar) -> bool:
-        pass
-
-    @abstractmethod
-    def __hash__(self) -> int:
+    def mlt(c1 : TRSTerm, c2 : TRSTerm) -> ComplexScalar:
         pass

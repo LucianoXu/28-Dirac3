@@ -12,7 +12,7 @@
 
 - About extra rules for Delta: 
     - now we analysis every individual delta-operator only
-    - the implementation with Wolfram Base backend relies on `FindInstance` method and requies the hint of variables, which is provided through `side_info` arguments in the trs.
+    - the implementation with Wolfram Base backend relies on `FindInstance` method and requies the hint of variables, which is automatically calculated.
 
 - We can output the corresponding CiME2 code for the trs and check the confluence of the trs indirectly.
 
@@ -26,5 +26,9 @@
 
 - About parameters: there are something not that natural about Rz(beta) Ry(gamma) Rz(delta). We need to incorporate abstractions to represent functions
 
+- Now the variables of dirac notation and wolfram language are unified. Meaning, we can substitute the symbols in wolfram language now.
+
 ## TODO
 - consider the case of teleportation after we have indices
+- refine the string output
+- consider latex output

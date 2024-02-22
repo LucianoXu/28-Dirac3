@@ -45,13 +45,8 @@ def modify_trs(
 
     def delta_ast_2_rewrite(rule, term, side_info):
         if isinstance(term, ScalarDelta) and isinstance(term[0], BaseAtom) and isinstance(term[1], BaseAtom):
-            mma_vars = side_info['mma_vars']
-            if mma_vars == ():
-                if term.args[0][0] != term.args[1][0]:
-                    return C0
-            else:
-                if not term.args[0][0].eq_satisfiable(term.args[1][0], mma_vars):
-                    return C0
+            if not term.args[0][0].eq_satisfiable(term.args[1][0]): # type: ignore
+                return C0
     
     DELTA_AST_2 = TRSRule(
         lhs = "DELTA(s, t) && s, t are base atoms && s = t is not satisfiable",
@@ -61,20 +56,7 @@ def modify_trs(
     rules.append(DELTA_AST_2)
 
 
-    # define the preprocess of side information
-
-    def side_info_vars_proc(side_info: dict[str, Any]) -> dict[str, Any]:
-        if "mma_vars" not in side_info:
-            side_info["mma_vars"] = ()
-            return side_info
-        
-        else:
-            if isinstance(side_info["mma_vars"], str):
-                side_info["mma_vars"] = wolfram_backend.session.evaluate(side_info["mma_vars"])
-            return side_info
-
-
     # construct the trs
-    return TRS(rules, trs.side_info_procs + (side_info_vars_proc,))
+    return TRS(rules, trs.side_info_procs)
 
 
