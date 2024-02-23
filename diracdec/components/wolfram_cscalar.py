@@ -61,7 +61,13 @@ class WolframCScalar(ComplexScalar):
         return int(h.hexdigest(), 16)
     
     def variables(self) -> set[str]:
-        return set(v.name for v in session.evaluate(wl.Cases(self.simp_expr, wl.Blank(wl.Symbol), wl.Infinity)))
+        '''
+        Special symbols like "Inifinity" will also match _Symbol, and we rule them out.
+        '''
+        return set(v.name 
+                   for v in session.evaluate(wl.Cases(self.simp_expr, wl.Blank(wl.Symbol), wl.Infinity)) 
+                   if isinstance(v, WLSymbol)
+                   )
 
     def substitute(self, sigma: Subst) -> TRSTerm:
         # create the substitution in Wolfram Language
@@ -74,3 +80,9 @@ class WolframCScalar(ComplexScalar):
 
         # substitute
         return WolframCScalar(session.evaluate(wl.ReplaceAll(self.simp_expr, tuple(wolfram_sub))))
+    
+    def reduce(self) -> WolframCScalar | None:
+        if isinstance(self.simp_expr, WLFunction) and self.simp_expr.head == wl.HoldForm:
+            return WolframCScalar(self.simp_expr[0])
+        else:
+            return None

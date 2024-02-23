@@ -3,6 +3,7 @@ The implementation for complex scalar system by wolfram expressions
 '''
 
 from __future__ import annotations
+from typing import Any
 
 from diracdec.theory.trs import Subst, TRSTerm
 
@@ -15,8 +16,13 @@ from ..backends.wolfram_backend import *
 
 
 class WolframABase(AtomicBase):
-    def __init__(self, expr : str):
-        self.simp_expr = wolfram_parser(f"FullSimplify[{expr}]")
+    def __init__(self, expr : str | Any):
+
+        if isinstance(expr, str):
+            expr = wlexpr(expr)
+
+        self.simp_expr = session.evaluate(wl.FullSimplify(expr))
+        
         TRSTerm.__init__(self)
 
     def __str__(self) -> str:
@@ -36,7 +42,13 @@ class WolframABase(AtomicBase):
     
 
     def variables(self) -> set[str]:
-        return set(v.name for v in session.evaluate(wl.Cases(self.simp_expr, wl.Blank(wl.Symbol), wl.Infinity)))
+        '''
+        Special symbols like "Inifinity" will also match _Symbol, and we rule them out.
+        '''
+        return set(v.name 
+                   for v in session.evaluate(wl.Cases(self.simp_expr, wl.Blank(wl.Symbol), wl.Infinity)) 
+                   if isinstance(v, WLSymbol)
+                   )
 
     def eq_satisfiable(self, other) -> bool:
         '''
@@ -65,3 +77,9 @@ class WolframABase(AtomicBase):
 
         # substitute
         return WolframABase(session.evaluate(wl.ReplaceAll(self.simp_expr, tuple(wolfram_sub))))
+    
+    def reduce(self) -> WolframABase | None:
+        if isinstance(self.simp_expr, WLFunction) and self.simp_expr.head == wl.HoldForm:
+            return WolframABase(self.simp_expr[0])
+        else:
+            return None

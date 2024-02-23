@@ -4,6 +4,19 @@ from diracdec import *
 
 from diracdec import dirac_parse as parse, dirac_trs as trs
 
+def test_ATOMIC_BASE():
+    with wolfram_backend.wolfram_session():
+        a = parse(''' 'HoldForm[Sum[(1/2)^i, {i,1,Infinity}] a + a]' ''')
+        b = parse(''' '2 a' ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+def test_COMPLEX_SCALAR():
+    with wolfram_backend.wolfram_session():
+        a = parse(''' "HoldForm[Sum[(1/2)^i, {i,1,Infinity}] a + a]" ''')
+        b = parse(''' "2 a" ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+
 
 
 def test_BASIS_1():

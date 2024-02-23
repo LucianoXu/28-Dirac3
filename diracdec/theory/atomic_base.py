@@ -21,3 +21,11 @@ class AtomicBase(TRSSpec):
         check whether e1 == e2 is satisfiable with variables of [vars]
         '''
         pass
+
+    @abstractmethod
+    def reduce(self) -> AtomicBase|None:
+        '''
+        reduce the expression, return the reduced result
+        return None if it is already normal
+        '''
+        pass

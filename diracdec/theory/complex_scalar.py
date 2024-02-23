@@ -35,3 +35,12 @@ class ComplexScalar(TRSSpec):
     @abstractmethod
     def mlt(c1 : TRSTerm, c2 : TRSTerm) -> ComplexScalar:
         pass
+
+
+    @abstractmethod
+    def reduce(self) -> ComplexScalar|None:
+        '''
+        reduce the expression, return the reduced result
+        return None if it is already normal
+        '''
+        pass

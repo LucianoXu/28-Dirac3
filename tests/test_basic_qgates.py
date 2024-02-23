@@ -96,19 +96,33 @@ def test_QCQI_Theorem_4_1():
     QCQI, Theorem 4.1
     '''
     with wolfram_backend.wolfram_session():
+
+        # define the rotation gates
         sub_rot = Subst({
             "Rz_beta" : sub(parse(''' ("Cos[beta/2]" SCRO I2) ADDO ("- Sin[beta/2] I" SCRO Z) ''')),
             "Ry_gamma" : sub(parse(''' ("Cos[gamma/2]" SCRO I2) ADDO ("- Sin[gamma/2] I" SCRO Y) ''')),
             "Rz_delta" : sub(parse(''' ("Cos[delta/2]" SCRO I2) ADDO ("- Sin[delta/2] I" SCRO Z) ''')),
         })
 
+        # get the idempotent operation
         new_sub = sub_rot.composite(sub).get_idempotent()
 
+        # RHS - rotations
         a = new_sub(parse(''' "Exp[I a]" SCRO (Rz_beta MLTO Ry_gamma MLTO Rz_delta) '''))
+        # LHS - U
         b = new_sub(parse(''' ("Exp[I (a - beta/2 - delta/2)] Cos[gamma/2]" SCRO (ket0 OUTER bra0))
-            ADDO ("- Exp[I (a - beta/2 + delta/2)] Sin[gamma/2]" SCRO (ket0 OUTER bra1)) ADDO ("Exp[I (a + beta/2 - delta/2)] Sin[gamma/2]" SCRO (ket1 OUTER bra0))
+            ADDO ("- Exp[I (a - beta/2 + delta/2)] Sin[gamma/2]" SCRO (ket0 OUTER bra1)) 
+            ADDO ("Exp[I (a + beta/2 - delta/2)] Sin[gamma/2]" SCRO (ket1 OUTER bra0))
             ADDO ("Exp[I (a + beta/2 + delta/2)] Cos[gamma/2]" SCRO (ket1 OUTER bra1))'''))
+        
         norm_a = trs.normalize(sub(a))
         norm_b = trs.normalize(sub(b))
-
         assert norm_a == norm_b
+
+
+def test_simple_circ():
+    with wolfram_backend.wolfram_session():
+        a = parse(''' (A TSRO I2) MLTO CX MLTO (X TSRO I2) MLTO (X TSRO I2) MLTO CX MLTO U ''')
+        b = parse(''' (A TSRO I2) MLTO (I2 TSRO I2) MLTO U ''')
+
+        assert trs.normalize(sub(a)) == trs.normalize(sub(b))

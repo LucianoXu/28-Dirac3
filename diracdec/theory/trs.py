@@ -484,7 +484,7 @@ class TRSRule:
         
         str_lhs = self.lhs if isinstance(self.lhs, str) else repr(self.lhs)
         str_rhs = self.rhs if isinstance(self.rhs, str) else repr(self.rhs)
-        return f'{str_lhs} -> {str_rhs}'
+        return f'{str_lhs} -> {str_rhs} ;'
 
         
 # define rule for AC symbols by defining new class
@@ -524,7 +524,7 @@ class TRS:
 
         # print the rules
         for rule in self.rules:
-            res += repr(rule) + " ;\n"
+            res += repr(rule) + "\n"
         return res
     
     def substitute(self, sigma : Subst) -> TRS:

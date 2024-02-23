@@ -8,6 +8,7 @@ from typing import Sequence
 
 from wolframclient.evaluation import WolframLanguageSession
 from wolframclient.language import wl, wlexpr
+from wolframclient.language.expression import WLFunction, WLSymbol
 import contextlib
 
 # the only session

@@ -36,6 +36,31 @@ def construct_trs(
     C1 = CScalar.one()
     C2 = CScalar.add(CScalar.one(), CScalar.one())
 
+    
+    #################################################
+    # reducing basis and complex scalars
+
+    def atomic_base_rewrite(rule, term, side_info):
+        if isinstance(term, ABase):
+            return term.reduce()
+    ATOMIC_BASE = TRSRule(
+        lhs = "a",
+        rhs = "a",
+        rewrite_method=atomic_base_rewrite,
+        rule_repr="(* base -> simp(base) *)"
+    )
+    rules.append(ATOMIC_BASE)
+
+    def complex_scalar_rewrite(rule, term, side_info):
+        if isinstance(term, CScalar):
+            return term.reduce()
+    COMPLEX_SCALAR = TRSRule(
+        lhs = "a",
+        rhs = "a",
+        rewrite_method=complex_scalar_rewrite,
+        rule_repr="(* complex -> simp(complex) *)"
+    )
+    rules.append(COMPLEX_SCALAR)
 
 
     #################################################
@@ -324,14 +349,14 @@ def construct_trs(
     SCR_DOT_1 = TRSRule(
         lhs = parse(r''' 0B DOT K0 '''),
         rhs = parse(r''' "0" '''),
-        rule_repr = '''0B DOT K0 -> C(0)'''
+        rule_repr = '''0B DOT K0 -> C(0) ;'''
     )
     rules.append(SCR_DOT_1)
 
     SCR_DOT_2 = TRSRule(
         lhs = parse(r''' B0 DOT 0K '''),
         rhs = parse(r''' "0" '''),
-        rule_repr = '''B0 DOT 0K -> C(0)'''
+        rule_repr = '''B0 DOT 0K -> C(0) ;'''
     )
     rules.append(SCR_DOT_2)
 
@@ -476,7 +501,7 @@ def construct_trs(
     KET_SCAL_1 = TRSRule(
         lhs = parse(r''' "0" SCRK K0 '''),
         rhs = parse(r''' 0K '''),
-        rule_repr = '''C(0) SCRK K0 -> 0K'''
+        rule_repr = '''C(0) SCRK K0 -> 0K ;'''
     )
     rules.append(KET_SCAL_1)
 
@@ -484,7 +509,7 @@ def construct_trs(
     KET_SCAL_2 = TRSRule(
         lhs = parse(r''' "1" SCRK K0 '''),
         rhs = parse(r''' K0 '''),
-        rule_repr = '''C(1) SCRK K0 -> K0'''
+        rule_repr = '''C(1) SCRK K0 -> K0 ;'''
     )
     rules.append(KET_SCAL_2)
 
@@ -770,14 +795,14 @@ def construct_trs(
     BRA_SCAL_1 = TRSRule(
         lhs = parse(r''' "0" SCRB B0 '''),
         rhs = parse(r''' 0B '''),
-        rule_repr = '''C(0) SCRB B0 -> 0B'''
+        rule_repr = '''C(0) SCRB B0 -> 0B ;'''
     )
     rules.append(BRA_SCAL_1)
 
     BRA_SCAL_2 = TRSRule(
         lhs = parse(r''' "1" SCRB B0 '''),
         rhs = parse(r''' B0 '''),
-        rule_repr = '''C(1) SCRB B0 -> B0'''
+        rule_repr = '''C(1) SCRB B0 -> B0 ;'''
     )
     rules.append(BRA_SCAL_2)
 
@@ -1121,14 +1146,14 @@ def construct_trs(
     OPT_SCAL_1 = TRSRule(
         lhs = parse(r''' "0" SCRO O0'''),
         rhs = parse(r'''0O'''),
-        rule_repr = '''C(0) SCRO O0 -> 0O'''
+        rule_repr = '''C(0) SCRO O0 -> 0O ;'''
     )
     rules.append(OPT_SCAL_1)
 
     OPT_SCAL_2 = TRSRule(
         lhs = parse(r''' "1" SCRO O0'''),
         rhs = parse(r'''O0'''),
-        rule_repr = '''C(1) SCRO O0 -> O0'''
+        rule_repr = '''C(1) SCRO O0 -> O0 ;'''
     )
     rules.append(OPT_SCAL_2)
 

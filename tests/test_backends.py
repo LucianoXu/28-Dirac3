@@ -36,6 +36,13 @@ def test_wolfram_variables():
         a = parse(''' 'Sum[(1/2)^x, {x, 1, m}]' ''')
         assert a.variables() == set(["Global`m"])
 
+        a = parse(''' "HoldForm[Sum[(1/2)^i, {i, 1, Infinity}]]" ''')
+        assert a.variables() == set(["Global`i"])
+
+        a = parse(''' 'HoldForm[Sum[(1/2)^i, {i, 1, Infinity}]]' ''')
+        assert a.variables() == set(["Global`i"])
+
+
 def test_wolfram_substitute():
     with wolfram_backend.wolfram_session():
         sub = Subst({
