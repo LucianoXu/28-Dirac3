@@ -117,7 +117,7 @@ class ScalarDot(DiracScalar, TRSInfixBinary):
         if isinstance(self.args[0], BraBase) and isinstance(self.args[1], KetBase):
             return rf" \langle {self.args[0].args[0].tex()} | {self.args[1].args[0].tex()} \rangle"
         
-        return rf" {self.args[0].tex()} \cdot {self.args[1].tex()}"
+        return rf" ({self.args[0].tex()} \cdot {self.args[1].tex()})"
 
 
 ############################################
@@ -197,7 +197,10 @@ class KetApply(DiracKet, TRSInfixBinary):
         TRSInfixBinary.__init__(self, O, K)
 
     def tex(self) -> str:
-        return rf" {self.args[0].tex()} {self.args[1].tex()}"
+        if isinstance(self.args[1], KetBase):
+            return rf" {self.args[0].tex()} {self.args[1].tex()}"
+        else:
+            return rf" {self.args[0].tex()} \cdot {self.args[1].tex()}"
 
 
 class KetTensor(DiracKet, TRSInfixBinary):
@@ -289,7 +292,10 @@ class BraApply(DiracBra, TRSInfixBinary):
         TRSInfixBinary.__init__(self, B, O)
 
     def tex(self) -> str:
-        return rf" {self.args[0].tex()} {self.args[1].tex()}"
+        if isinstance(self.args[0], BraBase):
+            return rf" {self.args[0].tex()} {self.args[1].tex()}"
+        else:
+            return rf" {self.args[0].tex()} \cdot {self.args[1].tex()}"
 
     
 
@@ -400,7 +406,7 @@ class OpApply(DiracOp, TRSInfixBinary):
         TRSInfixBinary.__init__(self, O1, O2)
 
     def tex(self) -> str:
-        return rf" {self.args[0].tex()} {self.args[1].tex()}"
+        return rf" {self.args[0].tex()} \cdot {self.args[1].tex()}"
 
 
 class OpTensor(DiracOp, TRSInfixBinary):

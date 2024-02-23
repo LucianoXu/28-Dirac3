@@ -129,7 +129,7 @@ class TRSVar(TRSTerm):
     
     def tex(self) -> str:
         new_name = self.name.replace('_',r'\_')
-        return rf" \mathop{{{new_name}}}"
+        return rf" \mathit{{{new_name}}}"
     
     def __eq__(self, other: TRSVar) -> bool:
         return isinstance(other, TRSVar) and self.name == other.name

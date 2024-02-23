@@ -28,6 +28,8 @@
 
 - Now the variables of dirac notation and wolfram language are unified. Meaning, we can substitute the symbols in wolfram language now.
 
+- Use `HoldForm` in the Wolfram Language to keep the input expression unchanged. The trs have rules to release the hold during reduction.
+
 ## TODO
 - consider the case of teleportation after we have indices
 - refine the string output
