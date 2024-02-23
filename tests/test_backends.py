@@ -31,16 +31,16 @@ def test_wolfram_cscalar():
 def test_wolfram_variables():
     with wolfram_backend.wolfram_session():
         a = parse(''' "Sum[(1/2)^x, {x, 1, m}]" ''')
-        assert a.variables() == set(["Global`m"])
+        assert a.variables() == set(["m"])
 
         a = parse(''' 'Sum[(1/2)^x, {x, 1, m}]' ''')
-        assert a.variables() == set(["Global`m"])
+        assert a.variables() == set(["m"])
 
         a = parse(''' "HoldForm[Sum[(1/2)^i, {i, 1, Infinity}]]" ''')
-        assert a.variables() == set(["Global`i"])
+        assert a.variables() == set(["i"])
 
         a = parse(''' 'HoldForm[Sum[(1/2)^i, {i, 1, Infinity}]]' ''')
-        assert a.variables() == set(["Global`i"])
+        assert a.variables() == set(["i"])
 
 
 def test_wolfram_substitute():

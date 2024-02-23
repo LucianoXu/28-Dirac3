@@ -47,8 +47,10 @@ class WolframABase(AtomicBase):
     def variables(self) -> set[str]:
         '''
         Special symbols like "Inifinity" will also match _Symbol, and we rule them out.
+
+        Notice: the "Global`" prefix is removed
         '''
-        return set(v.name 
+        return set(v.name.replace("Global`", "") 
                    for v in session.evaluate(wl.Cases(self.simp_expr, wl.Blank(wl.Symbol), wl.Infinity)) 
                    if isinstance(v, WLSymbol)
                    )
