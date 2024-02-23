@@ -557,6 +557,7 @@ def normal_rewrite(self, term : TRSTerm, side_info : dict[str, Any]) -> TRSTerm 
 
 class TRSRule:
     def __init__(self, 
+                 rule_name:str,
                  lhs: TRSTerm|str, 
                  rhs: TRSTerm|str,
                  rewrite_method : Callable[[TRSRule, TRSTerm, Dict[str, Any]], TRSTerm|None] = normal_rewrite,
@@ -569,6 +570,7 @@ class TRSRule:
         if isinstance(lhs, StdTerm) and check_special_symbol(lhs):
             raise ValueError(f"The rule {{{lhs}->{rhs}}} should not contain special symbols in the LHS.")
 
+        self.rule_name = rule_name
         self.lhs = lhs
         self.rhs = rhs
         self.rule_repr = rule_repr
@@ -633,7 +635,7 @@ class TRS:
         for rule in self.rules:
             new_lhs = rule.lhs.substitute(sigma) if isinstance(rule.lhs, TRSTerm) else rule.lhs
             new_rhs = rule.rhs.substitute(sigma) if isinstance(rule.rhs, TRSTerm) else rule.rhs
-            new_rules.append(TRSRule(new_lhs, new_rhs, rule.rewrite_method))
+            new_rules.append(TRSRule(rule.rule_name, new_lhs, new_rhs, rule.rewrite_method, rule.rule_repr))
 
         return TRS(new_rules)
 
@@ -641,7 +643,8 @@ class TRS:
             term : TRSTerm, 
             side_info : dict[str, Any] = {},
             verbose: bool = False, 
-            step_limit : int | None = None) -> TRSTerm:
+            step_limit : int | None = None,
+            alg: str = "inner_most") -> TRSTerm:
 
         # check the variable conincidence
         overlap = term.variables() & self.variables()
@@ -662,46 +665,84 @@ class TRS:
         for proc in self.side_info_procs:
             side_info = proc(side_info)
 
-        current_term = term            
+        current_term = term          
 
+        # choose the algorithm
+        if alg == "outer_most":
+            rewrite = self.rewrite_outer_most  
+        elif alg == "inner_most":
+            rewrite = self.rewrite_inner_most
+
+        step=0
         while True:
-            
-            if verbose:
-                print("--> ", current_term)
 
+            if verbose:
+                print(f"== STEP {step} ==\n")
+                
             # check whether rewrite rules are applicable
-            new_term = renamed_trs.rewrite(current_term, side_info)
+            new_term = rewrite(current_term, side_info, verbose)
             if new_term is None:
                 return current_term
             
             current_term = new_term
         
             # check whether the step limit is reached
-            if step_limit is not None:
-                step_limit -= 1
-                if step_limit <= 0:
-                    return current_term
+            step += 1
+            if step_limit is not None and step > step_limit:
+                return current_term
 
             
     
 
-    def rewrite(self, term : TRSTerm, side_info: dict[str, Any]) -> TRSTerm | None:
+    def rewrite_outer_most(self, term : TRSTerm, side_info: dict[str, Any], verbose:bool = False) -> TRSTerm | None:
         '''
         rewrite the term using the rules. Return the result.
         return None when no rewriting is applicable
+
+        algorithm: outer most
         '''
 
         # try to rewrite the term using the rules
         for rule in self.rules:
             new_term = rule.rewrite_method(rule, term, side_info)
             if new_term is not None:
+                # output information
+                if verbose:
+                    print(f"apply {rule.rule_name}: {term} -> {new_term}")
                 return new_term
                         
         if isinstance(term, StdTerm):
             # try to rewrite the subterms
             for i in range(len(term.args)):
-                new_subterm = self.rewrite(term.args[i], side_info)
+                new_subterm = self.rewrite_outer_most(term.args[i], side_info, verbose)
                 if new_subterm is not None:
                     return type(term)(*term.args[:i], new_subterm, *term.args[i+1:])
 
+        return None
+    
+
+    def rewrite_inner_most(self, term : TRSTerm, side_info: dict[str, Any], verbose:bool = False) -> TRSTerm | None:
+        '''
+        rewrite the term using the rules. Return the result.
+        return None when no rewriting is applicable
+
+        algorithm: outer most
+        '''
+
+        if isinstance(term, StdTerm):
+            # try to rewrite the subterms
+            for i in range(len(term.args)):
+                new_subterm = self.rewrite_inner_most(term.args[i], side_info, verbose)
+                if new_subterm is not None:
+                    return type(term)(*term.args[:i], new_subterm, *term.args[i+1:])
+
+        # try to rewrite the term using the rules
+        for rule in self.rules:
+            new_term = rule.rewrite_method(rule, term, side_info)
+            if new_term is not None:
+                # output information
+                if verbose:
+                    print(f"apply {rule.rule_name}: {term} -> {new_term}")
+                return new_term
+        
         return None

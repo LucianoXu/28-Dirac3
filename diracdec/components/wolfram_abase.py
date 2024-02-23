@@ -83,7 +83,7 @@ class WolframABase(AtomicBase):
             return self
 
         # substitute
-        return WolframABase(session.evaluate(wl.ReplaceAll(self.simp_expr, tuple(wolfram_sub))))
+        return WolframABase(wl.ReplaceAll(self.simp_expr, tuple(wolfram_sub)))
     
     def reduce(self) -> WolframABase | None:
         if isinstance(self.simp_expr, WLFunction) and self.simp_expr.head == wl.HoldForm:

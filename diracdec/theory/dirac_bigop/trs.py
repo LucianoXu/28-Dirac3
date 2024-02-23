@@ -42,6 +42,7 @@ def construct_trs(
                 return f.body.substitute(Subst({f.bind_var.name: x}))
             
     BETA_REDUCTION = TRSRule(
+        "BETA_REDUCTION",
         lhs = "APPLY(LAMBDA(x, A), a)",
         rhs = "A[x := a]",
         rewrite_method = beta_reduction_rewrite,

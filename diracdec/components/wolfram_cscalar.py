@@ -84,7 +84,7 @@ class WolframCScalar(ComplexScalar):
             return self
 
         # substitute
-        return WolframCScalar(session.evaluate(wl.ReplaceAll(self.simp_expr, tuple(wolfram_sub))))
+        return WolframCScalar(wl.ReplaceAll(self.simp_expr, tuple(wolfram_sub)))
     
     def reduce(self) -> WolframCScalar | None:
         if isinstance(self.simp_expr, WLFunction) and self.simp_expr.head == wl.HoldForm:

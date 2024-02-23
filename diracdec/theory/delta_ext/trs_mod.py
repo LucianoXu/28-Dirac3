@@ -36,6 +36,7 @@ def modify_trs(
                 return C1
             
     DELTA_AST_1 = TRSRule(
+        "DELTA_AST_1",
         lhs = "DELTA(s, s)",
         rhs = "C(1)",
         rewrite_method=delta_ast_1_rewrite
@@ -52,6 +53,7 @@ def modify_trs(
                     return C0
     
     DELTA_AST_2 = TRSRule(
+        "DELTA_AST_2",
         lhs = "DELTA(s, t) && s, t are base atoms && s = t is not satisfiable",
         rhs = "C(0)",
         rewrite_method=delta_ast_2_rewrite
