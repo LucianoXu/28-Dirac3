@@ -56,3 +56,17 @@ def test_wolfram_substitute():
         a = parse(''' 'b - a' ''')
         b = parse(''' 'a' ''')
         assert sub(a) == b
+
+def test_wolfram_substitue_TRSVar():
+    with wolfram_backend.wolfram_session():
+        sub = Subst({
+            "a" : parse(''' x '''),
+            "b" : parse(''' y '''),
+        })
+        a = parse(''' "a" ''')
+        b = parse(''' "x" ''')
+        assert sub(a) == b
+
+        a = parse(''' 'b - a' ''')
+        b = parse(''' 'y - x' ''')
+        assert sub(a) == b

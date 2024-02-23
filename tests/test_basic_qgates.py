@@ -99,16 +99,16 @@ def test_QCQI_Theorem_4_1():
 
         # define the rotation gates
         sub_rot = Subst({
-            "Rz_beta" : sub(parse(''' ("Cos[beta/2]" SCRO I2) ADDO ("- Sin[beta/2] I" SCRO Z) ''')),
-            "Ry_gamma" : sub(parse(''' ("Cos[gamma/2]" SCRO I2) ADDO ("- Sin[gamma/2] I" SCRO Y) ''')),
-            "Rz_delta" : sub(parse(''' ("Cos[delta/2]" SCRO I2) ADDO ("- Sin[delta/2] I" SCRO Z) ''')),
+            "Rzbeta" : sub(parse(''' ("Cos[beta/2]" SCRO I2) ADDO ("- Sin[beta/2] I" SCRO Z) ''')),
+            "Rygamma" : sub(parse(''' ("Cos[gamma/2]" SCRO I2) ADDO ("- Sin[gamma/2] I" SCRO Y) ''')),
+            "Rzdelta" : sub(parse(''' ("Cos[delta/2]" SCRO I2) ADDO ("- Sin[delta/2] I" SCRO Z) ''')),
         })
 
         # get the idempotent operation
         new_sub = sub_rot.composite(sub).get_idempotent()
 
         # RHS - rotations
-        a = new_sub(parse(''' "Exp[I a]" SCRO (Rz_beta MLTO Ry_gamma MLTO Rz_delta) '''))
+        a = new_sub(parse(''' "Exp[I a]" SCRO (Rzbeta MLTO Rygamma MLTO Rzdelta) '''))
         # LHS - U
         b = new_sub(parse(''' ("Exp[I (a - beta/2 - delta/2)] Cos[gamma/2]" SCRO (ket0 OUTER bra0))
             ADDO ("- Exp[I (a - beta/2 + delta/2)] Sin[gamma/2]" SCRO (ket0 OUTER bra1)) 

@@ -380,8 +380,8 @@ def test_KET_MUL_9():
 
 def test_KET_MUL_10():
     with wolfram_backend.wolfram_session():
-        a = parse(r'''(O1 TSRO O2) MLTK ((O1_ TSRO O2_) MLTK K0)''')
-        b = parse(r'''((O1 MLTO O1_) TSRO (O2 MLTO O2_)) MLTK K0''')
+        a = parse(r'''(O1 TSRO O2) MLTK ((O1p TSRO O2p) MLTK K0)''')
+        b = parse(r'''((O1 MLTO O1p) TSRO (O2 MLTO O2p)) MLTK K0''')
         assert trs.normalize(a) == trs.normalize(b)
 
 def test_KET_MUL_11():
@@ -609,8 +609,8 @@ def test_BRA_MUL_9():
 
 def test_BRA_MUL_10():
     with wolfram_backend.wolfram_session():
-        a = parse(r'''(B0 MLTB (O1 TSRO O2)) MLTB (O1_ TSRO O2_)''')
-        b = parse(r'''B0 MLTB ((O1 MLTO O1_) TSRO (O2 MLTO O2_))''')
+        a = parse(r'''(B0 MLTB (O1 TSRO O2)) MLTB (O1p TSRO O2p)''')
+        b = parse(r'''B0 MLTB ((O1 MLTO O1p) TSRO (O2 MLTO O2p))''')
         assert trs.normalize(a) == trs.normalize(b)
 
 def test_BRA_MUL_11():
@@ -881,14 +881,14 @@ def test_OPT_MUL_11():
 
 def test_OPT_MUL_12():
     with wolfram_backend.wolfram_session():
-        a = parse(r''' (O1 TSRO O2) MLTO (O1_ TSRO O2_) ''')
-        b = parse(r''' (O1 MLTO O1_) TSRO (O2 MLTO O2_) ''')
+        a = parse(r''' (O1 TSRO O2) MLTO (O1p TSRO O2p) ''')
+        b = parse(r''' (O1 MLTO O1p) TSRO (O2 MLTO O2p) ''')
         assert trs.normalize(a) == trs.normalize(b)
 
 def test_OPT_MUL_13():
     with wolfram_backend.wolfram_session():
-        a = parse(r''' (O1 TSRO O2) MLTO ((O1_ TSRO O2_) MLTO O0) ''')
-        b = parse(r''' ((O1 MLTO O1_) TSRO (O2 MLTO O2_)) MLTO O0 ''')
+        a = parse(r''' (O1 TSRO O2) MLTO ((O1p TSRO O2p) MLTO O0) ''')
+        b = parse(r''' ((O1 MLTO O1p) TSRO (O2 MLTO O2p)) MLTO O0 ''')
         assert trs.normalize(a) == trs.normalize(b)
 
 def test_OPT_TSR_1():

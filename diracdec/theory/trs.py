@@ -13,14 +13,14 @@ from ..backends import render_tex, render_tex_to_svg
 
 import hashlib
 
-def var_rename(vars: set[str], prefix: str) -> str:
+def var_rename(vars: set[str], prefix: str = "x") -> str:
     '''
     return the new variable name that is not in the vars.
     '''
     i = 0
-    while prefix + "_" + str(i) in vars:
+    while prefix + str(i) in vars:
         i += 1
-    return prefix + "_" + str(i)
+    return prefix + str(i)
 
 class TRSTerm(ABC):
     '''
@@ -184,6 +184,82 @@ class StdTerm(TRSTerm):
         )
         return type(self)(*new_args)
 
+class BindVarTerm(TRSTerm):
+    '''
+    The TRSTerm with a bind variable
+    '''
+    def __init__(self, bind_var: TRSVar, expr: TRSTerm):
+        self.bind_var = bind_var
+        self.expr = expr
+
+    def __str__(self) -> str:
+        return f"({self.fsymbol_print} {self.bind_var}.{self.expr})"
+    
+    def __repr__(self) -> str:
+        return f"{self.fsymbol}[{repr(self.bind_var)}]({repr(self.expr)})"
+    
+    def tex(self) -> str:
+        return rf" \left ({self.fsymbol_print}\ {self.bind_var.tex()}.{self.expr.tex()} \right )"
+    
+    def __eq__(self, __value: TRSTerm) -> bool:
+        '''
+        alpha-conversion is considered in the syntactical equivalence of bind variable expressions
+        '''
+        if self is __value:
+            return True
+        
+        if isinstance(__value, BindVarTerm):
+            if self.bind_var == __value.bind_var:
+                return self.expr == __value.expr
+            else:
+                new_v = var_rename(self.variables() | __value.variables())
+                return self.rename_bind(TRSVar(new_v)) == __value.rename_bind(TRSVar(new_v))
+        
+        else:
+            return False
+    
+    def __hash__(self) -> int:
+        '''
+        To make the hash value of the term unique, we need to consider the alpha-conversion of the bind variable.
+        '''
+        canonical_var = var_rename(self.variables())
+        h = hashlib.md5(self.fsymbol.encode())
+        h.update(canonical_var.encode())
+        h.update(abs(
+            hash(
+                self.expr.substitute(
+                    Subst({self.bind_var.name: TRSVar(canonical_var)})
+                    )
+                )).to_bytes(16, 'big')
+            )
+        return int(h.hexdigest(), 16)
+    
+    def size(self) -> int:
+        return self.expr.size() + 2
+    
+    def variables(self) -> set[str]:
+        res = self.expr.variables()
+        res.discard(self.bind_var.name)
+        return res
+    
+    def rename_bind(self, new_v: TRSVar) -> BindVarTerm:
+        '''
+        rename the bind variable to a new one.
+        '''
+        return type(self)(new_v, self.expr.substitute(Subst({self.bind_var.name: new_v})))
+    
+    def substitute(self, sigma: Subst) -> BindVarTerm:
+        '''
+        check whether the bind variable appears in sigma.
+        change the bind variable if so.
+        '''
+        vset = sigma.domain | sigma.vrange
+        if self.bind_var.name not in vset:
+            return type(self)(self.bind_var, self.expr.substitute(sigma))
+        else:
+            new_v = TRSVar(var_rename(vset))
+            return self.rename_bind(new_v).substitute(sigma)
+            
 
 ################################################################################
 # universal algebra methods
@@ -232,6 +308,9 @@ class Subst:
     
     @property
     def vrange(self) -> set[str]:
+        '''
+        variable range: the variables occuring in the range
+        '''
         res = set()
         for rhs in self.data.values():
             res |= rhs.variables()

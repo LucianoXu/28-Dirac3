@@ -670,8 +670,8 @@ def construct_trs(
 
 
     KET_MUL_10 = TRSRule(
-        lhs = parse(r'''(O1 TSRO O2) MLTK ((O1_ TSRO O2_) MLTK K0)'''),
-        rhs = parse(r'''((O1 MLTO O1_) TSRO (O2 MLTO O2_)) MLTK K0''')
+        lhs = parse(r'''(O1 TSRO O2) MLTK ((O1p TSRO O2p) MLTK K0)'''),
+        rhs = parse(r'''((O1 MLTO O1p) TSRO (O2 MLTO O2p)) MLTK K0''')
     )
     rules.append(KET_MUL_10)
 
@@ -967,8 +967,8 @@ def construct_trs(
 
 
     BRA_MUL_10 = TRSRule(
-        lhs = parse(r'''(B0 MLTB (O1 TSRO O2)) MLTB (O1_ TSRO O2_)'''),
-        rhs = parse(r'''B0 MLTB ((O1 MLTO O1_) TSRO (O2 MLTO O2_))''')
+        lhs = parse(r'''(B0 MLTB (O1 TSRO O2)) MLTB (O1p TSRO O2p)'''),
+        rhs = parse(r'''B0 MLTB ((O1 MLTO O1p) TSRO (O2 MLTO O2p))''')
     )
     rules.append(BRA_MUL_10)
 
@@ -1321,14 +1321,14 @@ def construct_trs(
     rules.append(OPT_MUL_11)
 
     OPT_MUL_12 = TRSRule(
-        lhs = parse(r'''(O1 TSRO O2) MLTO (O1_ TSRO O2_)'''),
-        rhs = parse(r'''(O1 MLTO O1_) TSRO (O2 MLTO O2_)''')
+        lhs = parse(r'''(O1 TSRO O2) MLTO (O1p TSRO O2p)'''),
+        rhs = parse(r'''(O1 MLTO O1p) TSRO (O2 MLTO O2p)''')
     )
     rules.append(OPT_MUL_12)
 
     OPT_MUL_13 = TRSRule(
-        lhs = parse(r'''(O1 TSRO O2) MLTO ((O1_ TSRO O2_) MLTO O3)'''),
-        rhs = parse(r'''((O1 MLTO O1_) TSRO (O2 MLTO O2_)) MLTO O3''')
+        lhs = parse(r'''(O1 TSRO O2) MLTO ((O1p TSRO O2p) MLTO O3)'''),
+        rhs = parse(r'''((O1 MLTO O1p) TSRO (O2 MLTO O2p)) MLTO O3''')
     )
     rules.append(OPT_MUL_13)
 
@@ -1528,7 +1528,7 @@ let F = signature
 
 ";
 
-let X = vars "a b c x S0 S1 S2 S3 s s1 s2 t t1 t2 B0 B1 B2 K0 K1 K2 O0 O1 O2 O1' O2' T1 T2 T3 T4 O1_ O2_ O3";
+let X = vars "a b c x S0 S1 S2 S3 s s1 s2 t t1 t2 B0 B1 B2 K0 K1 K2 O0 O1 O2 O1' O2' T1 T2 T3 T4 O1p O2p O3";
 
 let R = TRS F X "
 

@@ -8,7 +8,7 @@ from typing import Any
 
 from ..theory.complex_scalar import ComplexScalar
 
-from ..theory import TRSTerm, Subst
+from ..theory import TRSTerm, TRSVar, Subst
 
 from ..backends.wolfram_backend import *
 
@@ -76,7 +76,9 @@ class WolframCScalar(ComplexScalar):
         # create the substitution in Wolfram Language
         wolfram_sub = []
         for k, v in sigma.data.items():
-            if isinstance(v, WolframCScalar):
+            if isinstance(v, TRSVar):
+                wolfram_sub.append(wl.Rule(wl.Symbol(k), wl.Symbol(v.name)))
+            elif isinstance(v, WolframCScalar):
                 wolfram_sub.append(wl.Rule(wl.Symbol(k), v.simp_expr))
         if len(wolfram_sub) == 0:
             return self

@@ -9,7 +9,7 @@ from diracdec.theory.trs import Subst, TRSTerm
 
 from ..theory.atomic_base import AtomicBase
 
-from ..theory import TRSTerm, Subst
+from ..theory import TRSTerm, TRSVar, Subst
 
 from ..backends.wolfram_backend import *
 
@@ -75,7 +75,9 @@ class WolframABase(AtomicBase):
         # create the substitution in Wolfram Language
         wolfram_sub = []
         for k, v in sigma.data.items():
-            if isinstance(v, WolframABase):
+            if isinstance(v, TRSVar):
+                wolfram_sub.append(wl.Rule(wl.Symbol(k), wl.Symbol(v.name)))
+            elif isinstance(v, WolframABase):
                 wolfram_sub.append(wl.Rule(wl.Symbol(k), v.simp_expr))
         if len(wolfram_sub) == 0:
             return self
