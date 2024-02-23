@@ -53,6 +53,12 @@ dirac_bigop_parser = dirac_bigop.construct_parser(wolfram_cscalar.WolframCScalar
 
 def dirac_bigop_parse(s: str) -> TRSTerm:
     return dirac_bigop_parser.parse(s)
+
+dirac_bigop_trs = dirac_bigop.construct_trs(
+    wolfram_cscalar.WolframCScalar, 
+    wolfram_abase.WolframABase, 
+    dirac_bigop_parser
+    )
     
 ### with delta extensions
 
@@ -60,3 +66,9 @@ dirac_bigop_delta_parser = dirac_bigop_parser
 
 def dirac_bigop_delta_parse(s: str) -> TRSTerm:
     return dirac_bigop_delta_parser.parse(s)
+
+dirac_bigop_delta_trs = delta_ext.modify_trs(
+    dirac_bigop_trs, 
+    wolfram_cscalar.WolframCScalar, 
+    wolfram_abase.WolframABase
+    )

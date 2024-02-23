@@ -1,6 +1,6 @@
 
 ## Unicode Characters
-× · † ⊗
+× · † ⊗ λ
 
 ## Note
 - the terms are compared first by hash values
@@ -29,6 +29,8 @@
 - Now the variables of dirac notation and wolfram language are unified. Meaning, we can substitute the symbols in wolfram language now. And since we will always operate wolfram expression in the Global context, we delete the "Global`" prefix when calculating the variables. Also, it allowed to substitute the symbols in wolfram language by TRSVar  instances directly.
 
 - Use `HoldForm` in the Wolfram Language to keep the input expression unchanged. The trs have rules to release the hold during reduction.
+
+- We have implemented the abstract/application and beta reduction, but it is very slow currently.
 
 ## TODO
 - consider the case of teleportation after we have indices

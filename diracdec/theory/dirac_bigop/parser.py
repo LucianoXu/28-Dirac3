@@ -247,6 +247,19 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
         '''
         p[0] = ScalarSum(p[3], p[5])
 
+    ##############################
+    # abstraction and application
+    def p_abstract(p):
+        '''
+        trs-term    : LAMBDA trs-var '.' trs-term
+        '''
+        p[0] = Abstract(p[2], p[4])
+
+    def p_apply(p):
+        '''
+        trs-term    : trs-term '@' trs-term
+        '''
+        p[0] = Apply(p[1], p[3])
 
 
 

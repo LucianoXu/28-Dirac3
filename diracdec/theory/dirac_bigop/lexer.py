@@ -41,6 +41,10 @@ reserved = {
     ########################################
     # big-op
     'SUMS'      : 'SUMS',
+
+    ########################################
+    # abstraction and application
+    'FUN'    : 'LAMBDA',
     
 }
 
@@ -60,7 +64,7 @@ tokens = [
 
     ] + list(reserved.values())
 
-literals = ['(', ')', ',']
+literals = ['(', ')', ',', '.', '@']
 
 t_ZEROK = '0K'
 t_ZEROB = '0B'

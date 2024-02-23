@@ -191,18 +191,18 @@ class BindVarTerm(TRSTerm):
     '''
     The TRSTerm with a bind variable
     '''
-    def __init__(self, bind_var: TRSVar, expr: TRSTerm):
+    def __init__(self, bind_var: TRSVar, body: TRSTerm):
         self.bind_var = bind_var
-        self.expr = expr
+        self.body = body
 
     def __str__(self) -> str:
-        return f"({self.fsymbol_print} {self.bind_var}.{self.expr})"
+        return f"({self.fsymbol_print} {self.bind_var}.{self.body})"
     
     def __repr__(self) -> str:
-        return f"{self.fsymbol}[{repr(self.bind_var)}]({repr(self.expr)})"
+        return f"{self.fsymbol}[{repr(self.bind_var)}]({repr(self.body)})"
     
     def tex(self) -> str:
-        return rf" \left ({self.fsymbol_print}\ {self.bind_var.tex()}.{self.expr.tex()} \right )"
+        return rf" \left ({self.fsymbol_print}\ {self.bind_var.tex()}.{self.body.tex()} \right )"
     
     def __eq__(self, __value: TRSTerm) -> bool:
         '''
@@ -213,7 +213,7 @@ class BindVarTerm(TRSTerm):
         
         if isinstance(__value, BindVarTerm):
             if self.bind_var == __value.bind_var:
-                return self.expr == __value.expr
+                return self.body == __value.body
             else:
                 new_v = var_rename(self.variables() | __value.variables())
                 return self.rename_bind(TRSVar(new_v)) == __value.rename_bind(TRSVar(new_v))
@@ -230,7 +230,7 @@ class BindVarTerm(TRSTerm):
         h.update(canonical_var.encode())
         h.update(abs(
             hash(
-                self.expr.substitute(
+                self.body.substitute(
                     Subst({self.bind_var.name: TRSVar(canonical_var)})
                     )
                 )).to_bytes(16, 'big')
@@ -238,10 +238,10 @@ class BindVarTerm(TRSTerm):
         return int(h.hexdigest(), 16)
     
     def size(self) -> int:
-        return self.expr.size() + 2
+        return self.body.size() + 2
     
     def variables(self) -> set[str]:
-        res = self.expr.variables()
+        res = self.body.variables()
         res.discard(self.bind_var.name)
         return res
     
@@ -249,7 +249,7 @@ class BindVarTerm(TRSTerm):
         '''
         rename the bind variable to a new one.
         '''
-        return type(self)(new_v, self.expr.substitute(Subst({self.bind_var.name: new_v})))
+        return type(self)(new_v, self.body.substitute(Subst({self.bind_var.name: new_v})))
     
     def substitute(self, sigma: Subst) -> BindVarTerm:
         '''
@@ -258,7 +258,7 @@ class BindVarTerm(TRSTerm):
         '''
         vset = sigma.domain | sigma.vrange
         if self.bind_var.name not in vset:
-            return type(self)(self.bind_var, self.expr.substitute(sigma))
+            return type(self)(self.bind_var, self.body.substitute(sigma))
         else:
             new_v = TRSVar(var_rename(vset))
             return self.rename_bind(new_v).substitute(sigma)
