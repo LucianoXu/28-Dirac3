@@ -26,8 +26,8 @@ class TRSTerm(ABC):
     '''
     The abstract class for all terms in the term rewriting system.
     '''
-    fsymbol_print : str
-    fsymbol : str
+    fsymbol_print = 'term'
+    fsymbol = 'TERM'
 
     @abstractmethod
     def __str__(self) -> str:
@@ -101,7 +101,7 @@ class TRSTerm(ABC):
 
 class TRSVar(TRSTerm):
     fsymbol_print = "var"
-    fsymbol = "var"
+    fsymbol = "VAR"
 
     def __init__(self, name: str):
         self.name = name
@@ -133,8 +133,8 @@ class TRSVar(TRSTerm):
         return self if self.name not in sigma else sigma[self.name]
 
 class StdTerm(TRSTerm):
-    fsymbol_print : str
-    fsymbol : str
+    fsymbol_print = 'std'
+    fsymbol = 'STD'
 
     def __init__(self, *args: TRSTerm):
         self.args = args
@@ -185,6 +185,9 @@ class StdTerm(TRSTerm):
         return type(self)(*new_args)
 
 class BindVarTerm(TRSTerm):
+    fsymbol_print = 'bind'
+    fsymbol = 'BIND'
+
     '''
     The TRSTerm with a bind variable
     '''

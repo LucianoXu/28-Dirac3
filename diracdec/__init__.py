@@ -14,6 +14,8 @@ try:
 
     from .factory import dirac_delta_parser, dirac_delta_parse, dirac_delta_trs
 
+    from .factory import dirac_bigop_parser, dirac_bigop_parse
+
 except Exception as e:
     raise e
 
