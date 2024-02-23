@@ -60,6 +60,9 @@ class WolframCScalar(ComplexScalar):
         h = hashlib.md5(str(self.simp_expr).encode())
         return int(h.hexdigest(), 16)
     
+    def size(self) -> int:
+        return 1
+    
     def variables(self) -> set[str]:
         '''
         Special symbols like "Inifinity" will also match _Symbol, and we rule them out.

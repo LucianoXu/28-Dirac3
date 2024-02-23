@@ -8,6 +8,9 @@ from .syntax import *
 
 from .lexer import *
 
+from ..atomic_base import AtomicBase
+from ..complex_scalar import ComplexScalar
+
 def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> yacc.LRParser:
 
     precedence = (

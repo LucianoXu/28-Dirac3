@@ -1,16 +1,12 @@
 
 from __future__ import annotations
 
-from ..atomic_base import AtomicBase
-from ..complex_scalar import ComplexScalar
-
-from ..trs import TRSTerm, TRSVar, TRS_AC, TRSCommBinary, TRSInfixBinary, Subst
+from ..trs import TRSTerm, TRSVar, StdTerm, TRS_AC, TRSCommBinary, TRSInfixBinary, Subst
 
 
 
-class DiracSyntax(TRSTerm):
-    def substitute(self, sigma: Subst) -> TRSTerm:
-        return super().substitute(sigma)
+class DiracSyntax:
+    ...
 
 ############################################
 # DiracBase
@@ -19,7 +15,7 @@ class DiracBase(DiracSyntax):
     ...
     
     
-class BasePair(DiracBase):
+class BasePair(DiracBase, StdTerm):
     fsymbol_print = "pair"
     fsymbol = "PAIR"
     
@@ -34,7 +30,7 @@ class BasePair(DiracBase):
     
     
     
-class BaseFst(DiracBase):
+class BaseFst(DiracBase, StdTerm):
     fsymbol_print = "fst"
     fsymbol = "FST"
 
@@ -44,7 +40,7 @@ class BaseFst(DiracBase):
     def tex(self) -> str:
         return rf" \mathrm{{fst}} {self.args[0].tex()}"
     
-class BaseSnd(DiracBase):
+class BaseSnd(DiracBase, StdTerm):
     fsymbol_print = "snd"
     fsymbol = "SND"
 
@@ -91,7 +87,7 @@ class ScalarMlt(DiracScalar, TRS_AC):
     def tex(self) -> str:
         return "( " + " \times ".join([s.tex() for s in self.args]) + " )"
 
-class ScalarConj(DiracScalar):
+class ScalarConj(DiracScalar, StdTerm):
     fsymbol_print = "CONJS"
     fsymbol = "CONJS"
 
@@ -126,7 +122,7 @@ class ScalarDot(DiracScalar, TRSInfixBinary):
 class DiracKet(DiracSyntax):
     ...
 
-class KetZero(DiracKet):
+class KetZero(DiracKet, StdTerm):
     fsymbol_print = "0K"
     fsymbol = "0K"
 
@@ -143,7 +139,7 @@ class KetZero(DiracKet):
         return r" \mathbf{0}_\mathcal{K}"
     
     
-class KetBase(DiracKet):
+class KetBase(DiracKet, StdTerm):
     fsymbol_print = "ket"
     fsymbol = "KET"
 
@@ -157,7 +153,7 @@ class KetBase(DiracKet):
         return rf" |{self.args[0].tex()} \rangle"
     
     
-class KetAdj(DiracKet):
+class KetAdj(DiracKet, StdTerm):
     fsymbol_print = "ADJK"
     fsymbol = "ADJK"
 
@@ -220,7 +216,7 @@ class KetTensor(DiracKet, TRSInfixBinary):
 class DiracBra(DiracSyntax):
     ...
 
-class BraZero(DiracBra):
+class BraZero(DiracBra, StdTerm):
     fsymbol_print = "0B"
     fsymbol = "0B"
 
@@ -236,7 +232,7 @@ class BraZero(DiracBra):
     def tex(self) -> str:
         return r" \mathbf{0}_\mathcal{B}"
     
-class BraBase(DiracBra):
+class BraBase(DiracBra, StdTerm):
     fsymbol_print = "bra"
     fsymbol = "BRA"
 
@@ -251,7 +247,7 @@ class BraBase(DiracBra):
     
 
 
-class BraAdj(DiracBra):
+class BraAdj(DiracBra, StdTerm):
     fsymbol_print = "ADJB"
     fsymbol = "ADJB"
 
@@ -316,7 +312,7 @@ class DiracOp(DiracSyntax):
     ...
 
 
-class OpZero(DiracOp):
+class OpZero(DiracOp, StdTerm):
     fsymbol_print = "0O"
     fsymbol = "0O"
 
@@ -332,7 +328,7 @@ class OpZero(DiracOp):
     def tex(self) -> str:
         return r" \mathbf{0}_\mathcal{O}"
 
-class OpOne(DiracOp):
+class OpOne(DiracOp, StdTerm):
     fsymbol_print = "1O"
     fsymbol = "1O"
 
@@ -362,7 +358,7 @@ class OpOuter(DiracOp, TRSInfixBinary):
         
         return rf" {self.args[0].tex()} \otimes {self.args[1].tex()}"
     
-class OpAdj(DiracOp):
+class OpAdj(DiracOp, StdTerm):
     fsymbol_print = "ADJO"
     fsymbol = "ADJO"
 

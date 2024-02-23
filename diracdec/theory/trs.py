@@ -23,21 +23,23 @@ def var_rename(vars: set[str], prefix: str) -> str:
     return prefix + "_" + str(i)
 
 class TRSTerm(ABC):
+    '''
+    The abstract class for all terms in the term rewriting system.
+    '''
     fsymbol_print : str
     fsymbol : str
 
-    def __init__(self, *args: TRSTerm):
-        self.args = args
-
+    @abstractmethod
     def __str__(self) -> str:
-        return f'{self.fsymbol_print}({", ".join(map(str, self.args))})'
+        pass
 
+    @abstractmethod
     def __repr__(self) -> str:
         '''
         It is required that equivalence of the repr of two terms is equivalent to that of the terms.
         '''
-        return f'{self.fsymbol}({", ".join(map(repr, self.args))})'
-    
+        pass
+
     @abstractmethod
     def tex(self) -> str:
         '''
@@ -45,15 +47,18 @@ class TRSTerm(ABC):
         '''
         pass
 
-    def __eq__(self, other: TRSTerm) -> bool:
+    @abstractmethod
+    def __eq__(self, __value: TRSTerm) -> bool:
         '''
         This method calculates the equivalence in pure syntactic level.
         '''
-        if self is other:
-            return True
-        
-        return isinstance(other, type(self)) and self.args == other.args
+        return super().__eq__(__value)
     
+    @abstractmethod
+    def __hash__(self) -> int:
+        pass
+
+
     def __lt__(self, other: TRSTerm) -> bool:
         h_self = hash(self)
         h_other = hash(other)
@@ -61,46 +66,24 @@ class TRSTerm(ABC):
             return repr(self) < repr(other)
         else:
             return h_self < h_other
-
-    
-    def __hash__(self) -> int:
-        h = hashlib.md5(self.fsymbol.encode())
-        for arg in self.args:
-            h.update(abs(hash(arg)).to_bytes(16, 'big'))
-
-        return int(h.hexdigest(), 16)
-    
-    def __getitem__(self, index) -> TRSTerm:
-        return self.args[index]
-    
-    @property
+        
+    @abstractmethod
     def size(self) -> int:
-        '''
-        Return the size of the abstract syntax tree.
-        '''
-        return 1 + sum(arg.size for arg in self.args)
-    
+        pass
+
+    @abstractmethod
     def variables(self) -> set[str]:
-        '''
-        Return a set of (the name of) all free variables in this term.
-        '''
-        res = set()
-        for arg in self.args:
-            res |= arg.variables()
-        return res
+        pass
 
     @property
     def is_ground(self) -> bool:
         return len(self.variables()) == 0
-    
+
     @abstractmethod
     def substitute(self, sigma : Subst) -> TRSTerm:
-        
-        new_args = tuple(
-            arg.substitute(sigma) for arg in self.args
-        )
-        return type(self)(*new_args)
-    
+        pass
+
+
     #############################################
     # utilities
     def render_tex(self, filename:str|None = None, dpi:int = 300) -> Image:
@@ -117,6 +100,8 @@ class TRSTerm(ABC):
         
 
 class TRSVar(TRSTerm):
+    fsymbol_print = "var"
+    fsymbol = "var"
 
     def __init__(self, name: str):
         self.name = name
@@ -146,30 +131,59 @@ class TRSVar(TRSTerm):
     
     def substitute(self, sigma: Subst) -> TRSTerm:
         return self if self.name not in sigma else sigma[self.name]
-    
-class TRSSpec(TRSTerm):
-    '''
-    Special TRS terms have to redefine these methods
-    '''
-    @abstractmethod
+
+class StdTerm(TRSTerm):
+    fsymbol_print : str
+    fsymbol : str
+
+    def __init__(self, *args: TRSTerm):
+        self.args = args
+
     def __str__(self) -> str:
-        pass
+        return f'{self.fsymbol_print}({", ".join(map(str, self.args))})'
 
-    @abstractmethod
     def __repr__(self) -> str:
-        pass
+        return f'{self.fsymbol}({", ".join(map(repr, self.args))})'
 
-    @abstractmethod
-    def __eq__(self, other: Any) -> bool:
-        pass
+    def __eq__(self, other: TRSTerm) -> bool:
+        if self is other:
+            return True
+        
+        return isinstance(other, type(self)) and self.args == other.args
 
-    @abstractmethod
+
     def __hash__(self) -> int:
-        pass
+        h = hashlib.md5(self.fsymbol.encode())
+        for arg in self.args:
+            h.update(abs(hash(arg)).to_bytes(16, 'big'))
+
+        return int(h.hexdigest(), 16)
     
-    @abstractmethod
+    def __getitem__(self, index) -> TRSTerm:
+        return self.args[index]
+    
+    def size(self) -> int:
+        '''
+        Return the size of the abstract syntax tree.
+        '''
+        return 1 + sum(arg.size() for arg in self.args)
+    
     def variables(self) -> set[str]:
-        pass
+        '''
+        Return a set of (the name of) all free variables in this term.
+        '''
+        res = set()
+        for arg in self.args:
+            res |= arg.variables()
+        return res
+    
+    def substitute(self, sigma : Subst) -> TRSTerm:
+        
+        new_args = tuple(
+            arg.substitute(sigma) for arg in self.args
+        )
+        return type(self)(*new_args)
+
 
 ################################################################################
 # universal algebra methods
@@ -305,11 +319,11 @@ class Matching:
                     continue
 
             # being function constructions
-            elif not isinstance(lhs, TRSSpec):
+            elif isinstance(lhs, StdTerm):
                 if isinstance(rhs, TRSVar):
                     return None
             
-                elif not isinstance(rhs, TRSSpec):
+                elif isinstance(rhs, StdTerm):
                     if lhs.fsymbol == rhs.fsymbol:
                         ineqs = ineqs[1:]
                         for i in range(len(lhs.args)):
@@ -341,7 +355,7 @@ class Matching:
 ##################################################################
 # other specified terms (Commutative, AC, infix binary, ...)
     
-class TRSInfixBinary(TRSTerm):
+class TRSInfixBinary(StdTerm):
     def __init__(self, L : TRSTerm, R : TRSTerm):
         super().__init__(L, R)
 
@@ -354,7 +368,7 @@ class TRSInfixBinary(TRSTerm):
     def substitute(self, sigma: Subst) -> TRSTerm:
         return super().substitute(sigma)
     
-class TRSCommBinary(TRSTerm):
+class TRSCommBinary(StdTerm):
     '''
     (not infix)
     '''
@@ -372,7 +386,7 @@ class TRSCommBinary(TRSTerm):
     def substitute(self, sigma: Subst) -> TRSTerm:
         return super().substitute(sigma)
     
-class TRS_AC(TRSTerm):
+class TRS_AC(StdTerm):
 
     def __new__(cls, *tup: Any):
         '''
@@ -438,10 +452,12 @@ def check_special_symbol(term : TRSTerm) -> bool:
     else:
         if isinstance(term, TRSVar):
             return False
-        else:
+        elif isinstance(term, StdTerm):
             for arg in term.args:
                 if check_special_symbol(arg):
                     return True
+            return False
+        else:
             return False
 
 
@@ -468,7 +484,7 @@ class TRSRule:
         '''
         self.rewrite_method = rewrite_method
 
-        if isinstance(lhs, TRSTerm) and check_special_symbol(lhs):
+        if isinstance(lhs, StdTerm) and check_special_symbol(lhs):
             raise ValueError(f"The rule {{{lhs}->{rhs}}} should not contain special symbols in the LHS.")
 
         self.lhs = lhs
@@ -599,7 +615,7 @@ class TRS:
             if new_term is not None:
                 return new_term
                         
-        if isinstance(term, TRSTerm) and not isinstance(term, TRSVar):
+        if isinstance(term, StdTerm):
             # try to rewrite the subterms
             for i in range(len(term.args)):
                 new_subterm = self.rewrite(term.args[i], side_info)

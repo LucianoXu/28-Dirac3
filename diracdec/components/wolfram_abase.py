@@ -40,6 +40,9 @@ class WolframABase(AtomicBase):
     def __hash__(self) -> int:
         return hash(self.simp_expr)
     
+    def size(self) -> int:
+        return 1
+    
 
     def variables(self) -> set[str]:
         '''
