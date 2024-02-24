@@ -2,8 +2,7 @@ from diracdec import *
 
 from diracdec import dirac_parse as parse
 
-from diracdec.components.wolfram_cscalar import WolframCScalar
-from diracdec.components.wolfram_abase import WolframABase
+from diracdec.components.wolfram_simple import WolframCScalar, WolframABase
 
 def test_atomic_base():
     with wolfram_backend.wolfram_session():
@@ -54,7 +53,7 @@ def test_wolfram_substitute():
         assert sub(a) == b
 
         a = parse(''' 'b - a' ''')
-        b = parse(''' 'a' ''')
+        b = parse(''' '2a-1' ''')
         assert sub(a) == b
 
 def test_wolfram_substitue_TRSVar():

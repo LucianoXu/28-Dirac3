@@ -1,8 +1,6 @@
 
 from diracdec import *
 
-from diracdec.components.wolfram_cscalar import *
-
 from diracdec import dirac_delta_parse as parse, dirac_delta_trs as trs
 
 

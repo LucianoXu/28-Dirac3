@@ -15,16 +15,16 @@ from .theory.trs import TRSTerm, TRSVar
 
 ### ALL WOLFRAM BACKEND
 
-from .components import wolfram_abase, wolfram_cscalar
+from .components import wolfram_simple
 
-dirac_parser = dirac.construct_parser(wolfram_cscalar.WolframCScalar, wolfram_abase.WolframABase)
+dirac_parser = dirac.construct_parser(wolfram_simple.WolframCScalar, wolfram_simple.WolframABase)
 
 def dirac_parse(s: str) -> TRSTerm:
     return dirac_parser.parse(s)
 
 dirac_trs = dirac.construct_trs(
-    wolfram_cscalar.WolframCScalar, 
-    wolfram_abase.WolframABase, 
+    wolfram_simple.WolframCScalar, 
+    wolfram_simple.WolframABase, 
     dirac_parser
     )
 
@@ -40,23 +40,23 @@ def dirac_delta_parse(s: str) -> TRSTerm:
 
 dirac_delta_trs = delta_ext.modify_trs(
     dirac_trs, 
-    wolfram_cscalar.WolframCScalar, 
-    wolfram_abase.WolframABase
+    wolfram_simple.WolframCScalar, 
+    wolfram_simple.WolframABase
     )
 
 
 ############# with big-op
 
-from .components import wolfram_abase, wolfram_cscalar
+from .components import wolfram_simple
 
-dirac_bigop_parser = dirac_bigop.construct_parser(wolfram_cscalar.WolframCScalar, wolfram_abase.WolframABase)
+dirac_bigop_parser = dirac_bigop.construct_parser(wolfram_simple.WolframCScalar, wolfram_simple.WolframABase)
 
 def dirac_bigop_parse(s: str) -> TRSTerm:
     return dirac_bigop_parser.parse(s)
 
 dirac_bigop_trs = dirac_bigop.construct_trs(
-    wolfram_cscalar.WolframCScalar, 
-    wolfram_abase.WolframABase, 
+    wolfram_simple.WolframCScalar, 
+    wolfram_simple.WolframABase, 
     dirac_bigop_parser
     )
     
@@ -69,6 +69,6 @@ def dirac_bigop_delta_parse(s: str) -> TRSTerm:
 
 dirac_bigop_delta_trs = delta_ext.modify_trs(
     dirac_bigop_trs, 
-    wolfram_cscalar.WolframCScalar, 
-    wolfram_abase.WolframABase
+    wolfram_simple.WolframCScalar, 
+    wolfram_simple.WolframABase
     )
