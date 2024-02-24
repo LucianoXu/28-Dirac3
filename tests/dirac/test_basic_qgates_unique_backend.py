@@ -1,7 +1,7 @@
 
 from diracdec import *
 
-from diracdec import dirac_delta_parse as parse, dirac_delta_trs as trs
+from diracdec import dirac_U_delta_parse as parse, dirac_U_delta_trs as trs
 
 
 with wolfram_backend.wolfram_session():
@@ -88,6 +88,35 @@ def test_CX():
         a = sub(parse(''' (I2 TSRO H) MLTO CZ MLTO (I2 TSRO H)'''))
         b = sub(parse(''' CX '''))
         assert trs.normalize(a) == trs.normalize(b)
+
+def test_QCQI_Theorem_4_1():
+    '''
+    QCQI, Theorem 4.1
+    '''
+    with wolfram_backend.wolfram_session():
+
+        # define the rotation gates
+        sub_rot = Subst({
+            "Rzbeta" : sub(parse(''' ("Cos[beta/2]" SCRO I2) ADDO ("- Sin[beta/2] I" SCRO Z) ''')),
+            "Rygamma" : sub(parse(''' ("Cos[gamma/2]" SCRO I2) ADDO ("- Sin[gamma/2] I" SCRO Y) ''')),
+            "Rzdelta" : sub(parse(''' ("Cos[delta/2]" SCRO I2) ADDO ("- Sin[delta/2] I" SCRO Z) ''')),
+        })
+
+        # get the idempotent operation
+        new_sub = sub_rot.composite(sub).get_idempotent()
+
+        # RHS - rotations
+        a = new_sub(parse(''' "Exp[I a]" SCRO (Rzbeta MLTO Rygamma MLTO Rzdelta) '''))
+        # LHS - U
+        b = new_sub(parse(''' ("Exp[I (a - beta/2 - delta/2)] Cos[gamma/2]" SCRO (ket0 OUTER bra0))
+            ADDO ("- Exp[I (a - beta/2 + delta/2)] Sin[gamma/2]" SCRO (ket0 OUTER bra1)) 
+            ADDO ("Exp[I (a + beta/2 - delta/2)] Sin[gamma/2]" SCRO (ket1 OUTER bra0))
+            ADDO ("Exp[I (a + beta/2 + delta/2)] Cos[gamma/2]" SCRO (ket1 OUTER bra1))'''))
+        
+        norm_a = trs.normalize(sub(a), alg = "inner_most")
+        norm_b = trs.normalize(sub(b), alg = "inner_most")
+        assert norm_a == norm_b
+
 
 def test_simple_circ():
     with wolfram_backend.wolfram_session():

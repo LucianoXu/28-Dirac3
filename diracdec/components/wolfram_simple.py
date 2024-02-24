@@ -24,7 +24,6 @@ class WolframABase(AtomicBase):
 
         self.simp_expr = session.evaluate(wl.FullSimplify(expr))
         
-        TRSTerm.__init__(self)
 
     def __str__(self) -> str:
         return str(session.evaluate(wl.ToString(self.simp_expr)))
@@ -102,8 +101,6 @@ class WolframCScalar(ComplexScalar):
             expr = wlexpr(expr)
 
         self.simp_expr = session.evaluate(wl.FullSimplify(expr))
-
-        TRSTerm.__init__(self)
 
     @staticmethod
     def zero() -> WolframCScalar:

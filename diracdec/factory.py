@@ -17,13 +17,15 @@ from .theory.trs import TRSTerm, TRSVar
 
 from .components import wolfram_simple
 
-dirac_parser = dirac.construct_parser(wolfram_simple.WolframCScalar, wolfram_simple.WolframABase)
+dirac_parser = dirac.construct_parser(
+    wolfram_simple.WolframCScalar,
+    wolfram_simple.WolframABase)
 
 def dirac_parse(s: str) -> TRSTerm:
     return dirac_parser.parse(s)
 
 dirac_trs = dirac.construct_trs(
-    wolfram_simple.WolframCScalar, 
+    wolfram_simple.WolframCScalar,
     wolfram_simple.WolframABase, 
     dirac_parser
     )
@@ -40,9 +42,41 @@ def dirac_delta_parse(s: str) -> TRSTerm:
 
 dirac_delta_trs = delta_ext.modify_trs(
     dirac_trs, 
-    wolfram_simple.WolframCScalar, 
+    wolfram_simple.WolframCScalar,
     wolfram_simple.WolframABase
     )
+
+#############################################
+# wolfram_unique backend
+
+from .components import wolfram_unique
+
+dirac_U_parser = dirac.construct_parser(
+    wolfram_unique.WolCScalarUnique,
+    wolfram_unique.WolABaseUnique)
+
+def dirac_U_parse(s: str) -> TRSTerm:
+    return dirac_parser.parse(s)
+
+dirac_U_trs = dirac.construct_trs(
+    wolfram_unique.WolCScalarUnique,
+    wolfram_unique.WolABaseUnique, 
+    dirac_U_parser
+    )
+    
+### with delta extensions
+
+dirac_U_delta_parser = dirac_U_parser
+
+def dirac_U_delta_parse(s: str) -> TRSTerm:
+    return dirac_U_delta_parser.parse(s)
+
+dirac_U_delta_trs = delta_ext.modify_trs(
+    dirac_U_trs, 
+    wolfram_unique.WolCScalarUnique,
+    wolfram_unique.WolABaseUnique, 
+    )
+
 
 
 ############# with big-op

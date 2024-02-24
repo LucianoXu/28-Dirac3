@@ -33,6 +33,7 @@
 - We have implemented the abstract/application and beta reduction, but it is very slow currently.
 
 - I already encountered problem in using Wolfram Engine: equivalent expresssions reduced by `FullSimply` can have different syntax. I may need a complex scalar table to deal with this problem. (That is, we provide the choice to use a more powerful method to compare the equivalence of terms.)
+This is implemented in the backend "wolfram_unique". But it can be inefficient.
 
 ## TODO
 - consider the case of teleportation after we have indices
