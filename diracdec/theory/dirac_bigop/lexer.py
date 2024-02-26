@@ -38,6 +38,13 @@ reserved = {
     'MLTO'       : 'MLTO',      # infix binary
     'TSRO'       : 'TSRO',      # infix binary
 
+
+    ########################################
+    # transpose
+    'TRANK'     : 'TRANK',
+    'TRANB'     : 'TRANB',
+    'TRANO'     : 'TRANO',
+
     ########################################
     # big-op
     'SUMS'      : 'SUMS',

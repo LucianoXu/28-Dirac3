@@ -2,6 +2,20 @@ from diracdec import *
 from diracdec.theory.dirac_bigop import *
 from diracdec import dirac_bigop_parse as parse
 
+def test_trans():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' TRANK(B)''')
+        b = KetTrans(TRSVar("B"))
+        assert a == b
+
+        a = parse(r''' TRANB(K)''')
+        b = BraTrans(TRSVar("K"))
+        assert a == b
+
+        a = parse(r''' TRANO(O)''')
+        b = OpTrans(TRSVar("O"))
+        assert a == b
+
 def test_scalar_sum():
     with wolfram_backend.wolfram_session():
         a = parse(r''' SUMS(x, x)''')

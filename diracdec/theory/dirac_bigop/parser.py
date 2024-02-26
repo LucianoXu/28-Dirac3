@@ -238,6 +238,27 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
         '''
         p[0] = OpTensor(p[1], p[3])
 
+    ##############################
+    # transpose
+        
+    def p_diracket8(p):
+        '''
+        diracket    : TRANK '(' trs-term ')'
+        '''
+        p[0] = KetTrans(p[3])
+
+    def p_diracbra8(p):
+        '''
+        diracbra    : TRANB '(' trs-term ')'
+        '''
+        p[0] = BraTrans(p[3])
+
+    def p_diracop9(p):
+        '''
+        diracop     : TRANO '(' trs-term ')'
+        '''
+        p[0] = OpTrans(p[3])
+
 
     ##############################
     # big-op
