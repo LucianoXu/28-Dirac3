@@ -45,7 +45,32 @@ class OpTrans(DiracOp, StdTerm):
     
     def tex(self) -> str:
         return rf" {self.args[0].tex()}^T"
+
+
+#####################################
+# section-2 syntax
     
+class Juxtapose(DiracScalar, TRSCommBinary):
+    '''
+    Note: this rule is only for internal representation, and should not be used in the user interface or parsing
+    '''
+    fsymbol_print = "JUXT"
+    fsymbol = "JUXT"
+
+    def __init__(self, A: TRSTerm, B: TRSTerm):
+        super().__init__(A, B)
+
+    def __str__(self) -> str:
+        '''
+        use the first one to represent
+        '''
+        return str(self.args[0])
+    
+    def tex(self) -> str:
+        '''
+        use the first one to represent
+        '''
+        return self.args[0].tex()
 
 
 

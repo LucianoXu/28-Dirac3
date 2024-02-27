@@ -19,7 +19,12 @@ from ..dirac.trs import construct_trs as dirac_construct_trs
 def construct_trs(
         CScalar: Type[ComplexScalar], 
         ABase: Type[AtomicBase], 
-        parser: yacc.LRParser|None = None) -> TRS:
+        parser: yacc.LRParser|None = None) -> Tuple[TRS, Callable[[TRSTerm], TRSTerm]]:
+    '''
+    Return:
+        - the first TRS is the trs for the bigop theory
+        - the second function transform the term to apply juxtapose rule once.
+    '''
 
     # construct the parser
     if parser is None:
@@ -246,5 +251,26 @@ def construct_trs(
     )
     rules.append(BETA_REDUCTION)
 
+
+
+    #####################################################
+    # Juxtapose
+    JUXTAPOSE = TRSRule(
+        "JUXTAPOSE",
+        lhs = parse(r'''B0 DOT K0'''),
+        rhs = Juxtapose(parse(r'''B0 DOT K0'''), parse(r'''TRANB(K0) DOT TRANK(B0)''')),
+    )
+
+    def juxtapose_rewrite(term: TRSTerm) -> TRSTerm:
+        if isinstance(term, ScalarDot):
+            B, K = term.args[0], term.args[1]
+            return Juxtapose(ScalarDot(B, K), ScalarDot(BraTrans(K), KetTrans(B)))
+        
+        elif isinstance(term, StdTerm):
+            return type(term)(*map(juxtapose_rewrite, term.args))
+        
+        else:
+            return term
+        
     # build the trs
-    return TRS(rules)
+    return TRS(rules), juxtapose_rewrite

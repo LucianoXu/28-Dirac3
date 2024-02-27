@@ -186,3 +186,21 @@ def test_BETA_REDUCTION():
         a = parse(''' (FUN x.x) @ a''')
         b = parse(''' a ''')
         assert trs.normalize(a) == trs.normalize(b)
+
+
+###########################################################
+# 2-section rewriting to deal with DOT equational theory
+        
+def test_juxt_rewrite():
+    with wolfram_backend.wolfram_session():
+        a = parse(''' B0 DOT K0 ''')
+        b = parse(''' TRANB(K0) DOT TRANK(B0) ''')
+        a_ = trs.normalize(juxt(trs.normalize(a)))
+        b_ = trs.normalize(juxt(trs.normalize(b)))
+        assert a_ == b_
+
+        a = parse(''' BRA('0') DOT (A MLTK KET('1')) ''')
+        b = parse(''' BRA('1') DOT (TRANO(A) MLTK KET('0')) ''')
+        a_ = trs.normalize(juxt(trs.normalize(a)))
+        b_ = trs.normalize(juxt(trs.normalize(b)))
+        assert a_ == b_
