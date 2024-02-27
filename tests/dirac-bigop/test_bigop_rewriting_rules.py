@@ -175,6 +175,97 @@ def test_OPT_TRANS_9():
         assert trs.normalize(a) == trs.normalize(b)
 
 ###########################################################
+# sum-distribution
+        
+def test_SUM_DIST_1():
+    with wolfram_backend.wolfram_session():
+        a = parse(r'''SUM(x, B0) DOT K0''')
+        b = parse(r'''SUM(x, B0 DOT K0)''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(r'''SUM(x, O0) MLTK K0''')
+        b = parse(r'''SUM(x, O0 MLTK K0)''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(r'''SUM(x, B0) MLTB O0''')
+        b = parse(r'''SUM(x, B0 MLTB O0)''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(r'''SUM(x, O1) MLTO O2''')
+        b = parse(r'''SUM(x, O1 MLTO O2)''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        # check variable renaming
+        a = parse(r'''SUM(x, B0) DOT x''')
+        b = parse(r'''SUM(y, B0 DOT x)''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+
+def test_SUM_DIST_2():
+    with wolfram_backend.wolfram_session():
+        a = parse(r'''B0 DOT SUM(x, K0)''')
+        b = parse(r'''SUM(x, B0 DOT K0)''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(r'''O0 MLTK SUM(x, K0)''')
+        b = parse(r'''SUM(x, O0 MLTK K0)''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(r'''B0 MLTB SUM(x, O0)''')
+        b = parse(r'''SUM(x, B0 MLTB O0)''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(r'''O1 MLTO SUM(x, O2)''')
+        b = parse(r'''SUM(x, O1 MLTO O2)''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        # check variable renaming
+        a = parse(r'''x DOT SUM(x, K0)''')
+        b = parse(r'''SUM(y, x DOT K0)''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+
+def test_SUM_DIST_3():
+    with wolfram_backend.wolfram_session():
+        a = parse(r'''SUM(x, K1) TSRK K2''')
+        b = parse(r'''SUM(x, K1 TSRK K2)''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(r'''SUM(x, B1) TSRB B2''')
+        b = parse(r'''SUM(x, B1 TSRB B2)''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(r'''SUM(x, O1) MLTO O2''')
+        b = parse(r'''SUM(x, O1 MLTO O2)''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        # check variable renaming
+        a = parse(r'''SUM(x, K0) TSRK x''')
+        b = parse(r'''SUM(y, K0 TSRK x)''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+
+def test_SUM_DIST_4():
+    with wolfram_backend.wolfram_session():
+        a = parse(r'''K1 TSRK SUM(x, K2)''')
+        b = parse(r'''SUM(x, K1 TSRK K2)''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(r'''B1 TSRB SUM(x, B2)''')
+        b = parse(r'''SUM(x, B1 TSRB B2)''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(r'''O1 TSRO SUM(x, O2)''')
+        b = parse(r'''SUM(x, O1 TSRO O2)''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        # check variable renaming
+        a = parse(r'''x TSRK SUM(x, K0)''')
+        b = parse(r'''SUM(y, x TSRK K0)''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+
+###########################################################
 # beta reduction
 
 def test_BETA_REDUCTION():
@@ -213,8 +304,8 @@ def test_juxt_rewrite():
 
 def test_sumeq_rewrite():
     with wolfram_backend.wolfram_session():
-        a = parse(''' SUMS(a, SUMS(b, "a / b")) ''')
-        b = parse(''' SUMS(b, SUMS(a, "a / b")) ''')
+        a = parse(''' SUM(a, SUM(b, "a / b")) ''')
+        b = parse(''' SUM(b, SUM(a, "a / b")) ''')
 
         assert not a == b
 

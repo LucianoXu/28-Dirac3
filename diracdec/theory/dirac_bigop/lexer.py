@@ -47,7 +47,7 @@ reserved = {
 
     ########################################
     # big-op
-    'SUMS'      : 'SUMS',
+    'SUM'      : 'SUM',
 
     ########################################
     # abstraction and application

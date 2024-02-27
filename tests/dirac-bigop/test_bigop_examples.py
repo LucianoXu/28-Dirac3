@@ -41,17 +41,23 @@ with wolfram_backend.wolfram_session():
 
 def test_1():
     with wolfram_backend.wolfram_session():
-        a = parse(''' SUMS(a, "a")''')
+        a = parse(''' SUM(a, "a")''')
         sub = Subst({
             "a" : parse(''' "1" '''),
         })
         assert a == sub(a)
         assert hash(a) == hash(sub(a))
 
+def test_sum_swap():
+    with wolfram_backend.wolfram_session():
+        a = parse(''' SUM(a, SUM(b, KET(PAIR(a, b)))) ''')
+        b = parse(''' SUM(b, SUM(a, KET(PAIR(b, a)))) ''')
+        assert a == b
+
 def test_alpha_conv_with_Wolfram():
     with wolfram_backend.wolfram_session():
-        a = parse(''' SUMS(a, SUMS(b, "a + b")) ''')
-        b = parse(''' SUMS(b, SUMS(a, "a + b")) ''')
+        a = parse(''' SUM(a, SUM(b, "a + b")) ''')
+        b = parse(''' SUM(b, SUM(a, "a + b")) ''')
         assert a == b
 
 
@@ -71,3 +77,40 @@ def test_ASigma():
         norm_b = trs.normalize(b)
 
         assert trs.normalize(juxt(norm_a)) == trs.normalize(juxt(norm_b))
+
+
+def test_ASigma_bigop():
+    '''
+
+    `A[T] Sigma[T, S] == A^T[S] Sigma[T, S]`
+
+    Note that the `SUM(i, KET(i) OUTER BRA(i))` at the beginning is necessary to decide the space type of A operator.
+    '''
+    with wolfram_backend.wolfram_session():
+        a = parse(''' 
+                        (
+                            (
+                                SUM(i, KET(i) OUTER BRA(i)) TSRO 1O
+                            ) 
+                            MLTO (A TSRO 1O)
+                        ) 
+                        MLTK 
+                        (
+                            SUM(i, KET(PAIR(i, i)))
+                        ) 
+                    ''')
+
+        b = parse(''' 
+                        (
+                            (1O TSRO SUM(i, KET(i) OUTER BRA(i))) MLTO (1O TSRO TRANO(A))
+                        ) 
+                        MLTK 
+                        (
+                            SUM(i, KET(PAIR(i, i)))
+                        ) 
+                    ''')
+
+        norm_a = trs.normalize(a)
+        norm_b = trs.normalize(b)
+
+        assert trs.normalize(juxt(sumeq(norm_a))) == trs.normalize(juxt(sumeq(norm_b)))

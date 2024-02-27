@@ -1,4 +1,6 @@
 
+from ..trs import TRS_AC_safe, TRSCommBinary_safe
+
 from ..dirac.syntax import *
 
 from ..trs import BindVarTerm
@@ -69,9 +71,9 @@ class Apply(StdTerm):
     def tex(self) -> str:
         return rf" \left ({self.args[0].tex()} {self.args[1].tex()} \right)"
 
-class ScalarSum(DiracScalar, BindVarTerm):
+class Sum(DiracOp, BindVarTerm):
     fsymbol_print = "sum"
-    fsymbol = "SUMS"
+    fsymbol = "SUM"
 
     def tex(self) -> str:
         return rf" \left ( \sum_{{{self.bind_var.name}}} {self.body.tex()} \right )"
@@ -80,7 +82,7 @@ class ScalarSum(DiracScalar, BindVarTerm):
 #####################################
 # section-2 syntax
     
-class Juxtapose(DiracScalar, TRSCommBinary):
+class Juxtapose(DiracScalar, TRSCommBinary_safe):
     '''
     Note: this rule is only for internal representation, and should not be used in the user interface or parsing
     '''
@@ -102,7 +104,7 @@ class Juxtapose(DiracScalar, TRSCommBinary):
         '''
         return self.args[0].tex()
     
-class SumEq(TRS_AC):
+class SumEq(TRS_AC_safe):
     '''
     Note: this rule is only for internal representation, and should not be used in the user interface or parsing
     '''
@@ -110,7 +112,7 @@ class SumEq(TRS_AC):
     fsymbol = "SUMEQ"
 
     def __init__(self, *tup : TRSTerm):
-        TRS_AC.__init__(self, *tup)
+        TRS_AC_safe.__init__(self, *tup)
 
     def __str__(self) -> str:
         '''

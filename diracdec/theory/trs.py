@@ -170,7 +170,7 @@ class StdTerm(TRSTerm):
     
     def variables(self) -> set[str]:
         '''
-        Return a set of (the name of) all free variables in this term.
+        Return a set of (the name of) all variables in this term. (including the bind variables)
         '''
         res = set()
         for arg in self.args:
@@ -225,7 +225,7 @@ class BindVarTerm(TRSTerm):
         '''
         To make the hash value of the term unique, we need to consider the alpha-conversion of the bind variable.
         '''
-        canonical_var = var_rename(self.variables())
+        canonical_var = var_rename(self.free_variables())
         h = hashlib.md5(self.fsymbol.encode())
         h.update(canonical_var.encode())
         h.update(abs(
@@ -241,10 +241,18 @@ class BindVarTerm(TRSTerm):
         return self.body.size() + 2
     
     def variables(self) -> set[str]:
+        return self.body.variables() | {self.bind_var.name}
+    
+    def free_variables(self) -> set[str]:
         res = self.body.variables()
         res.discard(self.bind_var.name)
         return res
     
+    @property
+    def is_ground(self) -> bool:
+        return len(self.free_variables()) == 0
+
+
     def rename_bind(self, new_v: TRSVar) -> BindVarTerm:
         '''
         rename the bind variable to a new one.
@@ -468,6 +476,47 @@ class TRSCommBinary(StdTerm):
     def substitute(self, sigma: Subst) -> TRSTerm:
         return super().substitute(sigma)
     
+
+class TRSCommBinary_safe(StdTerm):
+    '''
+    TRSCommBinary_safe does not try to sort the operands, but compare them one by one. The hash value calculation is adjusted accordingly.
+
+    This is less efficient but more robust.
+    '''
+    def __init__(self, L : Any, R : Any):
+        super().__init__(L, R)
+
+    def __str__(self) -> str:
+        return f'{self.fsymbol_print}({str(self.args[0])}, {str(self.args[1])})'
+
+    def __repr__(self) -> str:
+        return f'{self.fsymbol}({repr(self.args[0])}, {repr(self.args[1])})'
+    
+    def substitute(self, sigma: Subst) -> TRSTerm:
+        return super().substitute(sigma)
+
+    def __eq__(self, other):
+        if self is other:
+            return True
+        
+        if isinstance(other, TRSCommBinary_safe):
+            if self.args[0] == other.args[0] and self.args[1] == other.args[1]:
+                return True
+            
+            if self.args[0] == other.args[1] and self.args[1] == other.args[0]:
+                return True
+            
+            return False
+        
+        else:
+            return False
+        
+    def __hash__(self) -> int:
+        h = int(hashlib.md5(self.fsymbol.encode()).hexdigest(), 16)
+
+        return h + hash(self.args[0]) + hash(self.args[1])
+    
+
 class TRS_AC(StdTerm):
 
     def __new__(cls, *tup: Any):
@@ -517,6 +566,91 @@ class TRS_AC(StdTerm):
         collect the terms that are not in the idx, and return as a new tuple.
         '''
         return tuple(self.args[i] for i in range(len(self.args)) if i not in idx)
+    
+
+class TRS_AC_safe(StdTerm):
+    '''
+    TRS_AC_safe does not try to sort the operands, but compare them one by one. The hash value calculation is adjusted accordingly.
+
+    This is less efficient but more robust.
+    '''
+
+    def __new__(cls, *tup: Any):
+        '''
+        return the element directly when tuple has only one element
+        '''
+        if len(tup) == 0:
+            raise ValueError("The tuple lengh should be at least 1.")
+        elif len(tup) == 1:
+            return tup[0]
+        else:
+            obj = object.__new__(cls)
+            TRS_AC_safe.__init__(obj, *tup)
+            return obj
+        
+    def __init__(self, *tup: Any):
+        '''
+        The method of flatten the tuple of arguments for the ac_symbol.
+        Assume that the items in tup are already flattened.
+        '''
+        if len(tup) < 2:
+            raise ValueError("The tuple lengh should be at least 2.")
+
+        new_ls = []
+        for item in tup:
+            if isinstance(item, type(self)):
+                new_ls.extend(item.args)
+            else:
+                new_ls.append(item)
+
+        self.args = tuple(new_ls)
+
+    def __str__(self) -> str:
+        return f'({f" {self.fsymbol_print} ".join(map(str, self.args))})'
+    
+    def __repr__(self) -> str:
+        return f'({f" {self.fsymbol} ".join(map(repr, self.args))})'
+    
+    def tex(self) -> str:
+        return rf' \left ({f" {self.fsymbol_print} ".join(map(lambda x: x.tex(), self.args))} \right )'
+    
+    def substitute(self, sigma: Subst) -> TRSTerm:
+        return type(self)(*tuple(arg.substitute(sigma) for arg in self.args))
+    
+    def remained_terms(self, *idx: int):
+        '''
+        collect the terms that are not in the idx, and return as a new tuple.
+        '''
+        return tuple(self.args[i] for i in range(len(self.args)) if i not in idx)
+    
+    def __eq__(self, other):
+        if self is other:
+            return True
+        
+        if isinstance(other, TRS_AC_safe):
+            if len(self.args) != len(other.args):
+                return False
+            
+            ls_self = list(self.args)
+            ls_other = list(other.args)
+
+            for i in range(len(ls_self)):
+                if ls_self[i] in ls_other:
+                    ls_other.remove(ls_self[i])
+                else:
+                    return False
+                
+            return True
+        
+        else:
+            return False
+        
+    def __hash__(self) -> int:
+        h = int(hashlib.md5(self.fsymbol.encode()).hexdigest(), 16)
+        for arg in self.args:
+            h += hash(arg)
+
+        return h
 
 ############################################################################
 # term rewriting rules
@@ -717,6 +851,13 @@ class TRS:
                 new_subterm = self.rewrite_outer_most(term.args[i], side_info, verbose)
                 if new_subterm is not None:
                     return type(term)(*term.args[:i], new_subterm, *term.args[i+1:])
+                
+        elif isinstance(term, BindVarTerm):
+            new_body = self.rewrite_outer_most(term.body, side_info, verbose)
+            if new_body is not None:
+                # risk exists: term.bind_var may collide with new_body
+                # but normal rewriting rules should not cause this problem because there are no free variables on the RHS
+                return type(term)(term.bind_var, new_body)
 
         return None
     
@@ -735,6 +876,14 @@ class TRS:
                 new_subterm = self.rewrite_inner_most(term.args[i], side_info, verbose)
                 if new_subterm is not None:
                     return type(term)(*term.args[:i], new_subterm, *term.args[i+1:])
+                
+        elif isinstance(term, BindVarTerm):
+            new_body = self.rewrite_inner_most(term.body, side_info, verbose)
+            if new_body is not None:
+                # risk exists: term.bind_var may collide with new_body
+                # but normal rewriting rules should not cause this problem because there are no free variables on the RHS
+                return type(term)(term.bind_var, new_body)
+
 
         # try to rewrite the term using the rules
         for rule in self.rules:

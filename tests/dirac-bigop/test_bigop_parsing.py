@@ -16,10 +16,10 @@ def test_trans():
         b = OpTrans(TRSVar("O"))
         assert a == b
 
-def test_scalar_sum():
+def test_sum():
     with wolfram_backend.wolfram_session():
-        a = parse(r''' SUMS(x, x)''')
-        b = ScalarSum(TRSVar("x"), TRSVar("x"))
+        a = parse(r''' SUM(x, x)''')
+        b = Sum(TRSVar("x"), TRSVar("x"))
         assert a == b
 
 def test_abstraction():

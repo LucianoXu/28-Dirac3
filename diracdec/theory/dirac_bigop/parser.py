@@ -264,9 +264,9 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
     # big-op
     def p_diracscalar7(p):
         '''
-        diracscalar : SUMS '(' trs-var ',' trs-term ')'
+        diracscalar : SUM '(' trs-var ',' trs-term ')'
         '''
-        p[0] = ScalarSum(p[3], p[5])
+        p[0] = Sum(p[3], p[5])
 
     ##############################
     # abstraction and application
