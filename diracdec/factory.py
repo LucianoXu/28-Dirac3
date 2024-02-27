@@ -88,7 +88,7 @@ dirac_bigop_parser = dirac_bigop.construct_parser(wolfram_simple.WolframCScalar,
 def dirac_bigop_parse(s: str) -> TRSTerm:
     return dirac_bigop_parser.parse(s)
 
-dirac_bigop_trs, juxt = dirac_bigop.construct_trs(
+dirac_bigop_trs, juxt, sumeq = dirac_bigop.construct_trs(
     wolfram_simple.WolframCScalar, 
     wolfram_simple.WolframABase, 
     dirac_bigop_parser

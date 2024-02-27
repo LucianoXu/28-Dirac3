@@ -1,6 +1,7 @@
 
 
 from __future__ import annotations
+import itertools
 
 from typing import Type
 
@@ -19,11 +20,12 @@ from ..dirac.trs import construct_trs as dirac_construct_trs
 def construct_trs(
         CScalar: Type[ComplexScalar], 
         ABase: Type[AtomicBase], 
-        parser: yacc.LRParser|None = None) -> Tuple[TRS, Callable[[TRSTerm], TRSTerm]]:
+        parser: yacc.LRParser|None = None) -> Tuple[TRS, Callable[[TRSTerm], TRSTerm], Callable[[TRSTerm], TRSTerm]]:
     '''
     Return:
         - the first TRS is the trs for the bigop theory
         - the second function transform the term to apply juxtapose rule once.
+        - the thrid function applies the sumeq extension.
     '''
 
     # construct the parser
@@ -255,11 +257,6 @@ def construct_trs(
 
     #####################################################
     # Juxtapose
-    JUXTAPOSE = TRSRule(
-        "JUXTAPOSE",
-        lhs = parse(r'''B0 DOT K0'''),
-        rhs = Juxtapose(parse(r'''B0 DOT K0'''), parse(r'''TRANB(K0) DOT TRANK(B0)''')),
-    )
 
     def juxtapose_rewrite(term: TRSTerm) -> TRSTerm:
         if isinstance(term, ScalarDot):
@@ -272,5 +269,36 @@ def construct_trs(
         else:
             return term
         
+    
+    def __construct_sum_term(bind_vars: Tuple[TRSVar, ...], body: TRSTerm) -> TRSTerm:
+        if len(bind_vars) == 0:
+            return body
+        else:
+            return ScalarSum(bind_vars[0], __construct_sum_term(bind_vars[1:], body))
+    
+        
+    def sumeq_rewrite(term: TRSTerm) -> TRSTerm:
+        if isinstance(term, ScalarSum):
+
+            # get the bind variable and the body
+            bind_vars : list[TRSVar] = []
+            while isinstance(term, ScalarSum):
+                bind_vars.append(term.bind_var)
+                term = term.body
+
+            # get all permutations of bind_vars
+            perms = itertools.permutations(bind_vars)
+            
+            # construct the sumeq term
+            return SumEq(*[__construct_sum_term(perm, term) for perm in perms])
+
+        elif isinstance(term, StdTerm):
+            return type(term)(*map(sumeq_rewrite, term.args))
+        
+        else:
+            return term
+
+             
+        
     # build the trs
-    return TRS(rules), juxtapose_rewrite
+    return TRS(rules), juxtapose_rewrite, sumeq_rewrite
