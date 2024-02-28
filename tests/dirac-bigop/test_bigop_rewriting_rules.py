@@ -177,7 +177,152 @@ def test_OPT_TRANS_9():
 ###########################################################
 # sum-distribution
         
+def test_SUM_ELIM_1():
+    with wolfram_backend.wolfram_session():
+        a = parse(''' SUM(i, "0") ''')
+        b = parse(''' "0" ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+def test_SUM_ELIM_2():
+    with wolfram_backend.wolfram_session():
+        a = parse(''' SUM(i, 0K) ''')
+        b = parse(''' 0K ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(''' SUM(i, 0B) ''')
+        b = parse(''' 0B ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(''' SUM(i, 0O) ''')
+        b = parse(''' 0O ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+
+def test_SUM_ELIM_3():
+    with wolfram_backend.wolfram_session():
+        a = parse(''' SUM(i, DELTA(i, s)) ''')
+        b = parse(''' "1" ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(''' SUM(i, DELTA(i, i)) ''')
+        b = parse(''' "1" ''')
+        assert trs.normalize(a) != trs.normalize(b)
+
+def test_SUM_ELIM_4():
+    with wolfram_backend.wolfram_session():
+        a = parse(''' SUM(i, DELTA(i, s) MLTS S1 MLTS i) ''')
+        b = parse(''' S1 MLTS s ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(''' SUM(i, DELTA(i, s) MLTS "i - s") ''')
+        b = parse(''' "0" ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+def test_SUM_ELIM_5():
+    with wolfram_backend.wolfram_session():
+        a = parse(''' SUM(i, DELTA(i, s) SCRK KET(i)) ''')
+        b = parse(''' KET(s) ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(''' SUM(i, DELTA(i, s) SCRB BRA(i)) ''')
+        b = parse(''' BRA(s) ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(''' SUM(i, DELTA(i, s) SCRO (KET(i) OUTER BRA(i))) ''')
+        b = parse(''' KET(s) OUTER BRA(s) ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+def test_SUM_ELIM_6():
+    with wolfram_backend.wolfram_session():
+        a = parse(''' SUM(i, (DELTA(i, s) MLTS S1 MLTS S2) SCRK KET(i)) ''')
+        b = parse(''' (S1 MLTS S2) SCRK KET(s) ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(''' SUM(i, (DELTA(i, s) MLTS S1 MLTS S2) SCRB BRA(i)) ''')
+        b = parse(''' (S1 MLTS S2) SCRB BRA(s) ''')
+        assert trs.normalize(a) == trs.normalize(b)
+        
+        a = parse(''' SUM(i, (DELTA(i, s) MLTS S1 MLTS S2) SCRO (KET(i) OUTER BRA(i))) ''')
+        b = parse(''' (S1 MLTS S2) SCRO (KET(s) OUTER BRA(s)) ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+
 def test_SUM_DIST_1():
+    with wolfram_backend.wolfram_session():
+        a = parse(''' SUM(i, A) MLTS B MLTS C ''')
+        b = parse(''' SUM(i, A MLTS B MLTS C) ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(''' SUM(i, A) MLTS B MLTS i ''')
+        b = parse(''' SUM(x, A MLTS B MLTS i) ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+def test_SUM_DIST_2():
+    with wolfram_backend.wolfram_session():
+        a = parse(''' CONJS(SUM(i, A)) ''')
+        b = parse(''' SUM(i, CONJS(A)) ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+
+def test_SUM_DIST_3():
+    with wolfram_backend.wolfram_session():
+        a = parse(''' ADJK(SUM(i, A)) ''')
+        b = parse(''' SUM(i, ADJK(A)) ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(''' ADJB(SUM(i, A)) ''')
+        b = parse(''' SUM(i, ADJB(A)) ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(''' ADJO(SUM(i, A)) ''')
+        b = parse(''' SUM(i, ADJO(A)) ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+
+def test_SUM_DIST_4():
+    with wolfram_backend.wolfram_session():
+        a = parse(''' TRANK(SUM(i, A)) ''')
+        b = parse(''' SUM(i, TRANK(A)) ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(''' TRANB(SUM(i, A)) ''')
+        b = parse(''' SUM(i, TRANB(A)) ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(''' TRANO(SUM(i, A)) ''')
+        b = parse(''' SUM(i, TRANO(A)) ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+def test_SUM_DIST_5():
+    with wolfram_backend.wolfram_session():
+        a = parse(''' S0 SCRK SUM(i, A) ''')
+        b = parse(''' SUM(i, S0 SCRK A) ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(''' S0 SCRB SUM(i, A) ''')
+        b = parse(''' SUM(i, S0 SCRB A) ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(''' S0 SCRO SUM(i, A) ''')
+        b = parse(''' SUM(i, S0 SCRO A) ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+
+def test_SUM_DIST_6():
+    with wolfram_backend.wolfram_session():
+        a = parse(''' SUM(i, S0) SCRK X ''')
+        b = parse(''' SUM(i, S0 SCRK X) ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(''' SUM(i, S0) SCRB X ''')
+        b = parse(''' SUM(i, S0 SCRB X) ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(''' SUM(i, S0) SCRO X ''')
+        b = parse(''' SUM(i, S0 SCRO X) ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+def test_SUM_DIST_7():
     with wolfram_backend.wolfram_session():
         a = parse(r'''SUM(x, B0) DOT K0''')
         b = parse(r'''SUM(x, B0 DOT K0)''')
@@ -201,7 +346,7 @@ def test_SUM_DIST_1():
         assert trs.normalize(a) == trs.normalize(b)
 
 
-def test_SUM_DIST_2():
+def test_SUM_DIST_8():
     with wolfram_backend.wolfram_session():
         a = parse(r'''B0 DOT SUM(x, K0)''')
         b = parse(r'''SUM(x, B0 DOT K0)''')
@@ -225,7 +370,7 @@ def test_SUM_DIST_2():
         assert trs.normalize(a) == trs.normalize(b)
 
 
-def test_SUM_DIST_3():
+def test_SUM_DIST_9():
     with wolfram_backend.wolfram_session():
         a = parse(r'''SUM(x, K1) TSRK K2''')
         b = parse(r'''SUM(x, K1 TSRK K2)''')
@@ -233,6 +378,10 @@ def test_SUM_DIST_3():
 
         a = parse(r'''SUM(x, B1) TSRB B2''')
         b = parse(r'''SUM(x, B1 TSRB B2)''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(r'''SUM(x, K0) OUTER B0''')
+        b = parse(r'''SUM(x, K0 OUTER B0)''')
         assert trs.normalize(a) == trs.normalize(b)
 
         a = parse(r'''SUM(x, O1) MLTO O2''')
@@ -245,7 +394,7 @@ def test_SUM_DIST_3():
         assert trs.normalize(a) == trs.normalize(b)
 
 
-def test_SUM_DIST_4():
+def test_SUM_DIST_10():
     with wolfram_backend.wolfram_session():
         a = parse(r'''K1 TSRK SUM(x, K2)''')
         b = parse(r'''SUM(x, K1 TSRK K2)''')
@@ -253,6 +402,10 @@ def test_SUM_DIST_4():
 
         a = parse(r'''B1 TSRB SUM(x, B2)''')
         b = parse(r'''SUM(x, B1 TSRB B2)''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(r'''K0 OUTER SUM(x, B0)''')
+        b = parse(r'''SUM(x, K0 OUTER B0)''')
         assert trs.normalize(a) == trs.normalize(b)
 
         a = parse(r'''O1 TSRO SUM(x, O2)''')
@@ -264,6 +417,29 @@ def test_SUM_DIST_4():
         b = parse(r'''SUM(y, x TSRK K0)''')
         assert trs.normalize(a) == trs.normalize(b)
 
+
+def test_SUM_ADD_1():
+    with wolfram_backend.wolfram_session():
+        a = parse(r'''SUM(i, A) ADDS SUM(j, B) ADDS S0''')
+        b = parse(r'''SUM(i, A ADDS B) ADDS S0''')
+        assert trs.normalize(a) == trs.normalize(b)
+        
+        a = parse(r'''SUM(i, A) ADDK SUM(j, B) ADDK K0''')
+        b = parse(r'''SUM(i, A ADDK B) ADDK K0''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(r'''SUM(i, A) ADDB SUM(j, B) ADDB B0''')
+        b = parse(r'''SUM(i, A ADDB B) ADDB B0''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(r'''SUM(i, A) ADDO SUM(j, B) ADDO O0''')
+        b = parse(r'''SUM(i, A ADDO B) ADDO O0''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        # check variable renaming
+        a = parse(r'''SUM(i, A) ADDS SUM(j, B) ADDS S0 ADDS SUM(k, i)''')
+        b = parse(r'''SUM(z, A ADDS B ADDS i) ADDS S0''')
+        assert trs.normalize(a) == trs.normalize(b)
 
 ###########################################################
 # beta reduction

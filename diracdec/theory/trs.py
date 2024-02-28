@@ -75,6 +75,9 @@ class TRSTerm(ABC):
     def variables(self) -> set[str]:
         pass
 
+    def free_variables(self) -> set[str]:
+        return self.variables()
+
     @property
     def is_ground(self) -> bool:
         return len(self.variables()) == 0

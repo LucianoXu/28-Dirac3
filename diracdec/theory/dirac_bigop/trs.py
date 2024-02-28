@@ -37,7 +37,7 @@ def construct_trs(
     
     # inherit the rules from dirac
     dirac_trs = dirac_construct_trs(CScalar, ABase)
-    rules = dirac_trs.rules.copy()
+    rules = []
 
     #####################################################
     # transpose
@@ -235,74 +235,249 @@ def construct_trs(
     rules.append(OPT_TRANS_9)
 
     #####################################################
-    # sum-distribution
+    # sum-elim
+
+    def sum_elim_1_rewrite(rule, term, side_info):
+        if isinstance(term, Sum) and term.body == CScalar.zero():
+            return CScalar.zero()
+    SUM_ELIM_1 = TRSRule(
+        "SUM_ELIM_1",
+        lhs = "SUM(i, C(0))",
+        rhs = "C(0)",
+        rewrite_method = sum_elim_1_rewrite
+    )
+    rules.append(SUM_ELIM_1)
+
+
+    def sum_elim_2_rewrite(rule, term, side_info):
+        if isinstance(term, Sum) and isinstance(term.body, (KetZero, BraZero, OpZero)):
+            return type(term.body)()
+    SUM_ELIM_2 = TRSRule(
+        "SUM_ELIM_2",
+        lhs = "SUM(i, {0K/0B/0O})",
+        rhs = "0O",
+        rewrite_method = sum_elim_2_rewrite
+    )
+    rules.append(SUM_ELIM_2)
+
+
+
+
+    def sum_elim_3_rewrite(rule, term, side_info):
+        if isinstance(term, Sum) and isinstance(term.body, ScalarDelta):
+            if term.bind_var == term.body.args[0]:
+                s = term.body.args[1]
+            elif term.bind_var == term.body.args[1]:
+                s = term.body.args[0]
+            else:
+                return None
+            
+            if term.bind_var.name not in s.free_variables():
+                return CScalar.one()
+            
+            else:
+                return None
+            
+    SUM_ELIM_3 = TRSRule(
+        "SUM_ELIM_3",
+        lhs = "SUM(i, DELTA(i, s))",
+        rhs = "C(1)",
+        rewrite_method = sum_elim_3_rewrite
+    )
+    rules.append(SUM_ELIM_3)
+
+    def sum_elim_4_rewrite(rule, term, side_info):
+        if isinstance(term, Sum) and isinstance(term.body, ScalarMlt):
+            for i, item in enumerate(term.body.args):
+                if isinstance(item, ScalarDelta):
+                    if term.bind_var == item.args[0]:
+                        s = item.args[1]
+                    elif term.bind_var == item.args[1]:
+                        s = item.args[0]
+                    else:
+                        return None
+                    
+                    if term.bind_var.name not in s.free_variables():
+                        sub = Subst({term.bind_var.name : s})
+                        return ScalarMlt(*term.body.remained_terms(i)).substitute(sub)
+                    
+                    else:
+                        return None
+            
+    SUM_ELIM_4 = TRSRule(
+        "SUM_ELIM_4",
+        lhs = "SUM(i, DELTA(i, s) MLTS S0)",
+        rhs = "S0[i:=s]",
+        rewrite_method = sum_elim_4_rewrite
+    )
+    rules.append(SUM_ELIM_4)
+
+
+    def sum_elim_5_rewrite(rule, term, side_info):
+        if isinstance(term, Sum) and isinstance(term.body, (KetScal, BraScal, OpScal)) and isinstance(term.body.args[0], ScalarDelta):
+            delta = term.body.args[0]
+            if term.bind_var == delta.args[0]:
+                s = delta.args[1]
+            elif term.bind_var == delta.args[1]:
+                s = delta.args[0]
+            else:
+                return None
+            
+            if term.bind_var.name not in s.free_variables():
+                sub = Subst({term.bind_var.name : s})
+                return term.body.args[1].substitute(sub)
+            
+            else:
+                return None
+            
+    SUM_ELIM_5 = TRSRule(
+        "SUM_ELIM_5",
+        lhs = "SUM(i, DELTA(i, s) {SCRK/SCRB/SCRO} X)",
+        rhs = "X[i:=s]",
+        rewrite_method = sum_elim_5_rewrite
+    )
+    rules.append(SUM_ELIM_5)
+
+
+    def sum_elim_6_rewrite(rule, term, side_info):
+        if isinstance(term, Sum) and isinstance(term.body, (KetScal, BraScal, OpScal)) and isinstance(term.body.args[0], ScalarMlt):
+            for i, delta in enumerate(term.body.args[0].args):
+                if isinstance(delta, ScalarDelta):
+                    if term.bind_var == delta.args[0]:
+                        s = delta.args[1]
+                    elif term.bind_var == delta.args[1]:
+                        s = delta.args[0]
+                    else:
+                        return None
+                    
+                    if term.bind_var.name not in s.free_variables():
+                        sub = Subst({term.bind_var.name : s})
+
+                        return type(term.body)(ScalarMlt(*term.body.args[0].remained_terms(i)).substitute(sub), term.body.args[1].substitute(sub))
+                    
+                    else:
+                        return None
+            
+    SUM_ELIM_6 = TRSRule(
+        "SUM_ELIM_6",
+        lhs = "SUM(i, (DELTA(i, s) MLTS S0) {SCRK/SCRB/SCRO} X)",
+        rhs = "S[i:=s] {SCRK/SCRB/SCRO} X[i:=s]",
+        rewrite_method = sum_elim_6_rewrite
+    )
+    rules.append(SUM_ELIM_6)
+
 
     def sum_dist_1_rewrite(rule, term, side_info):
-        if (isinstance(term, ScalarDot) or isinstance(term, KetApply) or isinstance(term, BraApply) or isinstance(term, OpApply)) and isinstance(term.args[0], Sum):
+        if isinstance(term, ScalarMlt):
+            for i, item in enumerate(term.args):
+                if isinstance(item, Sum):
 
-            bind_var, body = term.args[0].bind_var, term.args[0].body
+                    bind_var, body = item.bind_var, item.body
 
-            # check whether the bind_var is already used
-            new_body_vars = body.variables() | term.args[1].variables()
-            if bind_var.name in new_body_vars:
-                bind_var = TRSVar(var_rename(new_body_vars))
-                body = body.substitute(Subst({term.args[0].bind_var.name: bind_var}))
+                    rest_body = ScalarMlt(*term.remained_terms(i))
 
-            return Sum(bind_var, type(term)(body, term.args[1]))
-        
+                    # check whether the bind_var is already used
+                    new_body_vars = body.variables() | rest_body.variables()
+                    
+                    if bind_var.name in new_body_vars:
+                        bind_var = TRSVar(var_rename(new_body_vars))
+                        body = body.substitute(Subst({item.bind_var.name: bind_var}))
+
+                    return Sum(bind_var, ScalarMlt(body, rest_body))
     SUM_DIST_1 = TRSRule(
         "SUM_DIST_1",
-        lhs = "SUM(x, x1) {DOT/MLTK/MLTB/MLTO} x2",
-        rhs = "SUM(x, x1 {DOT/MLTK/MLTB/MLTO} x2)",
+        lhs = "SUM(i, S1) MLTS S2",
+        rhs = "SUM(i, S1 MLTS S2)",
         rewrite_method = sum_dist_1_rewrite
     )
     rules.append(SUM_DIST_1)
 
+
     def sum_dist_2_rewrite(rule, term, side_info):
-        if (isinstance(term, ScalarDot) or isinstance(term, KetApply) or isinstance(term, BraApply) or isinstance(term, OpApply)) and isinstance(term.args[1], Sum):
-            bind_var, body = term.args[1].bind_var, term.args[1].body
-
-            # check whether the bind_var is already used
-            new_body_vars = body.variables() | term.args[0].variables()
-            if bind_var.name in new_body_vars:
-                bind_var = TRSVar(var_rename(new_body_vars))
-                body = body.substitute(Subst({term.args[1].bind_var.name: bind_var}))
-
-            return Sum(bind_var, type(term)(term.args[0], body))
-        
+        if isinstance(term, ScalarConj) and isinstance(term.args[0], Sum):
+            return Sum(term.args[0].bind_var, ScalarConj(term.args[0].body))
     SUM_DIST_2 = TRSRule(
         "SUM_DIST_2",
-        lhs = "x1 {DOT/MLTK/MLTB/MLTO} SUM(x, x2)",
-        rhs = "SUM(x, x1 {DOT/MLTK/MLTB/MLTO} x2)",
+        lhs = "CONJS(SUM(i, A))",
+        rhs = "SUM(i, CONJS(A))",
         rewrite_method = sum_dist_2_rewrite
     )
     rules.append(SUM_DIST_2)
 
 
+
     def sum_dist_3_rewrite(rule, term, side_info):
-        if (isinstance(term, KetTensor) or isinstance(term, BraTensor) or isinstance(term, OpTensor)) and isinstance(term.args[0], Sum):
-
-            bind_var, body = term.args[0].bind_var, term.args[0].body
-
-            # check whether the bind_var is already used
-            new_body_vars = body.variables() | term.args[1].variables()
-            if bind_var.name in new_body_vars:
-                bind_var = TRSVar(var_rename(new_body_vars))
-                body = body.substitute(Subst({term.args[0].bind_var.name: bind_var}))
-
-            return Sum(bind_var, type(term)(body, term.args[1]))
-        
+        if isinstance(term, (KetAdj, BraAdj, OpAdj)) and isinstance(term.args[0], Sum):
+            return Sum(term.args[0].bind_var, type(term)(term.args[0].body))
     SUM_DIST_3 = TRSRule(
         "SUM_DIST_3",
-        lhs = "SUM(x, x1) {TSRK/TSRB/TSRO} x2",
-        rhs = "SUM(x, x1 {TSRK/TSRB/TSRO} x2)",
+        lhs = "{ADJK/ADJB/ADJO}(SUM(i, A))",
+        rhs = "SUM(i, {ADJK/ADJB/ADJO}(A))",
         rewrite_method = sum_dist_3_rewrite
     )
     rules.append(SUM_DIST_3)
 
 
     def sum_dist_4_rewrite(rule, term, side_info):
-        if (isinstance(term, KetTensor) or isinstance(term, BraTensor) or isinstance(term, OpTensor)) and isinstance(term.args[1], Sum):
+        if isinstance(term, (KetTrans, BraTrans, OpTrans)) and isinstance(term.args[0], Sum):
+            return Sum(term.args[0].bind_var, type(term)(term.args[0].body))
+    SUM_DIST_4 = TRSRule(
+        "SUM_DIST_4",
+        lhs = "{TRANK/TRANB/TRANO}(SUM(i, A))",
+        rhs = "SUM(i, {TRANK/TRANB/TRANO}(A))",
+        rewrite_method = sum_dist_4_rewrite
+    )
+    rules.append(SUM_DIST_4)
+
+
+    def sum_dist_5_rewrite(rule, term, side_info):
+        if isinstance(term, (KetScal, BraScal, OpScal)) and isinstance(term.args[1], Sum):
+            return Sum(term.args[1].bind_var, type(term)(term.args[0], term.args[1].body))
+    SUM_DIST_5 = TRSRule(
+        "SUM_DIST_5",
+        lhs = "S0 {SCRK/SCRB/SCRO} SUM(i, X)",
+        rhs = "SUM(i, S0 {SCRK/SCRB/SCRO} X)",
+        rewrite_method = sum_dist_5_rewrite
+    )
+    rules.append(SUM_DIST_5)
+
+    def sum_dist_6_rewrite(rule, term, side_info):
+        if isinstance(term, (KetScal, BraScal, OpScal)) and isinstance(term.args[0], Sum):
+            return Sum(term.args[0].bind_var, type(term)(term.args[0].body, term.args[1]))
+    SUM_DIST_6 = TRSRule(
+        "SUM_DIRAC_6",
+        lhs = "SUM(i, S0) {SCRK/SCRB/SCRO} X",
+        rhs = "SUM(i, S0 {SCRK/SCRB/SCRO} X)",
+        rewrite_method = sum_dist_6_rewrite
+    )
+    rules.append(SUM_DIST_6)
+    
+    #####################################################
+    # sum-distribution
+
+    def sum_dist_7_rewrite(rule, term, side_info):
+        if isinstance(term, (ScalarDot, KetApply, BraApply, OpApply)) and isinstance(term.args[0], Sum):
+
+            bind_var, body = term.args[0].bind_var, term.args[0].body
+
+            # check whether the bind_var is already used
+            new_body_vars = body.variables() | term.args[1].variables()
+            if bind_var.name in new_body_vars:
+                bind_var = TRSVar(var_rename(new_body_vars))
+                body = body.substitute(Subst({term.args[0].bind_var.name: bind_var}))
+
+            return Sum(bind_var, type(term)(body, term.args[1]))
+        
+    SUM_DIST_7 = TRSRule(
+        "SUM_DIST_7",
+        lhs = "SUM(x, x1) {DOT/MLTK/MLTB/MLTO} x2",
+        rhs = "SUM(x, x1 {DOT/MLTK/MLTB/MLTO} x2)",
+        rewrite_method = sum_dist_7_rewrite
+    )
+    rules.append(SUM_DIST_7)
+
+    def sum_dist_8_rewrite(rule, term, side_info):
+        if isinstance(term, (ScalarDot, KetApply, BraApply, OpApply)) and isinstance(term.args[1], Sum):
             bind_var, body = term.args[1].bind_var, term.args[1].body
 
             # check whether the bind_var is already used
@@ -313,13 +488,85 @@ def construct_trs(
 
             return Sum(bind_var, type(term)(term.args[0], body))
         
-    SUM_DIST_4 = TRSRule(
-        "SUM_DIST_4",
-        lhs = "x1 {TSRK/TSRB/TSRO} SUM(x, x2)",
-        rhs = "SUM(x, x1 {TSRK/TSRB/TSRO} x2)",
-        rewrite_method = sum_dist_4_rewrite
+    SUM_DIST_8 = TRSRule(
+        "SUM_DIST_8",
+        lhs = "x1 {DOT/MLTK/MLTB/MLTO} SUM(x, x2)",
+        rhs = "SUM(x, x1 {DOT/MLTK/MLTB/MLTO} x2)",
+        rewrite_method = sum_dist_8_rewrite
     )
-    rules.append(SUM_DIST_4)
+    rules.append(SUM_DIST_8)
+
+
+    def sum_dist_9_rewrite(rule, term, side_info):
+        if isinstance(term, (KetTensor, BraTensor, OpOuter, OpTensor)) and isinstance(term.args[0], Sum):
+
+            bind_var, body = term.args[0].bind_var, term.args[0].body
+
+            # check whether the bind_var is already used
+            new_body_vars = body.variables() | term.args[1].variables()
+            if bind_var.name in new_body_vars:
+                bind_var = TRSVar(var_rename(new_body_vars))
+                body = body.substitute(Subst({term.args[0].bind_var.name: bind_var}))
+
+            return Sum(bind_var, type(term)(body, term.args[1]))
+        
+    SUM_DIST_9 = TRSRule(
+        "SUM_DIST_9",
+        lhs = "SUM(x, x1) {TSRK/TSRB/OUTER/TSRO} x2",
+        rhs = "SUM(x, x1 {TSRK/TSRB/OUTER/TSRO} x2)",
+        rewrite_method = sum_dist_9_rewrite
+    )
+    rules.append(SUM_DIST_9)
+
+
+    def sum_dist_10_rewrite(rule, term, side_info):
+        if isinstance(term, (KetTensor, BraTensor, OpOuter, OpTensor)) and isinstance(term.args[1], Sum):
+            bind_var, body = term.args[1].bind_var, term.args[1].body
+
+            # check whether the bind_var is already used
+            new_body_vars = body.variables() | term.args[0].variables()
+            if bind_var.name in new_body_vars:
+                bind_var = TRSVar(var_rename(new_body_vars))
+                body = body.substitute(Subst({term.args[1].bind_var.name: bind_var}))
+
+            return Sum(bind_var, type(term)(term.args[0], body))
+        
+    SUM_DIST_10 = TRSRule(
+        "SUM_DIST_10",
+        lhs = "x1 {TSRK/TSRB/OUTER/TSRO} SUM(x, x2)",
+        rhs = "SUM(x, x1 {TSRK/TSRB/OUTER/TSRO} x2)",
+        rewrite_method = sum_dist_10_rewrite
+    )
+    rules.append(SUM_DIST_10)
+
+    def sum_add_1_rewrite(rule, term, side_info):
+        if isinstance(term, (ScalarAdd, KetAdd, BraAdd, OpAdd)):
+            for i, itemA in enumerate(term.args):
+                if isinstance(itemA, Sum):
+                    for j in range(i+1, len(term.args)):
+                        itemB = term.args[j]
+                        if isinstance(itemB, Sum):
+                            new_bind_var = TRSVar(var_rename(itemA.variables() | itemB.variables()))
+                            subA = Subst({
+                                itemA.bind_var.name: new_bind_var,
+                            })
+                            subB = Subst({
+                                itemB.bind_var.name: new_bind_var,
+                            })
+                            return type(term)(
+                                Sum(new_bind_var, type(term)(
+                                    itemA.body.substitute(subA), 
+                                    itemB.body.substitute(subB))),
+                                *term.remained_terms(i, j))
+
+    SUM_ADD_1 = TRSRule(
+        "SUM_ADD_1",
+        lhs = "SUM(i, A) {ADDS/ADDK/ADDB/ADDO} SUM(j, B)",
+        rhs = "SUM(k, A[i:=k] {ADDS/ADDK/ADDB/ADDO} B[j:=k])",
+        rewrite_method = sum_add_1_rewrite
+    )
+    rules.append(SUM_ADD_1)
+
 
     #####################################################
     # beta-reduction
@@ -393,4 +640,5 @@ def construct_trs(
              
         
     # build the trs
+    rules = rules + dirac_trs.rules
     return TRS(rules), juxtapose_rewrite, sumeq_rewrite
