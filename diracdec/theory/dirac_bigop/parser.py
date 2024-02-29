@@ -266,7 +266,7 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
         '''
         diracscalar : SUM '(' trs-var ',' trs-term ')'
         '''
-        p[0] = Sum(p[3], p[5])
+        p[0] = Sum((p[3],), p[5])
 
     ##############################
     # abstraction and application

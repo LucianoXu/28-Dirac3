@@ -113,7 +113,7 @@ def test_ASigma_bigop():
         norm_a = trs.normalize(a)
         norm_b = trs.normalize(b)
 
-        assert trs.normalize(juxt(sumeq(norm_a))) == trs.normalize(juxt(sumeq(norm_b)))
+        assert trs.normalize(juxt(norm_a)) == trs.normalize(juxt(norm_b))
 
 def test_choi():
     with wolfram_backend.wolfram_session():

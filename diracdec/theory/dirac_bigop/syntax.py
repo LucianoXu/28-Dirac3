@@ -3,7 +3,7 @@ from ..trs import TRS_AC_safe, TRSCommBinary_safe
 
 from ..dirac.syntax import *
 
-from ..trs import BindVarTerm
+from ..trs import BindVarTerm, MultiBindTerm
 
 
 #####################################
@@ -71,12 +71,13 @@ class Apply(StdTerm):
     def tex(self) -> str:
         return rf" \left ({self.args[0].tex()} {self.args[1].tex()} \right)"
 
-class Sum(DiracOp, BindVarTerm):
+class Sum(DiracOp, MultiBindTerm):
     fsymbol_print = "sum"
     fsymbol = "SUM"
 
     def tex(self) -> str:
-        return rf" \left ( \sum_{{{self.bind_var.name}}} {self.body.tex()} \right )"
+        vars = ", ".join([v.name for v in self.bind_vars])
+        return rf" \left ( \sum_{{{vars}}} {self.body.tex()} \right )"
     
 
 #####################################
@@ -103,29 +104,5 @@ class Juxtapose(DiracScalar, TRSCommBinary_safe):
         use the first one to represent
         '''
         return self.args[0].tex()
-    
-class SumEq(TRS_AC_safe):
-    '''
-    Note: this rule is only for internal representation, and should not be used in the user interface or parsing
-    '''
-    fsymbol_print = "SUMEQ"
-    fsymbol = "SUMEQ"
-
-    def __init__(self, *tup : TRSTerm):
-        TRS_AC_safe.__init__(self, *tup)
-
-    def __str__(self) -> str:
-        '''
-        use the first one to represent
-        '''
-        return str(self.args[0])
-    
-    def tex(self) -> str:
-        '''
-        use the first one to represent
-        '''
-        return self.args[0].tex()
-
-
 
 

@@ -25,3 +25,14 @@ def test_bind_substitute():
     b = BindVarTerm(TRSVar("c"), TRSVar("z"))
     assert sub(a) == b
 
+def test_multi_bind_eq():
+    a = MultiBindTerm((TRSVar('a'), TRSVar('b')), TRSVar('X'))
+    b = MultiBindTerm((TRSVar('b'), TRSVar('a')), TRSVar('X'))
+    assert a == b
+    assert hash(a) == hash(b)
+
+
+    a = MultiBindTerm((TRSVar('a'), TRSVar('b')), TRSVar('a'))
+    b = MultiBindTerm((TRSVar('b'), TRSVar('a')), TRSVar('a'))
+    assert a == b
+    assert hash(a) == hash(b)

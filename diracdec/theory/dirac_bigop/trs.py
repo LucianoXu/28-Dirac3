@@ -265,19 +265,18 @@ def construct_trs(
 
     def sum_elim_3_rewrite(rule, term, side_info):
         if isinstance(term, Sum) and isinstance(term.body, ScalarDelta):
-            if term.bind_var == term.body.args[0]:
-                s = term.body.args[1]
-            elif term.bind_var == term.body.args[1]:
-                s = term.body.args[0]
-            else:
-                return None
+            for i, v in enumerate(term.bind_vars):
+                if v == term.body.args[0]:
+                    s = term.body.args[1]
+                elif v == term.body.args[1]:
+                    s = term.body.args[0]
+                else:
+                    continue
             
-            if term.bind_var.name not in s.free_variables():
-                return CScalar.one()
-            
-            else:
-                return None
-            
+                if v.name not in s.free_variables():
+                    new_bind_vars = term.bind_vars[:i]+term.bind_vars[i+1:]
+                    return Sum(new_bind_vars, CScalar.one())
+                        
     SUM_ELIM_3 = TRSRule(
         "SUM_ELIM_3",
         lhs = "SUM(i, DELTA(i, s))",
@@ -290,20 +289,20 @@ def construct_trs(
         if isinstance(term, Sum) and isinstance(term.body, ScalarMlt):
             for i, item in enumerate(term.body.args):
                 if isinstance(item, ScalarDelta):
-                    if term.bind_var == item.args[0]:
-                        s = item.args[1]
-                    elif term.bind_var == item.args[1]:
-                        s = item.args[0]
-                    else:
-                        return None
-                    
-                    if term.bind_var.name not in s.free_variables():
-                        sub = Subst({term.bind_var.name : s})
-                        return ScalarMlt(*term.body.remained_terms(i)).substitute(sub)
-                    
-                    else:
-                        return None
-            
+                    for j, v in enumerate(term.bind_vars):
+                        if v == item.args[0]:
+                            s = item.args[1]
+                        elif v == item.args[1]:
+                            s = item.args[0]
+                        else:
+                            continue
+                        
+                        if v.name not in s.free_variables():
+                            new_bind_vars = term.bind_vars[:j]+term.bind_vars[j+1:]
+
+                            sub = Subst({v.name : s})
+                            return Sum(new_bind_vars, ScalarMlt(*term.body.remained_terms(i)).substitute(sub))
+                                    
     SUM_ELIM_4 = TRSRule(
         "SUM_ELIM_4",
         lhs = "SUM(i, DELTA(i, s) MLTS S0)",
@@ -316,19 +315,21 @@ def construct_trs(
     def sum_elim_5_rewrite(rule, term, side_info):
         if isinstance(term, Sum) and isinstance(term.body, (KetScal, BraScal, OpScal)) and isinstance(term.body.args[0], ScalarDelta):
             delta = term.body.args[0]
-            if term.bind_var == delta.args[0]:
-                s = delta.args[1]
-            elif term.bind_var == delta.args[1]:
-                s = delta.args[0]
-            else:
-                return None
+            for i, v in enumerate(term.bind_vars):
+
+                if v == delta.args[0]:
+                    s = delta.args[1]
+                elif v == delta.args[1]:
+                    s = delta.args[0]
+                else:
+                    continue
+                
+                if v.name not in s.free_variables():
+                    new_bind_vars = term.bind_vars[:i]+term.bind_vars[i+1:]
+
+                    sub = Subst({v.name : s})
+                    return Sum(new_bind_vars, term.body.args[1].substitute(sub))
             
-            if term.bind_var.name not in s.free_variables():
-                sub = Subst({term.bind_var.name : s})
-                return term.body.args[1].substitute(sub)
-            
-            else:
-                return None
             
     SUM_ELIM_5 = TRSRule(
         "SUM_ELIM_5",
@@ -343,20 +344,21 @@ def construct_trs(
         if isinstance(term, Sum) and isinstance(term.body, (KetScal, BraScal, OpScal)) and isinstance(term.body.args[0], ScalarMlt):
             for i, delta in enumerate(term.body.args[0].args):
                 if isinstance(delta, ScalarDelta):
-                    if term.bind_var == delta.args[0]:
-                        s = delta.args[1]
-                    elif term.bind_var == delta.args[1]:
-                        s = delta.args[0]
-                    else:
-                        return None
-                    
-                    if term.bind_var.name not in s.free_variables():
-                        sub = Subst({term.bind_var.name : s})
+                    for j, v in enumerate(term.bind_vars):
+                        if v == delta.args[0]:
+                            s = delta.args[1]
+                        elif v == delta.args[1]:
+                            s = delta.args[0]
+                        else:
+                            continue
+                        
+                        if v.name not in s.free_variables():
+                            new_bind_vars = term.bind_vars[:j]+term.bind_vars[j+1:]
 
-                        return type(term.body)(ScalarMlt(*term.body.args[0].remained_terms(i)).substitute(sub), term.body.args[1].substitute(sub))
-                    
-                    else:
-                        return None
+                            sub = Subst({v.name : s})
+
+                            return Sum(new_bind_vars, type(term.body)(ScalarMlt(*term.body.args[0].remained_terms(i)).substitute(sub), term.body.args[1].substitute(sub)))
+                        
             
     SUM_ELIM_6 = TRSRule(
         "SUM_ELIM_6",
@@ -372,18 +374,19 @@ def construct_trs(
             for i, item in enumerate(term.args):
                 if isinstance(item, Sum):
 
-                    bind_var, body = item.bind_var, item.body
+                    bind_vars, body = item.bind_vars, item.body
 
                     rest_body = ScalarMlt(*term.remained_terms(i))
 
                     # check whether the bind_var is already used
                     new_body_vars = body.variables() | rest_body.variables()
                     
-                    if bind_var.name in new_body_vars:
-                        bind_var = TRSVar(var_rename(new_body_vars))
-                        body = body.substitute(Subst({item.bind_var.name: bind_var}))
+                    if any(v.name in new_body_vars for v in bind_vars):
+                        bind_vars = tuple(TRSVar(v) for v in var_rename_ls(new_body_vars, len(bind_vars)))
 
-                    return Sum(bind_var, ScalarMlt(body, rest_body))
+                        body = item.rename_bind(bind_vars).body
+
+                    return Sum(bind_vars, ScalarMlt(body, rest_body))
     SUM_DIST_1 = TRSRule(
         "SUM_DIST_1",
         lhs = "SUM(i, S1) MLTS S2",
@@ -395,7 +398,7 @@ def construct_trs(
 
     def sum_dist_2_rewrite(rule, term, side_info):
         if isinstance(term, ScalarConj) and isinstance(term.args[0], Sum):
-            return Sum(term.args[0].bind_var, ScalarConj(term.args[0].body))
+            return Sum(term.args[0].bind_vars, ScalarConj(term.args[0].body))
     SUM_DIST_2 = TRSRule(
         "SUM_DIST_2",
         lhs = "CONJS(SUM(i, A))",
@@ -408,7 +411,7 @@ def construct_trs(
 
     def sum_dist_3_rewrite(rule, term, side_info):
         if isinstance(term, (KetAdj, BraAdj, OpAdj)) and isinstance(term.args[0], Sum):
-            return Sum(term.args[0].bind_var, type(term)(term.args[0].body))
+            return Sum(term.args[0].bind_vars, type(term)(term.args[0].body))
     SUM_DIST_3 = TRSRule(
         "SUM_DIST_3",
         lhs = "{ADJK/ADJB/ADJO}(SUM(i, A))",
@@ -420,7 +423,7 @@ def construct_trs(
 
     def sum_dist_4_rewrite(rule, term, side_info):
         if isinstance(term, (KetTrans, BraTrans, OpTrans)) and isinstance(term.args[0], Sum):
-            return Sum(term.args[0].bind_var, type(term)(term.args[0].body))
+            return Sum(term.args[0].bind_vars, type(term)(term.args[0].body))
     SUM_DIST_4 = TRSRule(
         "SUM_DIST_4",
         lhs = "{TRANK/TRANB/TRANO}(SUM(i, A))",
@@ -432,7 +435,17 @@ def construct_trs(
 
     def sum_dist_5_rewrite(rule, term, side_info):
         if isinstance(term, (KetScal, BraScal, OpScal)) and isinstance(term.args[1], Sum):
-            return Sum(term.args[1].bind_var, type(term)(term.args[0], term.args[1].body))
+
+            bind_vars, body = term.args[1].bind_vars, term.args[1].body
+
+            # check whether the bind_var is already used
+            new_body_vars = body.variables() | term.args[0].variables()
+            if any(v.name in new_body_vars for v in bind_vars):
+                bind_vars = tuple(TRSVar(v) for v in var_rename_ls(new_body_vars, len(bind_vars)))
+                body = term.args[1].rename_bind(bind_vars).body
+
+            return Sum(bind_vars, type(term)(term.args[0], body))
+        
     SUM_DIST_5 = TRSRule(
         "SUM_DIST_5",
         lhs = "S0 {SCRK/SCRB/SCRO} SUM(i, X)",
@@ -443,7 +456,15 @@ def construct_trs(
 
     def sum_dist_6_rewrite(rule, term, side_info):
         if isinstance(term, (KetScal, BraScal, OpScal)) and isinstance(term.args[0], Sum):
-            return Sum(term.args[0].bind_var, type(term)(term.args[0].body, term.args[1]))
+            bind_vars, body = term.args[0].bind_vars, term.args[0].body
+
+            # check whether the bind_var is already used
+            new_body_vars = body.variables() | term.args[1].variables()
+            if any(v.name in new_body_vars for v in bind_vars):
+                bind_vars = tuple(TRSVar(v) for v in var_rename_ls(new_body_vars, len(bind_vars)))
+                body = term.args[0].rename_bind(bind_vars).body
+
+            return Sum(bind_vars, type(term)(body, term.args[1]))
     SUM_DIST_6 = TRSRule(
         "SUM_DIRAC_6",
         lhs = "SUM(i, S0) {SCRK/SCRB/SCRO} X",
@@ -458,15 +479,15 @@ def construct_trs(
     def sum_dist_7_rewrite(rule, term, side_info):
         if isinstance(term, (ScalarDot, KetApply, BraApply, OpApply)) and isinstance(term.args[0], Sum):
 
-            bind_var, body = term.args[0].bind_var, term.args[0].body
+            bind_vars, body = term.args[0].bind_vars, term.args[0].body
 
             # check whether the bind_var is already used
             new_body_vars = body.variables() | term.args[1].variables()
-            if bind_var.name in new_body_vars:
-                bind_var = TRSVar(var_rename(new_body_vars))
-                body = body.substitute(Subst({term.args[0].bind_var.name: bind_var}))
+            if any(v.name in new_body_vars for v in bind_vars):
+                bind_vars = tuple(TRSVar(v) for v in var_rename_ls(new_body_vars, len(bind_vars)))
+                body = term.args[0].rename_bind(bind_vars).body
 
-            return Sum(bind_var, type(term)(body, term.args[1]))
+            return Sum(bind_vars, type(term)(body, term.args[1]))
         
     SUM_DIST_7 = TRSRule(
         "SUM_DIST_7",
@@ -478,15 +499,16 @@ def construct_trs(
 
     def sum_dist_8_rewrite(rule, term, side_info):
         if isinstance(term, (ScalarDot, KetApply, BraApply, OpApply)) and isinstance(term.args[1], Sum):
-            bind_var, body = term.args[1].bind_var, term.args[1].body
+
+            bind_vars, body = term.args[1].bind_vars, term.args[1].body
 
             # check whether the bind_var is already used
             new_body_vars = body.variables() | term.args[0].variables()
-            if bind_var.name in new_body_vars:
-                bind_var = TRSVar(var_rename(new_body_vars))
-                body = body.substitute(Subst({term.args[1].bind_var.name: bind_var}))
+            if any(v.name in new_body_vars for v in bind_vars):
+                bind_vars = tuple(TRSVar(v) for v in var_rename_ls(new_body_vars, len(bind_vars)))
+                body = term.args[1].rename_bind(bind_vars).body
 
-            return Sum(bind_var, type(term)(term.args[0], body))
+            return Sum(bind_vars, type(term)(term.args[0], body))
         
     SUM_DIST_8 = TRSRule(
         "SUM_DIST_8",
@@ -500,15 +522,15 @@ def construct_trs(
     def sum_dist_9_rewrite(rule, term, side_info):
         if isinstance(term, (KetTensor, BraTensor, OpOuter, OpTensor)) and isinstance(term.args[0], Sum):
 
-            bind_var, body = term.args[0].bind_var, term.args[0].body
+            bind_vars, body = term.args[0].bind_vars, term.args[0].body
 
             # check whether the bind_var is already used
             new_body_vars = body.variables() | term.args[1].variables()
-            if bind_var.name in new_body_vars:
-                bind_var = TRSVar(var_rename(new_body_vars))
-                body = body.substitute(Subst({term.args[0].bind_var.name: bind_var}))
+            if any(v.name in new_body_vars for v in bind_vars):
+                bind_vars = tuple(TRSVar(v) for v in var_rename_ls(new_body_vars, len(bind_vars)))
+                body = term.args[0].rename_bind(bind_vars).body
 
-            return Sum(bind_var, type(term)(body, term.args[1]))
+            return Sum(bind_vars, type(term)(body, term.args[1]))
         
     SUM_DIST_9 = TRSRule(
         "SUM_DIST_9",
@@ -521,15 +543,16 @@ def construct_trs(
 
     def sum_dist_10_rewrite(rule, term, side_info):
         if isinstance(term, (KetTensor, BraTensor, OpOuter, OpTensor)) and isinstance(term.args[1], Sum):
-            bind_var, body = term.args[1].bind_var, term.args[1].body
+
+            bind_vars, body = term.args[1].bind_vars, term.args[1].body
 
             # check whether the bind_var is already used
             new_body_vars = body.variables() | term.args[0].variables()
-            if bind_var.name in new_body_vars:
-                bind_var = TRSVar(var_rename(new_body_vars))
-                body = body.substitute(Subst({term.args[1].bind_var.name: bind_var}))
+            if any(v.name in new_body_vars for v in bind_vars):
+                bind_vars = tuple(TRSVar(v) for v in var_rename_ls(new_body_vars, len(bind_vars)))
+                body = term.args[1].rename_bind(bind_vars).body
 
-            return Sum(bind_var, type(term)(term.args[0], body))
+            return Sum(bind_vars, type(term)(term.args[0], body))
         
     SUM_DIST_10 = TRSRule(
         "SUM_DIST_10",
@@ -545,18 +568,12 @@ def construct_trs(
                 if isinstance(itemA, Sum):
                     for j in range(i+1, len(term.args)):
                         itemB = term.args[j]
-                        if isinstance(itemB, Sum):
-                            new_bind_var = TRSVar(var_rename(itemA.variables() | itemB.variables()))
-                            subA = Subst({
-                                itemA.bind_var.name: new_bind_var,
-                            })
-                            subB = Subst({
-                                itemB.bind_var.name: new_bind_var,
-                            })
+                        if isinstance(itemB, Sum) and len(itemB.bind_vars) == len(itemA.bind_vars):
+                            new_bind_vars = tuple(TRSVar(v) for v in var_rename_ls(itemA.variables() | itemB.variables(), len(itemA.bind_vars)))
                             return type(term)(
-                                Sum(new_bind_var, type(term)(
-                                    itemA.body.substitute(subA), 
-                                    itemB.body.substitute(subB))),
+                                Sum(new_bind_vars, type(term)(
+                                    itemA.rename_bind(new_bind_vars).body, 
+                                    itemB.rename_bind(new_bind_vars).body)),
                                 *term.remained_terms(i, j))
 
     SUM_ADD_1 = TRSRule(

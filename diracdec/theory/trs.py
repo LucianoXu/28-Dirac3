@@ -12,6 +12,7 @@ from IPython.core.display import Image
 from ..backends import render_tex, render_tex_to_svg
 
 import hashlib
+import itertools
 
 def var_rename(vars: set[str], prefix: str = "x") -> str:
     '''
@@ -21,6 +22,15 @@ def var_rename(vars: set[str], prefix: str = "x") -> str:
     while prefix + str(i) in vars:
         i += 1
     return prefix + str(i)
+
+def var_rename_ls(vars: set[str], count:int, prefix: str = "x") -> tuple[str, ...]:
+    i = 0
+    res = []
+    while len(res) < count:
+        if prefix + str(i) not in vars:
+            res.append(prefix + str(i))
+        i += 1
+    return tuple(res)
 
 class TRSTerm(ABC):
     '''
@@ -274,6 +284,147 @@ class BindVarTerm(TRSTerm):
             new_v = TRSVar(var_rename(vset))
             new_sigma = sigma.composite(Subst({self.bind_var.name : new_v}))
             return type(self)(new_v, self.body.substitute(new_sigma))
+        
+
+class MultiBindTerm(TRSTerm):
+    fsymbol_print = 'multi-bind'
+    fsymbol = 'MULBIND'
+
+    '''
+    The TRSTerm with multiple bind variable 
+    (different bind variable order are equivalent)
+    '''
+    def __new__(cls, bind_vars: Tuple[TRSVar, ...], body: TRSTerm):
+        if len(bind_vars) == 0:
+            return body
+        else:
+            obj = object.__new__(cls)
+            MultiBindTerm.__init__(obj, bind_vars, body)
+            return obj
+
+    def __init__(self, bind_vars: Tuple[TRSVar, ...], body: TRSTerm):
+        # try to flatten
+        if isinstance(body, type(self)):
+            bind_vars = bind_vars + body.bind_vars
+            body = body.body
+
+        # the bind variables are sorted
+        self.bind_vars = tuple(sorted(bind_vars))
+        self.body = body
+
+    def __str__(self) -> str:
+        return f"({self.fsymbol_print} {' '.join(map(str,self.bind_vars))}.{self.body})"
+    
+    def __repr__(self) -> str:
+        return f"{self.fsymbol}[{' '.join(map(repr, self.bind_vars))}]({repr(self.body)})"
+    
+    def tex(self) -> str:
+        var_tex = '\\ '.join(map(lambda x: x.tex(), self.bind_vars))
+        return rf" \left ({self.fsymbol_print}\ {var_tex}.{self.body.tex()} \right )"
+    
+    def __eq__(self, __value: TRSTerm) -> bool:
+        '''
+        alpha-conversion is considered in the syntactical equivalence of bind variable expressions
+        '''
+        if self is __value:
+            return True
+        
+        if isinstance(__value, MultiBindTerm):
+            if len(self.bind_vars) != len(__value.bind_vars):
+                return False
+            
+            # first find common bind variable renaming list
+            new_vars : list[str] = []
+            for i in range(len(self.bind_vars)):
+                new_v = var_rename(self.variables() | __value.variables() | set(new_vars))
+                new_vars.append(new_v)
+
+            self_renamed = self.rename_bind(tuple(TRSVar(v) for v in new_vars))
+
+            # try different bind variable sequences
+            for perm in itertools.permutations(new_vars):
+                other_renamed = __value.rename_bind(tuple(TRSVar(v) for v in perm))
+                if self_renamed.body == other_renamed.body:
+                    return True
+                
+            return False
+        
+        else:
+            return False
+    
+    def __hash__(self) -> int:
+        '''
+        To make the hash value of the term unique, we need to consider the alpha-conversion of the bind variable.
+        '''
+        h = int(hashlib.md5(self.fsymbol.encode()).hexdigest(), 16)
+
+        # first find common bind variable renaming list
+        new_vars : list[str] = []
+        for i in range(len(self.bind_vars)):
+            new_v = var_rename(self.free_variables() | set(new_vars))
+            new_vars.append(new_v)
+
+        # iterate through all possible bind variable sequences and sum up as the hash value
+            
+        for perm in itertools.permutations(new_vars):
+            self_renamed = self.rename_bind(tuple(TRSVar(v) for v in perm))
+            h_self = hashlib.md5(self_renamed.fsymbol.encode())
+            h_self.update(abs(
+                hash(self_renamed.body)).to_bytes(16, 'big')
+                )
+            h += int(h_self.hexdigest(), 16)
+
+        return h
+    
+    def size(self) -> int:
+        return self.body.size() + len(self.bind_vars) + 1
+    
+    def variables(self) -> set[str]:
+        return self.body.variables() | set(map(lambda x:x.name, self.bind_vars))
+    
+    def free_variables(self) -> set[str]:
+        res = self.body.variables()
+        return res - set(map(lambda x:x.name, self.bind_vars))
+    
+    @property
+    def is_ground(self) -> bool:
+        return len(self.free_variables()) == 0
+
+
+    def rename_bind(self, new_vars: Tuple[TRSVar, ...]) -> MultiBindTerm:
+        '''
+        rename the bind variables in order
+        '''
+        sub_dist = {}
+        for i, new_v in enumerate(new_vars):
+            sub_dist[self.bind_vars[i].name] = new_v
+
+        return type(self)(new_vars, self.body.substitute(Subst(sub_dist)))
+    
+    def substitute(self, sigma: Subst) -> MultiBindTerm:
+        '''
+        check whether the bind variable appears in sigma.
+        change the bind variable if so.
+        '''
+        vset = sigma.domain | sigma.vrange
+        bind_vars_set = set(map(lambda x:x.name, self.bind_vars))
+        if len(bind_vars_set & vset) == 0:
+            return type(self)(self.bind_vars, self.body.substitute(sigma))
+        else:
+            new_vars = []
+            for i in range(len(self.bind_vars)):
+                new_v = var_rename(vset | set(new_vars))
+                new_vars.append(new_v)
+
+            new_vars = tuple(TRSVar(v) for v in new_vars)
+
+            sub_dist = {}
+            for i, new_v in enumerate(new_vars):
+                sub_dist[self.bind_vars[i].name] = new_v
+
+            new_sigma = sigma.composite(Subst(sub_dist))
+            return type(self)(new_vars, self.body.substitute(new_sigma))
+            
             
 
 ################################################################################
@@ -861,7 +1012,12 @@ class TRS:
                 # risk exists: term.bind_var may collide with new_body
                 # but normal rewriting rules should not cause this problem because there are no free variables on the RHS
                 return type(term)(term.bind_var, new_body)
-
+            
+        elif isinstance(term, MultiBindTerm):
+            new_body = self.rewrite_outer_most(term.body, side_info, verbose)
+            if new_body is not None:
+                return type(term)(term.bind_vars, new_body)
+            
         return None
     
 
@@ -886,6 +1042,12 @@ class TRS:
                 # risk exists: term.bind_var may collide with new_body
                 # but normal rewriting rules should not cause this problem because there are no free variables on the RHS
                 return type(term)(term.bind_var, new_body)
+            
+        elif isinstance(term, MultiBindTerm):
+            new_body = self.rewrite_outer_most(term.body, side_info, verbose)
+            if new_body is not None:
+                return type(term)(term.bind_vars, new_body)
+
 
 
         # try to rewrite the term using the rules

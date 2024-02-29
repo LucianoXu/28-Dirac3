@@ -41,4 +41,5 @@ This is implemented in the backend "wolfram_unique". But it can be inefficient.
 - reconsider how to deal with equivalence
 - consider parsing latex input
 
-Maybe we can directly use SUMEQ in rule matching?
+## PROBLEM
+- When comparing equivalence, MulBindTerm will construct different possible forms, which will interfere with juxt transformation for DOT-DUAL-EQ.
