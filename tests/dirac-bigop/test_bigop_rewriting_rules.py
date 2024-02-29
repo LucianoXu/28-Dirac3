@@ -489,3 +489,12 @@ def test_sumeq_rewrite():
         b_ = sumeq(trs.normalize(b))
 
         assert a_ == b_
+
+#############################################################
+# other tests
+        
+def test_sum_elim_delta_with_sum_swap():
+    with wolfram_backend.wolfram_session():
+        a = parse(''' SUM(a, SUM(b, DELTA(a, x) SCRK KET(PAIR(a, b)))) ''')
+        b = parse(''' SUM(b, SUM(a, KET(PAIR(x, b)))) ''')
+        assert trs.normalize(a) == trs.normalize(b)

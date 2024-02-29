@@ -85,7 +85,7 @@ class ScalarMlt(DiracScalar, TRS_AC):
         TRS_AC.__init__(self, *tup)
 
     def tex(self) -> str:
-        return "( " + " \times ".join([s.tex() for s in self.args]) + " )"
+        return "( " + " \\times ".join([s.tex() for s in self.args]) + " )"
 
 class ScalarConj(DiracScalar, StdTerm):
     fsymbol_print = "CONJS"

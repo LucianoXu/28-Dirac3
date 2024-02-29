@@ -114,3 +114,37 @@ def test_ASigma_bigop():
         norm_b = trs.normalize(b)
 
         assert trs.normalize(juxt(sumeq(norm_a))) == trs.normalize(juxt(sumeq(norm_b)))
+
+def test_choi():
+    with wolfram_backend.wolfram_session():
+        sub = Subst({
+            "choi" : parse(r''' 
+            FUN A . SUM(i, 
+                        SUM(j, 
+                            (BRA(i) DOT (A MLTK KET(j)))
+                            SCRK KET(PAIR(i,j))
+                        )    
+                    ) ''')
+        }).get_idempotent()
+
+        a = sub(parse(r'''choi @ (KET('a') OUTER BRA('b'))'''))
+        b = parse(r''' KET(PAIR('a', 'b')) ''')
+
+        assert trs.normalize(a) == trs.normalize(b)
+
+def test_unchoi():
+    with wolfram_backend.wolfram_session():
+        sub = Subst({
+            "unchoi" : parse(r'''
+            FUN A . SUM(i,
+                        SUM(j,
+                            (BRA(PAIR(i, j)) DOT A)
+                            SCRO (KET(i) OUTER BRA(j))
+                            )
+                    )''')
+        }).get_idempotent()
+
+        a = sub(parse(r'''unchoi @ (KET(PAIR('a', 'b')))'''))
+        b = parse(r'''KET('a') OUTER BRA('b')''')
+
+        assert trs.normalize(a) == trs.normalize(b)

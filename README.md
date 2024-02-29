@@ -39,3 +39,6 @@ This is implemented in the backend "wolfram_unique". But it can be inefficient.
 - consider the case of teleportation after we have indices
 - refine the string output
 - reconsider how to deal with equivalence
+- consider parsing latex input
+
+Maybe we can directly use SUMEQ in rule matching?

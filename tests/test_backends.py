@@ -12,7 +12,7 @@ def test_atomic_base():
         assert hash(a) == hash(b)
 
 
-def test_complex_scalar():
+def test_cop_scalar():
     with wolfram_backend.wolfram_session():
         a = parse(''' "1.1" ''')
         b = parse(''' "1.1" ''')

@@ -141,22 +141,22 @@ def construct_trs(
     #################################################
     # Scalar
 
-    def scr_complex_1_rewrite(rule, term, side_info):
+    def scr_cop_1_rewrite(rule, term, side_info):
         if isinstance(term, ScalarAdd):
             for i in range(len(term.args)):
                 if term.args[i] == C0:
                     return ScalarAdd(*term.remained_terms(i))
 
-    SCR_COMPLEX_1 = TRSRule(
-        "SCR_COMPLEX_1",
+    SCR_COP_1 = TRSRule(
+        "SCR_COP_1",
         lhs="C(0) ADDS a", 
         rhs="a",
-        rewrite_method=scr_complex_1_rewrite
+        rewrite_method=scr_cop_1_rewrite
     )
-    rules.append(SCR_COMPLEX_1)
+    rules.append(SCR_COP_1)
 
 
-    def scr_complex_2_rewrite(rule, term, side_info):
+    def scr_cop_2_rewrite(rule, term, side_info):
         if isinstance(term, ScalarAdd):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], ComplexScalar):
@@ -167,15 +167,15 @@ def construct_trs(
 
                             return ScalarAdd(*new_args)
 
-    SCR_COMPLEX_2 = TRSRule(
-        "SCR_COMPLEX_2",
+    SCR_COP_2 = TRSRule(
+        "SCR_COP_2",
         lhs="C(a) ADDS C(b)", 
         rhs="C(a + b)",
-        rewrite_method=scr_complex_2_rewrite
+        rewrite_method=scr_cop_2_rewrite
     )
-    rules.append(SCR_COMPLEX_2)
+    rules.append(SCR_COP_2)
 
-    def scr_complex_3_rewrite(rule, term, side_info):
+    def scr_cop_3_rewrite(rule, term, side_info):
         if isinstance(term, ScalarAdd):
             for i in range(len(term.args)):
                 for j in range(i+1, len(term.args)):
@@ -183,15 +183,15 @@ def construct_trs(
                         new_args = (ScalarMlt(C2, term.args[i]),) + term.remained_terms(i, j)
                         return ScalarAdd(*new_args)
                     
-    SCR_COMPLEX_3 = TRSRule(
-        "SCR_COMPLEX_3",
+    SCR_COP_3 = TRSRule(
+        "SCR_COP_3",
         lhs = "S0 ADDS S0",
         rhs = "C(1 + 1) MLTS S0",
-        rewrite_method=scr_complex_3_rewrite
+        rewrite_method=scr_cop_3_rewrite
     )
-    rules.append(SCR_COMPLEX_3)
+    rules.append(SCR_COP_3)
 
-    def scr_complex_4_rewrite(rule, term, side_info):
+    def scr_cop_4_rewrite(rule, term, side_info):
         if isinstance(term, ScalarAdd):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], ScalarMlt):
@@ -204,15 +204,15 @@ def construct_trs(
                                     new_args += term.remained_terms(i, k)
                                     return ScalarAdd(*new_args)
                                 
-    SCR_COMPLEX_4 = TRSRule(
-        "SCR_COMPLEX_4",
+    SCR_COP_4 = TRSRule(
+        "SCR_COP_4",
         lhs = "(C(a) MLTS S0) ADDS S0",
         rhs = "C(a + 1) MLTS S0",
-        rewrite_method=scr_complex_4_rewrite
+        rewrite_method=scr_cop_4_rewrite
     )
-    rules.append(SCR_COMPLEX_4)
+    rules.append(SCR_COP_4)
 
-    def scr_complex_5_rewrite(rule, term, side_info):
+    def scr_cop_5_rewrite(rule, term, side_info):
         if isinstance(term, ScalarAdd):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], ScalarMlt):
@@ -229,43 +229,43 @@ def construct_trs(
                                                 new_args += term.remained_terms(i, k)
                                                 return ScalarAdd(*new_args)
 
-    SCR_COMPLEX_5 = TRSRule(
-        "SCR_COMPLEX_5",
+    SCR_COP_5 = TRSRule(
+        "SCR_COP_5",
         lhs = "(C(a) MLTS S0) ADDS (C(b) MLTS S0)",
         rhs = "C(a + b) MLTS S0",
-        rewrite_method=scr_complex_5_rewrite
+        rewrite_method=scr_cop_5_rewrite
     )
-    rules.append(SCR_COMPLEX_5)
+    rules.append(SCR_COP_5)
 
-    def scr_complex_6_rewrite(rule, term, side_info):
+    def scr_cop_6_rewrite(rule, term, side_info):
         if isinstance(term, ScalarMlt):
             for i in range(len(term.args)):
                 if term.args[i] == C0:
                     return C0
 
-    SCR_COMPLEX_6 = TRSRule(
-        "SCR_COMPLEX_6",
+    SCR_COP_6 = TRSRule(
+        "SCR_COP_6",
         lhs="C(0) MLTS a", 
         rhs="C(0)",
-        rewrite_method=scr_complex_6_rewrite
+        rewrite_method=scr_cop_6_rewrite
     )
-    rules.append(SCR_COMPLEX_6)
+    rules.append(SCR_COP_6)
 
-    def scr_complex_7_rewrite(rule, term, side_info):
+    def scr_cop_7_rewrite(rule, term, side_info):
         if isinstance(term, ScalarMlt):
             for i in range(len(term.args)):
                 if term.args[i] == C1:
                     return ScalarMlt(*term.remained_terms(i))
-    SCR_COMPLEX_7 = TRSRule(
-        "SCR_COMPLEX_7",
+    SCR_COP_7 = TRSRule(
+        "SCR_COP_7",
         lhs="C(1) MLTS a", 
         rhs="a",
-        rewrite_method=scr_complex_7_rewrite
+        rewrite_method=scr_cop_7_rewrite
     )
-    rules.append(SCR_COMPLEX_7)
+    rules.append(SCR_COP_7)
 
 
-    def scr_complex_8_rewrite(rule, term, side_info):
+    def scr_cop_8_rewrite(rule, term, side_info):
         if isinstance(term, ScalarMlt):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], ComplexScalar):
@@ -276,98 +276,98 @@ def construct_trs(
 
                             return ScalarMlt(*new_args)
 
-    SCR_COMPLEX_8 = TRSRule(
-        "SCR_COMPLEX_8",
+    SCR_COP_8 = TRSRule(
+        "SCR_COP_8",
         lhs="C(a) MLTS C(b)",
         rhs="C(a * b)",
-        rewrite_method=scr_complex_8_rewrite
+        rewrite_method=scr_cop_8_rewrite
     )
-    rules.append(SCR_COMPLEX_8)
+    rules.append(SCR_COP_8)
 
-    def scr_complex_9_rewrite(rule, term, side_info):
+    def scr_cop_9_rewrite(rule, term, side_info):
         if isinstance(term, ScalarMlt):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], ScalarAdd):
                     S1 = ScalarMlt(*term.args[:i], *term.args[i+1:])
                     new_args = tuple(ScalarMlt(S1, term.args[i][j]) for j in range(len(term.args[i].args)))
                     return ScalarAdd(*new_args)
-    SCR_COMPLEX_9 = TRSRule(
-        "SCR_COMPLEX_9",
+    SCR_COP_9 = TRSRule(
+        "SCR_COP_9",
         lhs="a MLTS (b ADDS c)",
         rhs="(a MLTS b) ADDS (a MLTS c)",
-        rewrite_method=scr_complex_9_rewrite
+        rewrite_method=scr_cop_9_rewrite
     )
-    rules.append(SCR_COMPLEX_9)
+    rules.append(SCR_COP_9)
 
 
-    def scr_complex_10_rewrite(rule, term, side_info):
+    def scr_cop_10_rewrite(rule, term, side_info):
         if isinstance(term, ScalarConj):
             if isinstance(term.args[0], ComplexScalar):
                 return CScalar.conj(term.args[0])
-    SCR_COMPLEX_10 = TRSRule(
-        "SCR_COMPLEX_10",
+    SCR_COP_10 = TRSRule(
+        "SCR_COP_10",
         lhs="CONJS(C(a))",
         rhs="C(a ^*)",
-        rewrite_method=scr_complex_10_rewrite
+        rewrite_method=scr_cop_10_rewrite
     )
-    rules.append(SCR_COMPLEX_10)
+    rules.append(SCR_COP_10)
         
 
-    def scr_complex_11_rewrite(rule, term, side_info):
+    def scr_cop_11_rewrite(rule, term, side_info):
         if isinstance(term, ScalarConj):
             if isinstance(term.args[0], ScalarDelta):
                 return term.args[0]
             
-    SCR_COMPLEX_11 = TRSRule(
-        "SCR_COMPLEX_11",
+    SCR_COP_11 = TRSRule(
+        "SCR_COP_11",
         lhs="CONJS(DELTA(a, b))",
         rhs="DELTA(a, b)",
-        rewrite_method=scr_complex_11_rewrite
+        rewrite_method=scr_cop_11_rewrite
     )
-    rules.append(SCR_COMPLEX_11)
+    rules.append(SCR_COP_11)
 
 
-    def scr_complex_12_rewrite(rule, term, side_info):
+    def scr_cop_12_rewrite(rule, term, side_info):
         if isinstance(term, ScalarConj):
             if isinstance(term.args[0], ScalarAdd):
                 new_args = tuple(ScalarConj(arg) for arg in term.args[0].args)
                 return ScalarAdd(*new_args)
-    SCR_COMPLEX_12 = TRSRule(
-        "SCR_COMPLEX_12",
+    SCR_COP_12 = TRSRule(
+        "SCR_COP_12",
         lhs="CONJS(a ADDS b)",
         rhs="CONJS(a) ADDS CONJS(b)",
-        rewrite_method=scr_complex_12_rewrite
+        rewrite_method=scr_cop_12_rewrite
     )
-    rules.append(SCR_COMPLEX_12)
+    rules.append(SCR_COP_12)
 
 
-    def scr_complex_13_rewrite(rule, term, side_info):
+    def scr_cop_13_rewrite(rule, term, side_info):
         if isinstance(term, ScalarConj):
             if isinstance(term.args[0], ScalarMlt):
                 new_args = tuple(ScalarConj(arg) for arg in term.args[0].args)
                 return ScalarMlt(*new_args)
-    SCR_COMPLEX_13 = TRSRule(
-        "SCR_COMPLEX_13",
+    SCR_COP_13 = TRSRule(
+        "SCR_COP_13",
         lhs="CONJS(a MLTS b)",
         rhs="CONJS(a) MLTS CONJS(b)",
-        rewrite_method=scr_complex_13_rewrite
+        rewrite_method=scr_cop_13_rewrite
     )
-    rules.append(SCR_COMPLEX_13)
+    rules.append(SCR_COP_13)
 
 
-    SCR_COMPLEX_14 = TRSRule(
-        "SCR_COMPLEX_14",
+    SCR_COP_14 = TRSRule(
+        "SCR_COP_14",
         lhs=parse(r''' CONJS(CONJS(a)) '''), 
         rhs=parse(r''' a ''')
     )
-    rules.append(SCR_COMPLEX_14)
+    rules.append(SCR_COP_14)
 
-    SCR_COMPLEX_15 = TRSRule(
-        "SCR_COMPLEX_15",
+    SCR_COP_15 = TRSRule(
+        "SCR_COP_15",
         lhs = parse(r''' CONJS(B0 DOT K0) '''),
         rhs = parse(r''' ADJB(K0) DOT ADJK(B0) ''')
     )
-    rules.append(SCR_COMPLEX_15)
+    rules.append(SCR_COP_15)
 
 
     SCR_DOT_1 = TRSRule(
@@ -542,52 +542,52 @@ def construct_trs(
     rules.append(KET_ADJ_7)
 
 
-    KET_SCAL_1 = TRSRule(
-        "KET_SCAL_1",
+    KET_SCR_1 = TRSRule(
+        "KET_SCR_1",
         lhs = parse(r''' "0" SCRK K0 '''),
         rhs = parse(r''' 0K '''),
         rule_repr = '''C(0) SCRK K0 -> 0K ;'''
     )
-    rules.append(KET_SCAL_1)
+    rules.append(KET_SCR_1)
 
 
-    KET_SCAL_2 = TRSRule(
-        "KET_SCAL_2",
+    KET_SCR_2 = TRSRule(
+        "KET_SCR_2",
         lhs = parse(r''' "1" SCRK K0 '''),
         rhs = parse(r''' K0 '''),
         rule_repr = '''C(1) SCRK K0 -> K0 ;'''
     )
-    rules.append(KET_SCAL_2)
+    rules.append(KET_SCR_2)
 
-    KET_SCAL_3 = TRSRule(
-        "KET_SCAL_3",
+    KET_SCR_3 = TRSRule(
+        "KET_SCR_3",
         lhs = parse(r'''S0 SCRK 0K'''),
         rhs = parse(r''' 0K ''')
     )
-    rules.append(KET_SCAL_3)
+    rules.append(KET_SCR_3)
 
         
-    KET_SCAL_4 = TRSRule(
-        "KET_SCAL_4",
+    KET_SCR_4 = TRSRule(
+        "KET_SCR_4",
         lhs = parse(r'''S1 SCRK (S2 SCRK K0)'''),
         rhs = parse(r'''(S1 MLTS S2) SCRK K0'''),
     )
-    rules.append(KET_SCAL_4)
+    rules.append(KET_SCR_4)
 
 
-    def ket_scal_5_rewrite(rule, term, side_info):
+    def ket_scr_5_rewrite(rule, term, side_info):
         if isinstance(term, KetScal):
             if isinstance(term.args[1], KetAdd):
                 new_args = tuple(KetScal(term.args[0], arg) for arg in term.args[1].args)
                 return KetAdd(*new_args)
             
-    KET_SCAL_5 = TRSRule(
-        "KET_SCAL_5",
+    KET_SCR_5 = TRSRule(
+        "KET_SCR_5",
         lhs = "S0 SCRK (K1 ADDK K2)",
         rhs = "(S0 SCRK K1) ADDK (S0 SCRK K2)",
-        rewrite_method=ket_scal_5_rewrite
+        rewrite_method=ket_scr_5_rewrite
     )
-    rules.append(KET_SCAL_5)
+    rules.append(KET_SCR_5)
 
 
     def ket_add_1(rule, term, side_info):
@@ -653,102 +653,102 @@ def construct_trs(
     rules.append(KET_ADD_4)
 
 
-    KET_MUL_1 = TRSRule(
-        "KET_MUL_1",
+    KET_MLT_1 = TRSRule(
+        "KET_MLT_1",
         lhs = parse(r'''0O MLTK K0'''),
         rhs = parse(r'''0K''')
     )
-    rules.append(KET_MUL_1)
+    rules.append(KET_MLT_1)
 
-    KET_MUL_2 = TRSRule(
-        "KET_MUL_2",
+    KET_MLT_2 = TRSRule(
+        "KET_MLT_2",
         lhs = parse(r'''O0 MLTK 0K'''),
         rhs = parse(r'''0K''')
     )
-    rules.append(KET_MUL_2)
+    rules.append(KET_MLT_2)
 
-    KET_MUL_3 = TRSRule(
-        "KET_MUL_3",
+    KET_MLT_3 = TRSRule(
+        "KET_MLT_3",
         lhs = parse(r'''1O MLTK K0'''),
         rhs = parse(r'''K0''')
     )
-    rules.append(KET_MUL_3)
+    rules.append(KET_MLT_3)
 
-    KET_MUL_4 = TRSRule(
-        "KET_MUL_4",
+    KET_MLT_4 = TRSRule(
+        "KET_MLT_4",
         lhs = parse(r'''(S0 SCRO O0) MLTK K0'''),
         rhs = parse(r'''S0 SCRK (O0 MLTK K0)''')
     )
-    rules.append(KET_MUL_4)
+    rules.append(KET_MLT_4)
 
-    KET_MUL_5 = TRSRule(
-        "KET_MUL_5",
+    KET_MLT_5 = TRSRule(
+        "KET_MLT_5",
         lhs = parse(r'''O0 MLTK (S0 SCRK K0)'''),
         rhs = parse(r'''S0 SCRK (O0 MLTK K0)''')
     )
-    rules.append(KET_MUL_5)
+    rules.append(KET_MLT_5)
 
 
-    def ket_mul_6_rewrite(rule, term, side_info):
+    def ket_mlt_6_rewrite(rule, term, side_info):
         if isinstance(term, KetApply) and isinstance(term.args[0], OpAdd):
             new_args = tuple(KetApply(arg, term[1]) for arg in term.args[0].args)
             return KetAdd(*new_args)
-    KET_MUL_6 = TRSRule(
-        "KET_MUL_6",
+    KET_MLT_6 = TRSRule(
+        "KET_MLT_6",
         lhs = "(O1 ADDO O2) MLTK K0",
         rhs = "(O1 MLTK K0) ADDK (O2 MLTK K0)",
-        rewrite_method=ket_mul_6_rewrite
+        rewrite_method=ket_mlt_6_rewrite
     )
-    rules.append(KET_MUL_6)
+    rules.append(KET_MLT_6)
 
 
-    def ket_mul_7_rewrite(rule, term, side_info):
+    def ket_mlt_7_rewrite(rule, term, side_info):
         if isinstance(term, KetApply) and isinstance(term.args[1], KetAdd):
             new_args = tuple(KetApply(term[0], arg) for arg in term.args[1].args)
             return KetAdd(*new_args)
-    KET_MUL_7 = TRSRule(
-        "KET_MUL_7",
+    KET_MLT_7 = TRSRule(
+        "KET_MLT_7",
         lhs = "O0 MLTK (K1 ADDK K2)",
         rhs = "(O0 MLTK K1) ADDK (O0 MLTK K2)",
-        rewrite_method=ket_mul_7_rewrite
+        rewrite_method=ket_mlt_7_rewrite
     )
-    rules.append(KET_MUL_7)
+    rules.append(KET_MLT_7)
 
-    KET_MUL_8 = TRSRule(
-        "KET_MUL_8",
+    KET_MLT_8 = TRSRule(
+        "KET_MLT_8",
         lhs = parse(r'''(K1 OUTER B0) MLTK K2'''),
         rhs = parse(r'''(B0 DOT K2) SCRK K1''')
     )
-    rules.append(KET_MUL_8)
+    rules.append(KET_MLT_8)
 
-    KET_MUL_9 = TRSRule(
-        "KET_MUL_9",
+    KET_MLT_9 = TRSRule(
+        "KET_MLT_9",
         lhs = parse(r'''(O1 MLTO O2) MLTK K0'''),
         rhs = parse(r'''O1 MLTK (O2 MLTK K0)''')
     )
-    rules.append(KET_MUL_9)
+    rules.append(KET_MLT_9)
 
 
-    KET_MUL_10 = TRSRule(
-        "KET_MUL_10",
+    KET_MLT_10 = TRSRule(
+        "KET_MLT_10",
         lhs = parse(r'''(O1 TSRO O2) MLTK ((O1p TSRO O2p) MLTK K0)'''),
         rhs = parse(r'''((O1 MLTO O1p) TSRO (O2 MLTO O2p)) MLTK K0''')
     )
-    rules.append(KET_MUL_10)
+    rules.append(KET_MLT_10)
 
-    KET_MUL_11 = TRSRule(
-        "KET_MUL_11",
+    KET_MLT_11 = TRSRule(
+        "KET_MLT_11",
         lhs = parse(r'''(O1 TSRO O2) MLTK KET(t)'''),
         rhs = parse(r'''(O1 MLTK KET(FST(t))) TSRK (O2 MLTK KET(SND(t)))''')
     )
-    rules.append(KET_MUL_11)
+    rules.append(KET_MLT_11)
 
-    KET_MUL_12 = TRSRule(
-        "KET_MUL_12",
+    KET_MLT_12 = TRSRule(
+        "KET_MLT_12",
         lhs = parse(r'''(O1 TSRO O2) MLTK (K1 TSRK K2)'''),
         rhs = parse(r'''(O1 MLTK K1) TSRK (O2 MLTK K2)''')
     )
-    rules.append(KET_MUL_12)
+    rules.append(KET_MLT_12)
 
     KET_TSR_1 = TRSRule(
         "KET_TSR_1",
@@ -871,51 +871,51 @@ def construct_trs(
 
 
 
-    BRA_SCAL_1 = TRSRule(
-        "BRA_SCAL_1",
+    BRA_SCR_1 = TRSRule(
+        "BRA_SCR_1",
         lhs = parse(r''' "0" SCRB B0 '''),
         rhs = parse(r''' 0B '''),
         rule_repr = '''C(0) SCRB B0 -> 0B ;'''
     )
-    rules.append(BRA_SCAL_1)
+    rules.append(BRA_SCR_1)
 
-    BRA_SCAL_2 = TRSRule(
-        "BRA_SCAL_2",
+    BRA_SCR_2 = TRSRule(
+        "BRA_SCR_2",
         lhs = parse(r''' "1" SCRB B0 '''),
         rhs = parse(r''' B0 '''),
         rule_repr = '''C(1) SCRB B0 -> B0 ;'''
     )
-    rules.append(BRA_SCAL_2)
+    rules.append(BRA_SCR_2)
 
-    BRA_SCAL_3 = TRSRule(
-        "BRA_SCAL_3",
+    BRA_SCR_3 = TRSRule(
+        "BRA_SCR_3",
         lhs = parse(r'''S0 SCRB 0B'''),
         rhs = parse(r''' 0B ''')
     )
-    rules.append(BRA_SCAL_3)
+    rules.append(BRA_SCR_3)
 
         
-    BRA_SCAL_4 = TRSRule(
-        "BRA_SCAL_4",
+    BRA_SCR_4 = TRSRule(
+        "BRA_SCR_4",
         lhs = parse(r'''S1 SCRB (S2 SCRB B0)'''),
         rhs = parse(r'''(S1 MLTS S2) SCRB B0'''),
     )
-    rules.append(BRA_SCAL_4)
+    rules.append(BRA_SCR_4)
 
 
-    def bra_scal_5_rewrite(rule, term, side_info):
+    def bra_scr_5_rewrite(rule, term, side_info):
         if isinstance(term, BraScal):
             if isinstance(term.args[1], BraAdd):
                 new_args = tuple(BraScal(term.args[0], arg) for arg in term.args[1].args)
                 return BraAdd(*new_args)
             
-    BRA_SCAL_5 = TRSRule(
-        "BRA_SCAL_5",
+    BRA_SCR_5 = TRSRule(
+        "BRA_SCR_5",
         lhs = "S0 SCRB (B1 ADDB B2)",
         rhs = "(S0 SCRB B1) ADDB (S0 SCRB B2)",
-        rewrite_method=bra_scal_5_rewrite
+        rewrite_method=bra_scr_5_rewrite
     )
-    rules.append(BRA_SCAL_5)
+    rules.append(BRA_SCR_5)
 
 
 
@@ -983,104 +983,104 @@ def construct_trs(
     rules.append(BRA_ADD_4)
 
 
-    BRA_MUL_1 = TRSRule(
-        "BRA_MUL_1",
+    BRA_MLT_1 = TRSRule(
+        "BRA_MLT_1",
         lhs = parse(r'''B0 MLTB 0O'''),
         rhs = parse(r'''0B''')
     )
-    rules.append(BRA_MUL_1)
+    rules.append(BRA_MLT_1)
 
-    BRA_MUL_2 = TRSRule(
-        "BRA_MUL_2",
+    BRA_MLT_2 = TRSRule(
+        "BRA_MLT_2",
         lhs = parse(r'''0B MLTB O0'''),
         rhs = parse(r'''0B''')
     )
-    rules.append(BRA_MUL_2)
+    rules.append(BRA_MLT_2)
 
-    BRA_MUL_3 = TRSRule(
-        "BRA_MUL_3",
+    BRA_MLT_3 = TRSRule(
+        "BRA_MLT_3",
         lhs = parse(r'''B0 MLTB 1O'''),
         rhs = parse(r'''B0''')
     )
-    rules.append(BRA_MUL_3)
+    rules.append(BRA_MLT_3)
 
-    BRA_MUL_4 = TRSRule(
-        "BRA_MUL_4",
+    BRA_MLT_4 = TRSRule(
+        "BRA_MLT_4",
         lhs = parse(r'''B0 MLTB (S0 SCRO O0)'''),
         rhs = parse(r'''S0 SCRB (B0 MLTB O0)''')
     )
-    rules.append(BRA_MUL_4)
+    rules.append(BRA_MLT_4)
 
-    BRA_MUL_5 = TRSRule(
-        "BRA_MUL_5",
+    BRA_MLT_5 = TRSRule(
+        "BRA_MLT_5",
         lhs = parse(r'''(S0 SCRB B0) MLTB O0'''),
         rhs = parse(r'''S0 SCRB (B0 MLTB O0)''')
     )
-    rules.append(BRA_MUL_5)
+    rules.append(BRA_MLT_5)
 
 
-    def bra_mul_6_rewrite(rule, term, side_info):
+    def bra_mlt_6_rewrite(rule, term, side_info):
         if isinstance(term, BraApply) and isinstance(term.args[1], OpAdd):
             new_args = tuple(BraApply(term[0], arg) for arg in term.args[1].args)
             return BraAdd(*new_args)
 
 
-    BRA_MUL_6 = TRSRule(
-        "BRA_MUL_6",
+    BRA_MLT_6 = TRSRule(
+        "BRA_MLT_6",
         lhs = "B0 MLTB (O1 ADDO O2)",
         rhs = "(B0 MLTB O1) ADDB (B0 MLTB O2)",
-        rewrite_method=bra_mul_6_rewrite
+        rewrite_method=bra_mlt_6_rewrite
     )
-    rules.append(BRA_MUL_6)
+    rules.append(BRA_MLT_6)
 
 
-    def bra_mul_7_rewrite(rule, term, side_info):
+    def bra_mlt_7_rewrite(rule, term, side_info):
         if isinstance(term, BraApply) and isinstance(term.args[0], BraAdd):
             new_args = tuple(BraApply(arg, term[1]) for arg in term.args[0].args)
             return BraAdd(*new_args)
-    BRA_MUL_7 = TRSRule(
-        "BRA_MUL_7",
+    BRA_MLT_7 = TRSRule(
+        "BRA_MLT_7",
         lhs = "(B1 ADDB B2) MLTB O0",
         rhs = "(B1 MLTB O0) ADDB (B2 MLTB O0)",
-        rewrite_method=bra_mul_7_rewrite
+        rewrite_method=bra_mlt_7_rewrite
     )
-    rules.append(BRA_MUL_7)
+    rules.append(BRA_MLT_7)
 
-    BRA_MUL_8 = TRSRule(
-        "BRA_MUL_8",
+    BRA_MLT_8 = TRSRule(
+        "BRA_MLT_8",
         lhs = parse(r'''B1 MLTB (K1 OUTER B2)'''),
         rhs = parse(r'''(B1 DOT K1) SCRB B2''')
     )
-    rules.append(BRA_MUL_8)
+    rules.append(BRA_MLT_8)
 
-    BRA_MUL_9 = TRSRule(
-        "BRA_MUL_9",
+    BRA_MLT_9 = TRSRule(
+        "BRA_MLT_9",
         lhs = parse(r'''B0 MLTB (O1 MLTO O2)'''),
         rhs = parse(r'''(B0 MLTB O1) MLTB O2''')
     )
-    rules.append(BRA_MUL_9)
+    rules.append(BRA_MLT_9)
 
 
-    BRA_MUL_10 = TRSRule(
-        "BRA_MUL_10",
+    BRA_MLT_10 = TRSRule(
+        "BRA_MLT_10",
         lhs = parse(r'''(B0 MLTB (O1 TSRO O2)) MLTB (O1p TSRO O2p)'''),
         rhs = parse(r'''B0 MLTB ((O1 MLTO O1p) TSRO (O2 MLTO O2p))''')
     )
-    rules.append(BRA_MUL_10)
+    rules.append(BRA_MLT_10)
 
-    BRA_MUL_11 = TRSRule(
-        "BRA_MUL_11",
+    BRA_MLT_11 = TRSRule(
+        "BRA_MLT_11",
         lhs = parse(r'''BRA(t) MLTB (O1 TSRO O2)'''),
         rhs = parse(r'''(BRA(FST(t)) MLTB O1) TSRB (BRA(SND(t)) MLTB O2)''')
     )
-    rules.append(BRA_MUL_11)
+    rules.append(BRA_MLT_11)
 
-    BRA_MUL_12 = TRSRule(
-        "BRA_MUL_12",
+    BRA_MLT_12 = TRSRule(
+        "BRA_MLT_12",
         lhs = parse(r'''(B1 TSRB B2) MLTB (O1 TSRO O2)'''),
         rhs = parse(r'''(B1 MLTB O1) TSRB (B2 MLTB O2)''')
     )
-    rules.append(BRA_MUL_12)
+    rules.append(BRA_MLT_12)
 
 
 
@@ -1264,48 +1264,48 @@ def construct_trs(
     rules.append(OPT_ADJ_8)
 
 
-    OPT_SCAL_1 = TRSRule(
-        "OPT_SCAL_1",
+    OPT_SCR_1 = TRSRule(
+        "OPT_SCR_1",
         lhs = parse(r''' "0" SCRO O0'''),
         rhs = parse(r'''0O'''),
         rule_repr = '''C(0) SCRO O0 -> 0O ;'''
     )
-    rules.append(OPT_SCAL_1)
+    rules.append(OPT_SCR_1)
 
-    OPT_SCAL_2 = TRSRule(
-        "OPT_SCAL_2",
+    OPT_SCR_2 = TRSRule(
+        "OPT_SCR_2",
         lhs = parse(r''' "1" SCRO O0'''),
         rhs = parse(r'''O0'''),
         rule_repr = '''C(1) SCRO O0 -> O0 ;'''
     )
-    rules.append(OPT_SCAL_2)
+    rules.append(OPT_SCR_2)
 
-    OPT_SCAL_3 = TRSRule(
-        "OPT_SCAL_3",
+    OPT_SCR_3 = TRSRule(
+        "OPT_SCR_3",
         lhs = parse(r'''S0 SCRO 0O'''),
         rhs = parse(r'''0O''')
     )
-    rules.append(OPT_SCAL_3)
+    rules.append(OPT_SCR_3)
 
-    OPT_SCAL_4 = TRSRule(
-        "OPT_SCAL_4",
+    OPT_SCR_4 = TRSRule(
+        "OPT_SCR_4",
         lhs = parse(r'''S1 SCRO (S2 SCRO O0)'''),
         rhs = parse(r'''(S1 MLTS S2) SCRO O0''')
     )
-    rules.append(OPT_SCAL_4)
+    rules.append(OPT_SCR_4)
 
-    def opt_scal_5_rewrite(rule, term, side_info):
+    def opt_scr_5_rewrite(rule, term, side_info):
         if isinstance(term, OpScal):
             if isinstance(term.args[1], OpAdd):
                 new_args = tuple(OpScal(term.args[0], arg) for arg in term.args[1].args)
                 return OpAdd(*new_args)
-    OPT_SCAL_5 = TRSRule(
-        "OPT_SCAL_5",
+    OPT_SCR_5 = TRSRule(
+        "OPT_SCR_5",
         lhs = "S0 SCRO (O1 ADDO O2)",
         rhs = "(S0 SCRO O1) ADDO (S0 SCRO O2)",
-        rewrite_method=opt_scal_5_rewrite
+        rewrite_method=opt_scr_5_rewrite
     )
-    rules.append(OPT_SCAL_5)
+    rules.append(OPT_SCR_5)
 
 
     def opt_add_1_rewrite(rule, term, side_info):
@@ -1372,106 +1372,106 @@ def construct_trs(
     rules.append(OPT_ADD_4)
 
 
-    OPT_MUL_1 = TRSRule(
-        "OPT_MUL_1",
+    OPT_MLT_1 = TRSRule(
+        "OPT_MLT_1",
         lhs = parse(r'''0O MLTO O0'''),
         rhs = parse(r'''0O''')
     )
-    rules.append(OPT_MUL_1)
+    rules.append(OPT_MLT_1)
 
-    OPT_MUL_2 = TRSRule(
-        "OPT_MUL_2",
+    OPT_MLT_2 = TRSRule(
+        "OPT_MLT_2",
         lhs = parse(r'''O0 MLTO 0O'''),
         rhs = parse(r'''0O''')
     )
-    rules.append(OPT_MUL_2)
+    rules.append(OPT_MLT_2)
 
-    OPT_MUL_3 = TRSRule(
-        "OPT_MUL_3",
+    OPT_MLT_3 = TRSRule(
+        "OPT_MLT_3",
         lhs = parse(r'''1O MLTO O0'''),
         rhs = parse(r'''O0''')
     )
-    rules.append(OPT_MUL_3)
+    rules.append(OPT_MLT_3)
 
-    OPT_MUL_4 = TRSRule(
-        "OPT_MUL_4",
+    OPT_MLT_4 = TRSRule(
+        "OPT_MLT_4",
         lhs = parse(r'''O0 MLTO 1O'''),
         rhs = parse(r'''O0''')
     )
-    rules.append(OPT_MUL_4)
+    rules.append(OPT_MLT_4)
 
-    OPT_MUL_5 = TRSRule(
-        "OPT_MUL_5",
+    OPT_MLT_5 = TRSRule(
+        "OPT_MLT_5",
         lhs = parse(r'''(K0 OUTER B0) MLTO O0'''),
         rhs = parse(r'''K0 OUTER (B0 MLTB O0)''')
     )
-    rules.append(OPT_MUL_5)
+    rules.append(OPT_MLT_5)
 
-    OPT_MUL_6 = TRSRule(
-        "OPT_MUL_6",
+    OPT_MLT_6 = TRSRule(
+        "OPT_MLT_6",
         lhs = parse(r'''O0 MLTO (K0 OUTER B0)'''),
         rhs = parse(r'''(O0 MLTK K0) OUTER B0''')
     )
-    rules.append(OPT_MUL_6)
+    rules.append(OPT_MLT_6)
 
-    OPT_MUL_7 = TRSRule(
-        "OPT_MUL_7",
+    OPT_MLT_7 = TRSRule(
+        "OPT_MLT_7",
         lhs = parse(r'''(S0 SCRO O1) MLTO O2'''),
         rhs = parse(r'''S0 SCRO (O1 MLTO O2)''')
     )
-    rules.append(OPT_MUL_7)
+    rules.append(OPT_MLT_7)
 
-    OPT_MUL_8 = TRSRule(
-        "OPT_MUL_8",
+    OPT_MLT_8 = TRSRule(
+        "OPT_MLT_8",
         lhs = parse(r'''O1 MLTO (S0 SCRO O2)'''),
         rhs = parse(r'''S0 SCRO (O1 MLTO O2)''')
     )
-    rules.append(OPT_MUL_8)
+    rules.append(OPT_MLT_8)
 
-    def opt_mul_9_rewrite(rule, term, side_info):
+    def opt_mlt_9_rewrite(rule, term, side_info):
         if isinstance(term, OpApply) and isinstance(term.args[0], OpAdd):
             new_args = tuple(OpApply(arg, term[1]) for arg in term.args[0].args)
             return OpAdd(*new_args)
-    OPT_MUL_9 = TRSRule(
-        "OPT_MUL_9",
+    OPT_MLT_9 = TRSRule(
+        "OPT_MLT_9",
         lhs = "(O1 ADDO O2) MLTO O0",
         rhs = "(O1 MLTO O0) ADDO (O2 MLTO O0)",
-        rewrite_method=opt_mul_9_rewrite
+        rewrite_method=opt_mlt_9_rewrite
     )
-    rules.append(OPT_MUL_9)
+    rules.append(OPT_MLT_9)
 
-    def opt_mul_10_rewrite(rule, term, side_info):
+    def opt_mlt_10_rewrite(rule, term, side_info):
         if isinstance(term, OpApply) and isinstance(term.args[1], OpAdd):
             new_args = tuple(OpApply(term[0], arg) for arg in term.args[1].args)
             return OpAdd(*new_args)
-    OPT_MUL_10 = TRSRule(
-        "OPT_MUL_10",
+    OPT_MLT_10 = TRSRule(
+        "OPT_MLT_10",
         lhs = "O0 MLTO (O1 ADDO O2)",
         rhs = "(O0 MLTO O1) ADDO (O0 MLTO O2)",
-        rewrite_method=opt_mul_10_rewrite
+        rewrite_method=opt_mlt_10_rewrite
     )
-    rules.append(OPT_MUL_10)
+    rules.append(OPT_MLT_10)
 
-    OPT_MUL_11 = TRSRule(
-        "OPT_MUL_11",
+    OPT_MLT_11 = TRSRule(
+        "OPT_MLT_11",
         lhs = parse(r'''(O1 MLTO O2) MLTO O3'''),
         rhs = parse(r'''O1 MLTO (O2 MLTO O3)''')
     )
-    rules.append(OPT_MUL_11)
+    rules.append(OPT_MLT_11)
 
-    OPT_MUL_12 = TRSRule(
-        "OPT_MUL_12",
+    OPT_MLT_12 = TRSRule(
+        "OPT_MLT_12",
         lhs = parse(r'''(O1 TSRO O2) MLTO (O1p TSRO O2p)'''),
         rhs = parse(r'''(O1 MLTO O1p) TSRO (O2 MLTO O2p)''')
     )
-    rules.append(OPT_MUL_12)
+    rules.append(OPT_MLT_12)
 
-    OPT_MUL_13 = TRSRule(
-        "OPT_MUL_13",
+    OPT_MLT_13 = TRSRule(
+        "OPT_MLT_13",
         lhs = parse(r'''(O1 TSRO O2) MLTO ((O1p TSRO O2p) MLTO O3)'''),
         rhs = parse(r'''((O1 MLTO O1p) TSRO (O2 MLTO O2p)) MLTO O3''')
     )
-    rules.append(OPT_MUL_13)
+    rules.append(OPT_MLT_13)
 
 
     OPT_TSR_1 = TRSRule(

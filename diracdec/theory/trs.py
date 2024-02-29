@@ -272,7 +272,8 @@ class BindVarTerm(TRSTerm):
             return type(self)(self.bind_var, self.body.substitute(sigma))
         else:
             new_v = TRSVar(var_rename(vset))
-            return self.rename_bind(new_v).substitute(sigma)
+            new_sigma = sigma.composite(Subst({self.bind_var.name : new_v}))
+            return type(self)(new_v, self.body.substitute(new_sigma))
             
 
 ################################################################################
@@ -813,6 +814,11 @@ class TRS:
         step=0
         while True:
 
+            # check whether the step limit is reached
+            step += 1
+            if step_limit is not None and step > step_limit:
+                return current_term
+
             if verbose:
                 print(f"== STEP {step} ==\n")
                 
@@ -822,12 +828,6 @@ class TRS:
                 return current_term
             
             current_term = new_term
-        
-            # check whether the step limit is reached
-            step += 1
-            if step_limit is not None and step > step_limit:
-                return current_term
-
             
     
 
