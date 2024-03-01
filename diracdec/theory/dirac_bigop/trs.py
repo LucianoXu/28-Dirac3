@@ -264,19 +264,35 @@ def construct_trs(
 
 
     def sum_elim_3_rewrite(rule, term, side_info):
-        if isinstance(term, Sum) and isinstance(term.body, ScalarDelta):
-            if term.bind_var == term.body.args[0]:
-                s = term.body.args[1]
-            elif term.bind_var == term.body.args[1]:
-                s = term.body.args[0]
-            else:
-                return None
+        if isinstance(term, Sum):
+            # iteratively serach for delta inside
+            cursor = term
+            route  = []
+            while isinstance(cursor, Sum):
+                route.append(cursor)
+                cursor = cursor.body
+
+            if isinstance(cursor, ScalarDelta):
+                if term.bind_var == cursor.args[0]:
+                    s = cursor.args[1]
+                elif term.bind_var == cursor.args[1]:
+                    s = cursor.args[0]
+                else:
+                    return None
+        
+                if term.bind_var.name not in s.free_variables():
+                    # reconstruct the sum
+                    new_term = CScalar.one()
+                    while len(route) > 1:
+                        cursor = route.pop()
+                        new_term = Sum(cursor.bind_var, new_term)
+
+                    return new_term
+                
+                else:
+                    return None
+                
             
-            if term.bind_var.name not in s.free_variables():
-                return CScalar.one()
-            
-            else:
-                return None
             
     SUM_ELIM_3 = TRSRule(
         "SUM_ELIM_3",
@@ -287,22 +303,39 @@ def construct_trs(
     rules.append(SUM_ELIM_3)
 
     def sum_elim_4_rewrite(rule, term, side_info):
-        if isinstance(term, Sum) and isinstance(term.body, ScalarMlt):
-            for i, item in enumerate(term.body.args):
-                if isinstance(item, ScalarDelta):
-                    if term.bind_var == item.args[0]:
-                        s = item.args[1]
-                    elif term.bind_var == item.args[1]:
-                        s = item.args[0]
-                    else:
-                        return None
-                    
-                    if term.bind_var.name not in s.free_variables():
-                        sub = Subst({term.bind_var.name : s})
-                        return ScalarMlt(*term.body.remained_terms(i)).substitute(sub)
-                    
-                    else:
-                        return None
+        if isinstance(term, Sum):
+            # iteratively serach for delta inside
+            cursor = term
+            route  = []
+            while isinstance(cursor, Sum):
+                route.append(cursor)
+                cursor = cursor.body
+
+            if isinstance(cursor, ScalarMlt):
+                for i, item in enumerate(cursor.args):
+                    if isinstance(item, ScalarDelta):
+                        if term.bind_var == item.args[0]:
+                            s = item.args[1]
+                        elif term.bind_var == item.args[1]:
+                            s = item.args[0]
+                        else:
+                            continue
+                        
+                        if term.bind_var.name not in s.free_variables():
+
+                            # reconstruct the sum
+                            sub = Subst({term.bind_var.name : s})
+                            new_term = ScalarMlt(*cursor.remained_terms(i)).substitute(sub)
+
+                            while len(route) > 1:
+                                cursor = route.pop()
+                                new_term = Sum(cursor.bind_var, new_term)
+
+                            return new_term
+
+                        else:
+                            return None
+                            
             
     SUM_ELIM_4 = TRSRule(
         "SUM_ELIM_4",
@@ -314,21 +347,36 @@ def construct_trs(
 
 
     def sum_elim_5_rewrite(rule, term, side_info):
-        if isinstance(term, Sum) and isinstance(term.body, (KetScal, BraScal, OpScal)) and isinstance(term.body.args[0], ScalarDelta):
-            delta = term.body.args[0]
-            if term.bind_var == delta.args[0]:
-                s = delta.args[1]
-            elif term.bind_var == delta.args[1]:
-                s = delta.args[0]
-            else:
-                return None
-            
-            if term.bind_var.name not in s.free_variables():
-                sub = Subst({term.bind_var.name : s})
-                return term.body.args[1].substitute(sub)
-            
-            else:
-                return None
+        if isinstance(term, Sum):
+            cursor = term
+            route  = []
+            while isinstance(cursor, Sum):
+                route.append(cursor)
+                cursor = cursor.body
+
+            if isinstance(cursor, (KetScal, BraScal, OpScal)) and isinstance(cursor.args[0], ScalarDelta):
+
+                delta = cursor.args[0]
+                if term.bind_var == delta.args[0]:
+                    s = delta.args[1]
+                elif term.bind_var == delta.args[1]:
+                    s = delta.args[0]
+                else:
+                    return None
+                
+                if term.bind_var.name not in s.free_variables():
+                    # reconstruct the sum
+                    sub = Subst({term.bind_var.name : s})
+                    new_term = cursor.args[1].substitute(sub)
+
+                    while len(route) > 1:
+                        cursor = route.pop()
+                        new_term = Sum(cursor.bind_var, new_term)
+
+                    return new_term
+                
+                else:
+                    return None
             
     SUM_ELIM_5 = TRSRule(
         "SUM_ELIM_5",
@@ -340,23 +388,39 @@ def construct_trs(
 
 
     def sum_elim_6_rewrite(rule, term, side_info):
-        if isinstance(term, Sum) and isinstance(term.body, (KetScal, BraScal, OpScal)) and isinstance(term.body.args[0], ScalarMlt):
-            for i, delta in enumerate(term.body.args[0].args):
-                if isinstance(delta, ScalarDelta):
-                    if term.bind_var == delta.args[0]:
-                        s = delta.args[1]
-                    elif term.bind_var == delta.args[1]:
-                        s = delta.args[0]
-                    else:
-                        return None
-                    
-                    if term.bind_var.name not in s.free_variables():
-                        sub = Subst({term.bind_var.name : s})
+        if isinstance(term, Sum):
+            cursor = term
+            route  = []
 
-                        return type(term.body)(ScalarMlt(*term.body.args[0].remained_terms(i)).substitute(sub), term.body.args[1].substitute(sub))
-                    
-                    else:
-                        return None
+            while isinstance(cursor, Sum):
+                route.append(cursor)
+                cursor = cursor.body
+
+            if isinstance(cursor, (KetScal, BraScal, OpScal)) and isinstance(cursor.args[0], ScalarMlt):
+
+                for i, delta in enumerate(cursor.args[0].args):
+                    if isinstance(delta, ScalarDelta):
+                        if term.bind_var == delta.args[0]:
+                            s = delta.args[1]
+                        elif term.bind_var == delta.args[1]:
+                            s = delta.args[0]
+                        else:
+                            return None
+                        
+                        if term.bind_var.name not in s.free_variables():
+
+                            # reconstruct the sum
+                            sub = Subst({term.bind_var.name : s})
+                            new_term = type(cursor)(ScalarMlt(*cursor.args[0].remained_terms(i)).substitute(sub), cursor.args[1].substitute(sub))
+
+                            while len(route) > 1:
+                                cursor = route.pop()
+                                new_term = Sum(cursor.bind_var, new_term)
+
+                            return new_term
+                        
+                        else:
+                            return None
             
     SUM_ELIM_6 = TRSRule(
         "SUM_ELIM_6",

@@ -208,6 +208,10 @@ def test_SUM_ELIM_3():
         b = parse(''' "1" ''')
         assert trs.normalize(a) != trs.normalize(b)
 
+        a = parse(''' SUM(i, SUM(j, DELTA(i, i))) ''')
+        b = parse(''' SUM(j, "1") ''')
+        assert trs.normalize(a) != trs.normalize(b)
+
 def test_SUM_ELIM_4():
     with wolfram_backend.wolfram_session():
         a = parse(''' SUM(i, DELTA(i, s) MLTS S1 MLTS i) ''')
@@ -217,6 +221,16 @@ def test_SUM_ELIM_4():
         a = parse(''' SUM(i, DELTA(i, s) MLTS "i - s") ''')
         b = parse(''' "0" ''')
         assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(''' SUM(i, DELTA(i, s) MLTS "i - s") ''')
+        b = parse(''' "0" ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+        a = parse(''' SUM(i, SUM(j, DELTA(i, s) MLTS "i - s")) ''')
+        b = parse(''' SUM(j, "0") ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+
 
 def test_SUM_ELIM_5():
     with wolfram_backend.wolfram_session():
@@ -232,6 +246,11 @@ def test_SUM_ELIM_5():
         b = parse(''' KET(s) OUTER BRA(s) ''')
         assert trs.normalize(a) == trs.normalize(b)
 
+        a = parse(''' SUM(i, SUM(j, DELTA(i, s) SCRO (KET(i) OUTER BRA(i)))) ''')
+        b = parse(''' SUM(j, KET(s) OUTER BRA(s)) ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+
 def test_SUM_ELIM_6():
     with wolfram_backend.wolfram_session():
         a = parse(''' SUM(i, (DELTA(i, s) MLTS S1 MLTS S2) SCRK KET(i)) ''')
@@ -246,6 +265,9 @@ def test_SUM_ELIM_6():
         b = parse(''' (S1 MLTS S2) SCRO (KET(s) OUTER BRA(s)) ''')
         assert trs.normalize(a) == trs.normalize(b)
 
+        a = parse(''' SUM(i, SUM(j, (DELTA(i, s) MLTS S1 MLTS S2) SCRO (KET(i) OUTER BRA(i)))) ''')
+        b = parse(''' SUM(j, (S1 MLTS S2) SCRO (KET(s) OUTER BRA(s))) ''')
+        assert trs.normalize(a) == trs.normalize(b)
 
 def test_SUM_DIST_1():
     with wolfram_backend.wolfram_session():
@@ -496,5 +518,5 @@ def test_sumeq_rewrite():
 def test_sum_elim_delta_with_sum_swap():
     with wolfram_backend.wolfram_session():
         a = parse(''' SUM(a, SUM(b, DELTA(a, x) SCRK KET(PAIR(a, b)))) ''')
-        b = parse(''' SUM(b, SUM(a, KET(PAIR(x, b)))) ''')
+        b = parse(''' SUM(b, KET(PAIR(x, b))) ''')
         assert trs.normalize(a) == trs.normalize(b)
