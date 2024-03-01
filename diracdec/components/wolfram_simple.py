@@ -35,7 +35,17 @@ class WolframABase(AtomicBase):
         return session.evaluate(wl.ToString(self.simp_expr, wl.TeXForm))    
     
     def __eq__(self, other: WolframABase) -> bool:
-        return isinstance(other, WolframABase) and self.simp_expr == other.simp_expr
+        # 1. if not the same type, return False
+        if not isinstance(other, WolframABase):
+            return False
+        
+        # 2. try to compare the syntax first
+        if self.simp_expr == other.simp_expr:
+            return True
+        
+        # 3. for different syntax, compare the semantics by invoking Wolfram Engine
+        return session.evaluate(wl.FullSimplify(wl.Equal(self.simp_expr, other.simp_expr))) == True
+
     
     def __hash__(self) -> int:
         h = hashlib.md5(str(self.simp_expr).encode())

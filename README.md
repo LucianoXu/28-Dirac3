@@ -33,7 +33,7 @@
 - We have implemented the abstract/application and beta reduction, but it is very slow currently.
 
 - I already encountered problem in using Wolfram Engine: equivalent expresssions reduced by `FullSimply` can have different syntax. I may need a complex scalar table to deal with this problem. (That is, we provide the choice to use a more powerful method to compare the equivalence of terms.)
-This is implemented in the backend "wolfram_unique". But it can be inefficient.
+This is implemented in the backend "wolfram_unique". We transform terms in simple backend to wolfram_unique backend when comparing.
 
 
 - I implemented `sum_i sum_j <i|A|j> |i><j| -> A`, but the matching is far from complete. Now I believe the rule for sum is not well designed - in the opposite direction actually. We should try to pull things out of the sum instead of pushing them in.

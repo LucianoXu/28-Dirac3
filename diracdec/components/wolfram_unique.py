@@ -9,7 +9,7 @@ Semantical equivalence is checked by testing `FullSimplify[A == B]`
 from __future__ import annotations
 from typing import Any, List
 
-from diracdec.theory.trs import Subst, TRSTerm
+from diracdec.theory.trs import Subst, TRSTerm, StdTerm, BindVarTerm
 
 from ..theory.atomic_base import AtomicBase
 from ..theory.complex_scalar import ComplexScalar
@@ -17,6 +17,9 @@ from ..theory.complex_scalar import ComplexScalar
 from ..theory import TRSTerm, TRSVar, Subst
 
 from ..backends.wolfram_backend import *
+
+# introduce transformations from simple Wolfram backend
+from .wolfram_simple import WolframABase, WolframCScalar
 
 import hashlib
 
@@ -214,3 +217,22 @@ class WolCScalarUnique(ComplexScalar):
             return WolCScalarUnique(self.expr[0])
         else:
             return None
+        
+def wolU(term : TRSTerm) -> TRSTerm:
+    '''
+    iteratively transform all simple Wolfram backend instances to the unique version
+    '''
+    if isinstance(term, WolframABase):
+        return WolABaseUnique(term.simp_expr)
+    
+    elif isinstance(term, WolframCScalar):
+        return WolCScalarUnique(term.simp_expr)
+    
+    elif isinstance(term, StdTerm):
+        return type(term)(*map(wolU, term.args))
+    
+    elif isinstance(term, BindVarTerm):
+        return type(term)(term.bind_var, wolU(term.body))
+    
+    else:
+        return term

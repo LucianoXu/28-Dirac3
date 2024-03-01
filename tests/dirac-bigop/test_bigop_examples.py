@@ -61,6 +61,30 @@ def test_alpha_conv_with_Wolfram():
         assert a == b
 
 
+
+def test_QCQI_Theorem_4_1_with_abstraction():
+    with wolfram_backend.wolfram_session():
+        # define the rotation gates
+        sub_rot = Subst({
+            "Rz" : sub(parse(''' FUN beta . ( ("Cos[beta/2]" SCRO I2) ADDO ("- Sin[beta/2] I" SCRO Z) )''')),
+            "Ry" : sub(parse(''' FUN gamma . ( ("Cos[gamma/2]" SCRO I2) ADDO ("- Sin[gamma/2] I" SCRO Y) )''')),
+        })
+
+        # get the idempotent operation
+        new_sub = sub_rot.composite(sub).get_idempotent()
+
+        a = new_sub(parse(''' "Exp[I a]" SCRO ((Rz @ beta) MLTO (Ry @ gamma) MLTO (Rz @ delta)) '''))
+
+        b = new_sub(parse(''' ("Exp[I (a - beta/2 - delta/2)] Cos[gamma/2]" SCRO (ket0 OUTER bra0))
+            ADDO ("- Exp[I (a - beta/2 + delta/2)] Sin[gamma/2]" SCRO (ket0 OUTER bra1)) 
+            ADDO ("Exp[I (a + beta/2 - delta/2)] Sin[gamma/2]" SCRO (ket1 OUTER bra0))
+            ADDO ("Exp[I (a + beta/2 + delta/2)] Cos[gamma/2]" SCRO (ket1 OUTER bra1))'''))
+
+        norm_a = trs.normalize(sub(a))
+        norm_b = trs.normalize(sub(b))
+        assert wolU(norm_a) == wolU(norm_b)
+
+
 def test_ASigma():
     '''
     2-qubit case for 
