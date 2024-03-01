@@ -148,3 +148,27 @@ def test_unchoi():
         b = parse(r'''KET('a') OUTER BRA('b')''')
 
         assert trs.normalize(a) == trs.normalize(b)
+
+def test_choi_unchoi():
+    with wolfram_backend.wolfram_session():
+        sub = Subst({
+        "choi" : parse(r''' 
+        FUN A . SUM(i, 
+                    SUM(j, 
+                        (BRA(i) DOT (A MLTK KET(j)))
+                        SCRK KET(PAIR(i,j))
+                    )    
+                ) '''),
+        "unchoi" : parse(r'''
+        FUN A . SUM(i,
+                    SUM(j,
+                        (BRA(PAIR(i, j)) DOT A)
+                        SCRO (KET(i) OUTER BRA(j))
+                        )
+                )''')
+        }).get_idempotent()
+
+        a = sub(parse(r'''FUN A . unchoi @ (choi @ A) '''))
+        b = parse(r'''FUN A . A''')
+
+        assert trs.normalize(a) == trs.normalize(b)

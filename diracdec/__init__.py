@@ -22,6 +22,8 @@ try:
 
     from .factory import dirac_bigop_delta_parser, dirac_bigop_delta_parse, dirac_bigop_delta_trs
 
+    from .factory import dirac_U_bigop_delta_parser, dirac_U_bigop_delta_parse, dirac_U_bigop_delta_trs
+
 except Exception as e:
     raise e
 
