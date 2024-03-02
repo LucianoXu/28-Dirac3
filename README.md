@@ -40,6 +40,5 @@ This is implemented in the backend "wolfram_unique". We transform terms in simpl
 
 ## TODO
 - consider the case of teleportation after we have indices
-- refine the string output
 - reconsider how to deal with equivalence
 - consider parsing latex input
