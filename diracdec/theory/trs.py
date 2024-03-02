@@ -9,7 +9,9 @@ from abc import ABC, abstractmethod
 
 from IPython.core.display import Image
 
+from ..backends.formprint import *
 from ..backends import render_tex, render_tex_to_svg
+
 
 import hashlib
 import itertools
@@ -153,7 +155,18 @@ class StdTerm(TRSTerm):
         self.args = args
 
     def __str__(self) -> str:
-        return f'{self.fsymbol_print}({", ".join(map(str, self.args))})'
+        arg_blocks = []
+
+        if len(self.args) > 0:
+            arg_blocks.append(str(self.args[0]))
+        for arg in self.args[1:]:
+            arg_blocks.append(", ")
+            arg_blocks.append(str(arg))
+
+        return str(HSeqBlock(
+            self.fsymbol_print,
+            ParenBlock(HSeqBlock(*arg_blocks))
+            ))
 
     def __repr__(self) -> str:
         return f'{self.fsymbol}({", ".join(map(repr, self.args))})'
@@ -209,7 +222,15 @@ class BindVarTerm(TRSTerm):
         self.body = body
 
     def __str__(self) -> str:
-        return f"({self.fsymbol_print} {self.bind_var}.{self.body})"
+        return str(ParenBlock(HSeqBlock(
+            self.fsymbol_print,
+            " ",
+            str(self.bind_var),
+            ".",
+            str(self.body),
+            v_align='c'
+        )
+        ))
     
     def __repr__(self) -> str:
         return f"{self.fsymbol}[{repr(self.bind_var)}]({repr(self.body)})"
@@ -313,6 +334,7 @@ class MultiBindTerm(TRSTerm):
         self.body = body
 
     def __str__(self) -> str:
+        raise NotImplementedError()
         return f"({self.fsymbol_print} {' '.join(map(str,self.bind_vars))}.{self.body})"
     
     def __repr__(self) -> str:
@@ -448,7 +470,11 @@ class Subst:
         return self.data[idx]
     
     def __str__(self):
-        return "{\n\t" + ", \n\t".join(f"{key} ↦ {self.data[key]}" for key in self.data) + "\n}"
+        blocks : List[str|FormBlock] = [' ']
+        for key in self.data:
+            blocks.append(HSeqBlock(' ', key, ' ↦ ', str(self.data[key]), ' '))
+            blocks.append(' ')
+        return str(FrameBlock(VSeqBlock(*blocks, h_align='l')))
     
     def __eq__(self, other) -> bool:
         if self is other:
@@ -605,7 +631,9 @@ class TRSInfixBinary(StdTerm):
         super().__init__(L, R)
 
     def __str__(self) -> str:
-        return f'({str(self.args[0])} {self.fsymbol_print} {str(self.args[1])})'
+        return str(ParenBlock(HSeqBlock(
+            str(self.args[0]), self.fsymbol_print, str(self.args[1])
+        )))
 
     def __repr__(self) -> str:
         return f'({repr(self.args[0])} {self.fsymbol} {repr(self.args[1])})'
@@ -622,9 +650,6 @@ class TRSCommBinary(StdTerm):
             L, R = R, L
         super().__init__(L, R)
 
-    def __str__(self) -> str:
-        return f'{self.fsymbol_print}({str(self.args[0])}, {str(self.args[1])})'
-
     def __repr__(self) -> str:
         return f'{self.fsymbol}({repr(self.args[0])}, {repr(self.args[1])})'
     
@@ -640,9 +665,6 @@ class TRSCommBinary_safe(StdTerm):
     '''
     def __init__(self, L : Any, R : Any):
         super().__init__(L, R)
-
-    def __str__(self) -> str:
-        return f'{self.fsymbol_print}({str(self.args[0])}, {str(self.args[1])})'
 
     def __repr__(self) -> str:
         return f'{self.fsymbol}({repr(self.args[0])}, {repr(self.args[1])})'
@@ -705,7 +727,12 @@ class TRS_AC(StdTerm):
         self.args = tuple(sorted(new_ls))
 
     def __str__(self) -> str:
-        return f'({f" {self.fsymbol_print} ".join(map(str, self.args))})'
+        blocks = [str(self.args[0])]
+        for arg in self.args[1:]:
+            blocks.append(f" {self.fsymbol_print} ")
+            blocks.append(str(arg))
+
+        return str(ParenBlock(HSeqBlock(*blocks, v_align='c')))
     
     def __repr__(self) -> str:
         return f'({f" {self.fsymbol} ".join(map(repr, self.args))})'
@@ -761,7 +788,12 @@ class TRS_AC_safe(StdTerm):
         self.args = tuple(new_ls)
 
     def __str__(self) -> str:
-        return f'({f" {self.fsymbol_print} ".join(map(str, self.args))})'
+        blocks = [str(self.args[0])]
+        for arg in self.args[1:]:
+            blocks.append(f" {self.fsymbol_print} ")
+            blocks.append(str(arg))
+
+        return str(ParenBlock(HSeqBlock(*blocks, v_align='c')))
     
     def __repr__(self) -> str:
         return f'({f" {self.fsymbol} ".join(map(repr, self.args))})'
@@ -865,7 +897,9 @@ class TRSRule:
         self.rule_repr = rule_repr
 
     def __str__(self) -> str:
-        return f'{self.lhs} → {self.rhs}'
+        return str(HSeqBlock(
+            str(self.lhs), ' → ', str(self.rhs),
+            v_align='c'))
 
     def __repr__(self) -> str:
         if self.rule_repr is not None:
@@ -971,11 +1005,17 @@ class TRS:
                 return current_term
 
             if verbose:
-                print(f"== STEP {step} ==\n")
+                print(f"== STEP {step} ==")
+                print("Current Term:")
+                print(str(current_term))
+                print()
                 
             # check whether rewrite rules are applicable
             new_term = rewrite(current_term, side_info, verbose)
+
             if new_term is None:
+                if verbose:
+                    print("It is the normal form.")
                 return current_term
             
             current_term = new_term
@@ -996,7 +1036,14 @@ class TRS:
             if new_term is not None:
                 # output information
                 if verbose:
-                    print(f"apply {rule.rule_name}: {term} -> {new_term}")
+                    print(str(
+                        FrameBlock(
+                        HSeqBlock(str(term), ' -> ', str(new_term), v_align='c'),
+                        caption=f"apply {rule.rule_name}"
+                        )
+                        ))
+                    print("\n")
+
                 return new_term
                         
         if isinstance(term, StdTerm):
@@ -1056,7 +1103,13 @@ class TRS:
             if new_term is not None:
                 # output information
                 if verbose:
-                    print(f"apply {rule.rule_name}: {term} -> {new_term}")
+                    print(str(
+                        FrameBlock(
+                        HSeqBlock(str(term), ' -> ', str(new_term), v_align='c'),
+                        caption=f"apply {rule.rule_name}"
+                        )
+                        ))
+                    print("\n")
                 return new_term
         
         return None

@@ -17,10 +17,10 @@ class KetTrans(DiracKet, StdTerm):
         super().__init__(B)
 
     def __str__(self) -> str:
-        return f"({self.args[0]}^T)"
+        return str(IndexBlock(str(self.args[0]), UR_index="⊤"))
     
     def tex(self) -> str:
-        return rf" {self.args[0].tex()}^T"
+        return rf" {self.args[0].tex()}^\top"
     
 class BraTrans(DiracBra, StdTerm):
     fsymbol_print = "TRANB"
@@ -30,10 +30,10 @@ class BraTrans(DiracBra, StdTerm):
         super().__init__(K)
 
     def __str__(self) -> str:
-        return f"({self.args[0]}^T)"
+        return str(IndexBlock(str(self.args[0]), UR_index="⊤"))
     
     def tex(self) -> str:
-        return rf" {self.args[0].tex()}^T"
+        return rf" {self.args[0].tex()}^\top"
     
 class OpTrans(DiracOp, StdTerm):
     fsymbol_print = "TRANO"
@@ -43,10 +43,10 @@ class OpTrans(DiracOp, StdTerm):
         super().__init__(O)
 
     def __str__(self) -> str:
-        return f"({self.args[0]}^T)"
+        return str(IndexBlock(str(self.args[0]), UR_index="⊤"))
     
     def tex(self) -> str:
-        return rf" {self.args[0].tex()}^T"
+        return rf" {self.args[0].tex()}^\top"
 
 
 
@@ -68,12 +68,21 @@ class Apply(StdTerm):
     def __init__(self, f: TRSTerm, x: TRSTerm):
         super().__init__(f, x)
 
+    def __str__(self) -> str:
+        return str(HSeqBlock(
+            str(self.args[0]), ' ', str(self.args[1]), 
+            v_align='c'))
+
     def tex(self) -> str:
         return rf" \left ({self.args[0].tex()} {self.args[1].tex()} \right)"
 
 class Sum(DiracOp, BindVarTerm):
     fsymbol_print = "sum"
     fsymbol = "SUM"
+
+    def __str__(self) -> str:
+        return str(HSeqBlock(
+            IndexBlock('__\n\\ \n/ \n‾‾', D_index=self.bind_var.name), " ", str(self.body)))
 
     def tex(self) -> str:
         return rf" \left ( \sum_{{{self.bind_var.name}}} {self.body.tex()} \right )"

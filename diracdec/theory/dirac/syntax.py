@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from ..trs import TRSTerm, TRSVar, StdTerm, TRS_AC, TRSCommBinary, TRSInfixBinary, Subst
 
-
+from ...backends.formprint import *
 
 class DiracSyntax:
     ...
@@ -23,7 +23,10 @@ class BasePair(DiracBase, StdTerm):
         super().__init__(left, right)
     
     def __str__(self) -> str:
-        return f"({self.args[0]}, {self.args[1]})"
+        return str(ParenBlock(HSeqBlock(
+            str(self.args[0]), ', ', str(self.args[1]),
+            v_align='b')))
+
     
     def tex(self) -> str:
         return f"( {self.args[0].tex()} , {self.args[1].tex()} )"
@@ -95,7 +98,7 @@ class ScalarConj(DiracScalar, StdTerm):
         super().__init__(s)
 
     def __str__(self) -> str:
-        return f"({self.args[0]}^*)"
+        return str(IndexBlock(str(self.args[0]), UR_index='*'))
     
     def tex(self) -> str:
         return f" {self.args[0].tex()}^*"
@@ -147,7 +150,7 @@ class KetBase(DiracKet, StdTerm):
         super().__init__(b)
     
     def __str__(self) -> str:
-        return f"|{self.args[0]}>"
+        return str(HSeqBlock("|", str(self.args[0]), ">"))
     
     def tex(self) -> str:
         return rf" |{self.args[0].tex()} \rangle"
@@ -161,7 +164,7 @@ class KetAdj(DiracKet, StdTerm):
         super().__init__(B)
 
     def __str__(self) -> str:
-        return f"({self.args[0]}†)"
+        return str(IndexBlock(str(self.args[0]), UR_index="†"))
     
     def tex(self) -> str:
         return rf" {self.args[0].tex()}^\dagger"
@@ -240,7 +243,7 @@ class BraBase(DiracBra, StdTerm):
         super().__init__(b)
     
     def __str__(self) -> str:
-        return f"<{self.args[0]}|"
+        return str(HSeqBlock("<", str(self.args[0]), "|"))
     
     def tex(self) -> str:
         return rf" \langle {self.args[0].tex()} |"
@@ -255,7 +258,7 @@ class BraAdj(DiracBra, StdTerm):
         super().__init__(K)
 
     def __str__(self) -> str:
-        return f"({self.args[0]}†)"
+        return str(IndexBlock(str(self.args[0]), UR_index="†"))
     
     def tex(self) -> str:
         return rf" {self.args[0].tex()}^\dagger"
@@ -366,7 +369,7 @@ class OpAdj(DiracOp, StdTerm):
         super().__init__(O)
 
     def __str__(self) -> str:
-        return f"({self.args[0]}†)"
+        return str(IndexBlock(str(self.args[0]), UR_index="†"))
     
     def __repr__(self) -> str:
         return f"ADJO({repr(self.args[0])})"
