@@ -21,9 +21,7 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
         trs-term    : trs-var
                     | diracbase
                     | diracscalar
-                    | diracket
-                    | diracbra
-                    | diracop
+                    | diracnotation
         '''
         p[0] = p[1]
 
@@ -103,138 +101,97 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
         p[0] = ScalarDot(p[1], p[3])
 
 
+    # unified symbols
+        
+    def p_dirac_zero(p):
+        '''
+        diracnotation    : ZEROX
+        '''
+        p[0] = Zero()
 
+    def p_dirac_adj(p):
+        '''
+        diracnotation    : ADJ '(' trs-term ')'
+        '''
+        p[0] = Adj(p[3])
+
+    def p_dirac_scal(p):
+        '''
+        diracnotation    : trs-term SCR trs-term
+        '''
+        p[0] = Scal(p[1], p[3])
+
+    def p_dirac_add(p):
+        '''
+        diracnotation    : trs-term ADD trs-term
+        '''
+        p[0] = Add(p[1], p[3])
+
+
+    # ket
     def p_diracket1(p):
         '''
-        diracket    : ZEROK
+        diracnotation    : KET '(' trs-term ')'
         '''
-        p[0] = KetZero()
+        p[0] = KetBase(p[3])
 
 
     def p_diracket2(p):
         '''
-        diracket    : KET '(' trs-term ')'
-        '''
-        p[0] = KetBase(p[3])
-
-    def p_diracket3(p):
-        '''
-        diracket    : ADJK '(' trs-term ')'
-        '''
-        p[0] = KetAdj(p[3])
-
-    def p_diracket4(p):
-        '''
-        diracket    : trs-term SCRK trs-term
-        '''
-        p[0] = KetScal(p[1], p[3])
-
-    def p_diracket5(p):
-        '''
-        diracket    : trs-term ADDK trs-term
-        '''
-        p[0] = KetAdd(p[1], p[3])
-
-    def p_diracket6(p):
-        '''
-        diracket    : trs-term MLTK trs-term
+        diracnotation    : trs-term MLTK trs-term
         '''
         p[0] = KetApply(p[1], p[3])
 
-    def p_diracket7(p):
+    def p_diracket3(p):
         '''
-        diracket    : trs-term TSRK trs-term
+        diracnotation    : trs-term TSRK trs-term
         '''
         p[0] = KetTensor(p[1], p[3])
 
+    # bra
 
     def p_diracbra1(p):
         '''
-        diracbra    : ZEROB
-        '''
-        p[0] = BraZero()
-
-    def p_diracbra2(p):
-        '''
-        diracbra    : BRA '(' trs-term ')'
+        diracnotation    : BRA '(' trs-term ')'
         '''
         p[0] = BraBase(p[3])
 
-    def p_diracbra3(p):
+    def p_diracbra2(p):
         '''
-        diracbra    : ADJB '(' trs-term ')'
-        '''
-        p[0] = BraAdj(p[3])
-
-    def p_diracbra4(p):
-        '''
-        diracbra    : trs-term SCRB trs-term
-        '''
-        p[0] = BraScal(p[1], p[3])
-
-    def p_diracbra5(p):
-        '''
-        diracbra    : trs-term ADDB trs-term
-        '''
-        p[0] = BraAdd(p[1], p[3])
-
-    def p_diracbra6(p):
-        '''
-        diracbra    : trs-term MLTB trs-term
+        diracnotation    : trs-term MLTB trs-term
         '''
         p[0] = BraApply(p[1], p[3])
 
-    def p_diracbra7(p):
+    def p_diracbra3(p):
         '''
-        diracbra    : trs-term TSRB trs-term
+        diracnotation    : trs-term TSRB trs-term
         '''
         p[0] = BraTensor(p[1], p[3])
 
+
+    # operator
+
     def p_diracop1(p):
         '''
-        diracop     : ZEROO
-        '''
-        p[0] = OpZero()
-
-    def p_diracop2(p):
-        '''
-        diracop     : ONEO
+        diracnotation     : ONEO
         '''
         p[0] = OpOne()
 
-    def p_diracop3(p):
+    def p_diracop2(p):
         '''
-        diracop     : trs-term OUTER trs-term
+        diracnotation     : trs-term OUTER trs-term
         '''
         p[0] = OpOuter(p[1], p[3])
 
-    def p_diracop4(p):
+    def p_diracop3(p):
         '''
-        diracop     : ADJO '(' trs-term ')'
-        '''
-        p[0] = OpAdj(p[3])
-
-    def p_diracop5(p):
-        '''
-        diracop     : trs-term SCRO trs-term
-        '''
-        p[0] = OpScal(p[1], p[3])
-
-    def p_diracop6(p):
-        '''
-        diracop     : trs-term ADDO trs-term
-        '''
-        p[0] = OpAdd(p[1], p[3])
-
-    def p_diracop7(p):
-        '''
-        diracop     : trs-term MLTO trs-term
+        diracnotation     : trs-term MLTO trs-term
         '''
         p[0] = OpApply(p[1], p[3])
 
-    def p_diracop8(p):
+    def p_diracop4(p):
         '''
-        diracop     : trs-term TSRO trs-term
+        diracnotation     : trs-term TSRO trs-term
         '''
         p[0] = OpTensor(p[1], p[3])
 

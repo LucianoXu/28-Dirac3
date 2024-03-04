@@ -4,16 +4,16 @@ from diracdec import dirac_bigop_parse as parse
 
 def test_trans():
     with wolfram_backend.wolfram_session():
-        a = parse(r''' TRANK(B)''')
-        b = KetTrans(TRSVar("B"))
+        a = parse(r''' TP(B)''')
+        b = Transpose(TRSVar("B"))
         assert a == b
 
-        a = parse(r''' TRANB(K)''')
-        b = BraTrans(TRSVar("K"))
+        a = parse(r''' TP(K)''')
+        b = Transpose(TRSVar("K"))
         assert a == b
 
-        a = parse(r''' TRANO(O)''')
-        b = OpTrans(TRSVar("O"))
+        a = parse(r''' TP(O)''')
+        b = Transpose(TRSVar("O"))
         assert a == b
 
 def test_sum():

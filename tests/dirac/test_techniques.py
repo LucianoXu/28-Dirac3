@@ -25,12 +25,12 @@ def test_subst_idempotent():
             "bra0" : parse('''BRA('0')'''),
             "ket1" : parse('''KET('1')'''),
             "bra1" : parse('''BRA('1')'''),
-            "I2" : parse('''(ket0 OUTER bra0) ADDO (ket1 OUTER bra1)'''),
-            "Z" : parse('''(ket0 OUTER bra0) ADDO ("-1" SCRO (ket1 OUTER bra1))'''),
+            "I2" : parse('''(ket0 OUTER bra0) ADD (ket1 OUTER bra1)'''),
+            "Z" : parse('''(ket0 OUTER bra0) ADD ("-1" SCR (ket1 OUTER bra1))'''),
         })
 
         sub_idempotent = sub.get_idempotent()
-        assert sub_idempotent["I2"] == parse('''(KET('0') OUTER BRA('0')) ADDO (KET('1') OUTER BRA('1'))''')
+        assert sub_idempotent["I2"] == parse('''(KET('0') OUTER BRA('0')) ADD (KET('1') OUTER BRA('1'))''')
 
 
 

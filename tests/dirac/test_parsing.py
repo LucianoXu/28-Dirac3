@@ -40,24 +40,24 @@ def test_basic_S():
 
 def test_basic_K():
     with wolfram_backend.wolfram_session():
-        a = parse(r'''0K''')
-        b = KetZero()
+        a = parse(r'''0X''')
+        b = Zero()
         assert a == b
 
         a = parse(r''' KET(s) ''')
         b = KetBase(TRSVar('s'))
         assert a == b
 
-        a = parse(r''' ADJK(s) ''')
-        b = KetAdj(TRSVar('s'))
+        a = parse(r''' ADJ(s) ''')
+        b = Adj(TRSVar('s'))
         assert a == b
         
-        a = parse(r''' S SCRK K ''')
-        b = KetScal(TRSVar('S'), TRSVar('K'))
+        a = parse(r''' S SCR K ''')
+        b = Scal(TRSVar('S'), TRSVar('K'))
         assert a == b
 
-        a = parse(r''' K1 ADDK K2 ADDK K3 ''')
-        b = KetAdd(TRSVar('K1'), TRSVar('K2'), TRSVar('K3'))
+        a = parse(r''' K1 ADD K2 ADD K3 ''')
+        b = Add(TRSVar('K1'), TRSVar('K2'), TRSVar('K3'))
         assert a == b
 
         a = parse(r''' O MLTK K ''')
@@ -70,24 +70,24 @@ def test_basic_K():
 
 def test_basic_B():
     with wolfram_backend.wolfram_session():
-        a = parse(r'''0B''')
-        b = BraZero()
+        a = parse(r'''0X''')
+        b = Zero()
         assert a == b
 
         a = parse(r''' BRA(s) ''')
         b = BraBase(TRSVar('s'))
         assert a == b
 
-        a = parse(r''' ADJB(s) ''')
-        b = BraAdj(TRSVar('s'))
+        a = parse(r''' ADJ(s) ''')
+        b = Adj(TRSVar('s'))
         assert a == b
         
-        a = parse(r''' S SCRB B ''')
-        b = BraScal(TRSVar('S'), TRSVar('B'))
+        a = parse(r''' S SCR B ''')
+        b = Scal(TRSVar('S'), TRSVar('B'))
         assert a == b
 
-        a = parse(r''' B1 ADDB B2 ADDB B3 ''')
-        b = BraAdd(TRSVar('B1'), TRSVar('B2'), TRSVar('B3'))
+        a = parse(r''' B1 ADD B2 ADD B3 ''')
+        b = Add(TRSVar('B1'), TRSVar('B2'), TRSVar('B3'))
         assert a == b
 
         a = parse(r''' B MLTB O ''')
@@ -100,8 +100,8 @@ def test_basic_B():
 
 def test_basic_O():
     with wolfram_backend.wolfram_session():
-        a = parse(r'''0O''')
-        b = OpZero()
+        a = parse(r'''0X''')
+        b = Zero()
         assert a == b
 
         a = parse(r''' 1O ''')
@@ -112,16 +112,16 @@ def test_basic_O():
         b = OpOuter(TRSVar('K'), TRSVar('B'))
         assert a == b
 
-        a = parse(r''' ADJO(O)''')
-        b = OpAdj(TRSVar('O'))
+        a = parse(r''' ADJ(O)''')
+        b = Adj(TRSVar('O'))
         assert a == b
         
-        a = parse(r''' S SCRO O ''')
-        b = OpScal(TRSVar('S'), TRSVar('O'))
+        a = parse(r''' S SCR O ''')
+        b = Scal(TRSVar('S'), TRSVar('O'))
         assert a == b
 
-        a = parse(r''' O1 ADDO O2 ADDO O3 ''')
-        b = OpAdd(TRSVar('O1'), TRSVar('O2'), TRSVar('O3'))
+        a = parse(r''' O1 ADD O2 ADD O3 ''')
+        b = Add(TRSVar('O1'), TRSVar('O2'), TRSVar('O3'))
         assert a == b
 
         a = parse(r''' O1 MLTO O2 ''')

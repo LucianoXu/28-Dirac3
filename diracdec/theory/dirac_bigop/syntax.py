@@ -9,25 +9,12 @@ from ..trs import BindVarTerm
 #####################################
 # transpose
 
-class KetTrans(DiracKet, StdTerm):
-    fsymbol_print = "TRANK"
-    fsymbol = "TRANK"
+class Transpose(DiracNotation, StdTerm):
+    fsymbol_print = "TP"
+    fsymbol = "TP"
 
-    def __init__(self, B : TRSTerm):
-        super().__init__(B)
-
-    def __str__(self) -> str:
-        return str(IndexBlock(str(self.args[0]), UR_index="⊤"))
-    
-    def tex(self) -> str:
-        return rf" {self.args[0].tex()}^\top"
-    
-class BraTrans(DiracBra, StdTerm):
-    fsymbol_print = "TRANB"
-    fsymbol = "TRANB"
-
-    def __init__(self, K : TRSTerm):
-        super().__init__(K)
+    def __init__(self, X : TRSTerm):
+        super().__init__(X)
 
     def __str__(self) -> str:
         return str(IndexBlock(str(self.args[0]), UR_index="⊤"))
@@ -35,21 +22,6 @@ class BraTrans(DiracBra, StdTerm):
     def tex(self) -> str:
         return rf" {self.args[0].tex()}^\top"
     
-class OpTrans(DiracOp, StdTerm):
-    fsymbol_print = "TRANO"
-    fsymbol = "TRANO"
-
-    def __init__(self, O : TRSTerm):
-        super().__init__(O)
-
-    def __str__(self) -> str:
-        return str(IndexBlock(str(self.args[0]), UR_index="⊤"))
-    
-    def tex(self) -> str:
-        return rf" {self.args[0].tex()}^\top"
-
-
-
 #####################################
 # high-level constructions
 
@@ -76,7 +48,7 @@ class Apply(StdTerm):
     def tex(self) -> str:
         return rf" \left ({self.args[0].tex()} {self.args[1].tex()} \right)"
 
-class Sum(DiracOp, BindVarTerm):
+class Sum(DiracNotation, BindVarTerm):
     fsymbol_print = "sum"
     fsymbol = "SUM"
 

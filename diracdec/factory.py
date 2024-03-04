@@ -5,13 +5,13 @@ The script to construct rewriting systems and corresponding parsers with differe
 #########################
 # prepare the theories (functors)
 
-from .theory import dirac, delta_ext, dirac_bigop
 
 from .theory.trs import TRSTerm, TRSVar
 
 #########################
 # build some parser
 
+from .theory import dirac, delta_ext
 
 ### ALL WOLFRAM BACKEND
 
@@ -48,6 +48,7 @@ dirac_delta_trs = delta_ext.modify_trs(
 
 ############# with big-op
 
+from .theory import dirac_bigop, delta_ext
 from .components import wolfram_simple
 
 dirac_bigop_parser = dirac_bigop.construct_parser(wolfram_simple.WolframCScalar, wolfram_simple.WolframABase)

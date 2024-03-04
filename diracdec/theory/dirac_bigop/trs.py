@@ -42,197 +42,115 @@ def construct_trs(
     #####################################################
     # transpose
 
-    KET_TRANS_1 = TRSRule(
-        "KET-TRANS-1",
-        lhs = parse(r'''TRANK(0B)'''),
-        rhs = parse(r'''0K'''),
+    TRANS_UNI_1 = TRSRule(
+        "TRANS-UNI-1",
+        lhs = parse(r'''TP(0X)'''),
+        rhs = parse(r'''0X'''),
     )
-    rules.append(KET_TRANS_1)
+    rules.append(TRANS_UNI_1)
 
-    KET_TRANS_2 = TRSRule(
-        "KET-TRANS-2",
-        lhs = parse(r'''TRANK(BRA(s))'''),
+    TRANS_UNI_2 = TRSRule(
+        "TRANS-UNI-2",
+        lhs = parse(r'''TP(ADJ(X0))'''),
+        rhs = parse(r'''ADJ(TP(X0))''')
+    )
+    rules.append(TRANS_UNI_2)
+
+    TRANS_UNI_3 = TRSRule(
+        "TRANS-UNI-3",
+        lhs = parse(r'''TP(TP(X0))'''),
+        rhs = parse(r'''X0'''),
+    )
+    rules.append(TRANS_UNI_3)
+
+    TRANS_UNI_4 = TRSRule(
+        "TRANS-UNI-4",
+        lhs = parse(r'''TP(S0 SCR X0)'''),
+        rhs = parse(r'''S0 SCR TP(X0)'''),
+    )
+    rules.append(TRANS_UNI_4)
+
+    def trans_5_rewrite(rule, term, side_info):
+        if isinstance(term, Transpose) and isinstance(term.args[0], Add):
+                new_args = tuple(Transpose(arg) for arg in term.args[0].args)
+                return Add(*new_args)
+    TRANS_UNI_5 = TRSRule(
+        "TRANS-UNI-5",
+        lhs = "TP(X1 ADD X2)",
+        rhs = "TP(X1) ADD TP(X2)",
+        rewrite_method=trans_5_rewrite
+    )
+    rules.append(TRANS_UNI_5)
+
+    TRANS_KET_1 = TRSRule(
+        "TRANS-KET-1",
+        lhs = parse(r'''TP(BRA(s))'''),
         rhs = parse(r'''KET(s)'''),
     )
-    rules.append(KET_TRANS_2)
+    rules.append(TRANS_KET_1)
 
-    KET_TRANS_3 = TRSRule(
-        "KET-TRANS-3",
-        lhs = parse(r'''TRANK(ADJB(K0))'''),
-        rhs = parse(r'''ADJK(TRANB(K0))''')
+    TRANS_KET_2 = TRSRule(
+        "TRANS-KET-2",
+        lhs = parse(r'''TP(B0 MLTB O0)'''),
+        rhs = parse(r'''TP(O0) MLTK TP(B0)''')
     )
-    rules.append(KET_TRANS_3)
+    rules.append(TRANS_KET_2)
 
-    KET_TRANS_4 = TRSRule(
-        "KET-TRANS-4",
-        lhs = parse(r'''TRANK(TRANB(K0))'''),
-        rhs = parse(r'''K0'''),
+    TRANS_KET_3 = TRSRule(
+        "TRANS-KET-3",
+        lhs = parse(r'''TP(B1 TSRB B2)'''),
+        rhs = parse(r'''TP(B1) TSRK TP(B2)''')
     )
-    rules.append(KET_TRANS_4)
+    rules.append(TRANS_KET_3)
 
-    KET_TRANS_5 = TRSRule(
-        "KET-TRANS-5",
-        lhs = parse(r'''TRANK(S0 SCRB B0)'''),
-        rhs = parse(r'''S0 SCRK TRANK(B0)'''),
-    )
-    rules.append(KET_TRANS_5)
-
-    def ket_trans_6_rewrite(rule, term, side_info):
-        if isinstance(term, KetTrans) and isinstance(term.args[0], BraAdd):
-                new_args = tuple(KetTrans(arg) for arg in term.args[0].args)
-                return KetAdd(*new_args)
-    KET_TRANS_6 = TRSRule(
-        "KET-TRANS-6",
-        lhs = "TRANK(B1 ADDB B2)",
-        rhs = "TRANK(B1) ADDK TRANK(B2)",
-        rewrite_method=ket_trans_6_rewrite
-    )
-    rules.append(KET_TRANS_6)
-
-    KET_TRANS_7 = TRSRule(
-         "KET-TRANS-7",
-         lhs = parse(r'''TRANK(B0 MLTB O0)'''),
-         rhs = parse(r'''TRANO(O0) MLTK TRANK(B0)''')
-    )
-    rules.append(KET_TRANS_7)
-
-    KET_TRANS_8 = TRSRule(
-        "KET-TRANS-8",
-        lhs = parse(r'''TRANK(B1 TSRB B2)'''),
-        rhs = parse(r'''TRANK(B1) TSRK TRANK(B2)''')
-    )
-    rules.append(KET_TRANS_8)
-
-
-    BRA_TRANS_1 = TRSRule(
-        "BRA-TRANS-1",
-        lhs = parse(r'''TRANB(0K)'''),
-        rhs = parse(r'''0B'''),
-    )
-    rules.append(BRA_TRANS_1)
-
-    BRA_TRANS_2 = TRSRule(
-        "BRA-TRANS-2",
-        lhs = parse(r'''TRANB(KET(s))'''),
+    TRANS_BRA_1 = TRSRule(
+        "TRANS-BRA-1",
+        lhs = parse(r'''TP(KET(s))'''),
         rhs = parse(r'''BRA(s)'''),
     )
-    rules.append(BRA_TRANS_2)
+    rules.append(TRANS_BRA_1)
 
-    BRA_TRANS_3 = TRSRule(
-        "BRA-TRANS-3",
-        lhs = parse(r'''TRANB(ADJK(B0))'''),
-        rhs = parse(r'''ADJB(TRANK(B0))'''),
+    TRANS_BRA_2 = TRSRule(
+        "TRANS-BRA-2",
+        lhs = parse(r'''TP(O0 MLTK K0)'''),
+        rhs = parse(r'''TP(K0) MLTB TP(O0)''')
     )
-    rules.append(BRA_TRANS_3)
+    rules.append(TRANS_BRA_2)
 
-    BRA_TRANS_4 = TRSRule(
-        "BRA-TRANS-4",
-        lhs = parse(r'''TRANB(TRANK(B0))'''),
-        rhs = parse(r'''B0'''),
+    TRANS_BRA_3 = TRSRule(
+        "TRANS-BRA-3",
+        lhs = parse(r'''TP(K1 TSRK K2)'''),
+        rhs = parse(r'''TP(K1) TSRB TP(K2)''')
     )
-    rules.append(BRA_TRANS_4)
+    rules.append(TRANS_BRA_3)
 
-    BRA_TRANS_5 = TRSRule(
-        "BRA-TRANS-5",
-        lhs = parse(r'''TRANB(S0 SCRK K0)'''),
-        rhs = parse(r'''S0 SCRB TRANB(K0)'''),
-    )
-    rules.append(BRA_TRANS_5)
-
-    def bra_trans_6_rewrite(rule, term, side_info):
-        if isinstance(term, BraTrans) and isinstance(term.args[0], KetAdd):
-                new_args = tuple(BraTrans(arg) for arg in term.args[0].args)
-                return BraAdd(*new_args)
-    BRA_TRANS_6 = TRSRule(
-        "BRA-TRANS-6",
-        lhs = "TRANB(K1 ADDK K2)",
-        rhs = "TRANB(K1) ADDB TRANB(K2)",
-        rewrite_method=bra_trans_6_rewrite
-    )
-    rules.append(BRA_TRANS_6)
-
-    BRA_TRANS_7 = TRSRule(
-         "BRA-TRANS-7",
-         lhs = parse(r'''TRANB(O0 MLTK K0)'''),
-         rhs = parse(r'''TRANB(K0) MLTB TRANO(O0)''')
-    )
-    rules.append(BRA_TRANS_7)
-
-    BRA_TRANS_8 = TRSRule(
-        "BRA-TRANS-8",
-        lhs = parse(r'''TRANB(K1 TSRK K2)'''),
-        rhs = parse(r'''TRANB(K1) TSRB TRANB(K2)''')
-    )
-    rules.append(BRA_TRANS_8)
-
-
-    OPT_TRANS_1 = TRSRule(
-        "OPT-TRANS-1",
-        lhs = parse(r'''TRANO(0O)'''),
-        rhs = parse(r'''0O'''),
-    )
-    rules.append(OPT_TRANS_1)
-
-    OPT_TRANS_2 = TRSRule(
-        "OPT-TRANS-2",
-        lhs = parse(r'''TRANO(1O)'''),
+    TRANS_OPT_1 = TRSRule(
+        "TRANS-OPT-1",
+        lhs = parse(r'''TP(1O)'''),
         rhs = parse(r'''1O'''),
     )
-    rules.append(OPT_TRANS_2)
+    rules.append(TRANS_OPT_1)
 
-    OPT_TRANS_3 = TRSRule(
-        "OPT-TRANS-3",
-        lhs = parse(r'''TRANO(K0 OUTER B0)'''),
-        rhs = parse(r'''TRANK(B0) OUTER TRANB(K0)''')
+    TRANS_OPT_2 = TRSRule(
+        "TRANS-OPT-2",
+        lhs = parse(r'''TP(K0 OUTER B0)'''),
+        rhs = parse(r'''TP(B0) OUTER TP(K0)''')
     )
-    rules.append(OPT_TRANS_3)
+    rules.append(TRANS_OPT_2)
 
-    OPT_TRANS_4 = TRSRule(
-        "OPT-TRANS-4",
-        lhs = parse(r'''TRANO(ADJO(O0))'''),
-        rhs = parse(r'''ADJO(TRANO(O0))''')
+    TRANS_OPT_3 = TRSRule(
+        "TRANS-OPT-3",
+        lhs = parse(r'''TP(O1 MLTO O2)'''),
+        rhs = parse(r'''TP(O2) MLTO TP(O1)''')
     )
-    rules.append(OPT_TRANS_4)
+    rules.append(TRANS_OPT_3)
 
-    OPT_TRANS_5 = TRSRule(
-        "OPT-TRANS-5",
-        lhs = parse(r'''TRANO(TRANO(O0))'''),
-        rhs = parse(r'''O0'''),
+    TRANS_OPT_4 = TRSRule(
+        "TRANS-OPT-4",
+        lhs = parse(r'''TP(O1 TSRO O2)'''),
+        rhs = parse(r'''TP(O1) TSRO TP(O2)''')
     )
-    rules.append(OPT_TRANS_5)
-
-    OPT_TRANS_6 = TRSRule(
-        "OPT-TRANS-6",
-        lhs = parse(r'''TRANO(S0 SCRO O0)'''),
-        rhs = parse(r'''S0 SCRO TRANO(O0)'''),
-    )
-    rules.append(OPT_TRANS_6)
-
-    def opt_trans_7_rewrite(rule, term, side_info):
-        if isinstance(term, OpTrans) and isinstance(term.args[0], OpAdd):
-                new_args = tuple(OpTrans(arg) for arg in term.args[0].args)
-                return OpAdd(*new_args)
-    OPT_TRANS_7 = TRSRule(
-        "OPT-TRANS-7",
-        lhs = "TRANO(O1 ADDO O2)",
-        rhs = "TRANO(O1) ADDO TRANO(O2)",
-        rewrite_method=opt_trans_7_rewrite
-    )
-    rules.append(OPT_TRANS_7)
-
-    OPT_TRANS_8 = TRSRule(
-         "OPT-TRANS-8",
-         lhs = parse(r'''TRANO(O1 MLTO O2)'''),
-         rhs = parse(r'''TRANO(O2) MLTO TRANO(O1)''')
-    )
-    rules.append(OPT_TRANS_8)
-
-    OPT_TRANS_9 = TRSRule(
-        "OPT-TRANS-9",
-        lhs = parse(r'''TRANO(O1 TSRO O2)'''),
-        rhs = parse(r'''TRANO(O1) TSRO TRANO(O2)''')
-    )
-    rules.append(OPT_TRANS_9)
+    rules.append(TRANS_OPT_4)
 
     #####################################################
     # sum-elim
@@ -250,12 +168,12 @@ def construct_trs(
 
 
     def sum_elim_2_rewrite(rule, term, side_info):
-        if isinstance(term, Sum) and isinstance(term.body, (KetZero, BraZero, OpZero)):
+        if isinstance(term, Sum) and isinstance(term.body, Zero):
             return type(term.body)()
     SUM_ELIM_2 = TRSRule(
         "SUM-ELIM-2",
-        lhs = "SUM(i, {0K/0B/0O})",
-        rhs = "0O",
+        lhs = "SUM(i, 0X)",
+        rhs = "0X",
         rewrite_method = sum_elim_2_rewrite
     )
     rules.append(SUM_ELIM_2)
@@ -354,7 +272,7 @@ def construct_trs(
                 route.append(cursor)
                 cursor = cursor.body
 
-            if isinstance(cursor, (KetScal, BraScal, OpScal)) and isinstance(cursor.args[0], ScalarDelta):
+            if isinstance(cursor, Scal) and isinstance(cursor.args[0], ScalarDelta):
 
                 delta = cursor.args[0]
                 if term.bind_var == delta.args[0]:
@@ -380,7 +298,7 @@ def construct_trs(
             
     SUM_ELIM_5 = TRSRule(
         "SUM-ELIM-5",
-        lhs = "SUM(i, DELTA(i, s) {SCRK/SCRB/SCRO} X)",
+        lhs = "SUM(i, DELTA(i, s) SCR X)",
         rhs = "X[i:=s]",
         rewrite_method = sum_elim_5_rewrite
     )
@@ -396,7 +314,7 @@ def construct_trs(
                 route.append(cursor)
                 cursor = cursor.body
 
-            if isinstance(cursor, (KetScal, BraScal, OpScal)) and isinstance(cursor.args[0], ScalarMlt):
+            if isinstance(cursor, Scal) and isinstance(cursor.args[0], ScalarMlt):
 
                 for i, delta in enumerate(cursor.args[0].args):
                     if isinstance(delta, ScalarDelta):
@@ -424,15 +342,15 @@ def construct_trs(
             
     SUM_ELIM_6 = TRSRule(
         "SUM-ELIM-6",
-        lhs = "SUM(i, (DELTA(i, s) MLTS S0) {SCRK/SCRB/SCRO} X)",
-        rhs = "S[i:=s] {SCRK/SCRB/SCRO} X[i:=s]",
+        lhs = "SUM(i, (DELTA(i, s) MLTS S0) SCR X)",
+        rhs = "S[i:=s] SCR X[i:=s]",
         rewrite_method = sum_elim_6_rewrite
     )
     rules.append(SUM_ELIM_6)
 
     def sum_elim_7_rewrite(rule, term, side_info):
         if isinstance(term, Sum):
-            if isinstance(term.body, KetScal) and\
+            if isinstance(term.body, Scal) and\
                 isinstance(term.body.args[0], ScalarDot) and\
                 isinstance(term.body.args[0].args[0], BraBase) and\
                 isinstance(term.body.args[1], KetBase) and\
@@ -441,7 +359,7 @@ def construct_trs(
                 return term.body.args[0].args[1]
     SUM_ELIM_7 = TRSRule(
         "SUM-ELIM-7",
-        lhs = "SUM(i, (BRA(i) DOT K0) SCRK KET(i))",
+        lhs = "SUM(i, (BRA(i) DOT K0) SCR KET(i))",
         rhs = "K0",
         rewrite_method = sum_elim_7_rewrite
     )
@@ -449,7 +367,7 @@ def construct_trs(
 
     def sum_elim_8_rewrite(rule, term, side_info):
         if isinstance(term, Sum):
-            if isinstance(term.body, BraScal) and\
+            if isinstance(term.body, Scal) and\
                 isinstance(term.body.args[0], ScalarDot) and\
                 isinstance(term.body.args[0].args[1], KetBase) and\
                 isinstance(term.body.args[1], BraBase) and\
@@ -458,7 +376,7 @@ def construct_trs(
                 return term.body.args[0].args[0]
     SUM_ELIM_8 = TRSRule(
         "SUM-ELIM-8",
-        lhs = "SUM(i, (B0 DOT KET(i)) SCRB BRA(i))",
+        lhs = "SUM(i, (B0 DOT KET(i)) SCR BRA(i))",
         rhs = "B0",
         rewrite_method = sum_elim_8_rewrite
     )
@@ -468,7 +386,7 @@ def construct_trs(
         '''
         Note: only SUM-SWAP-EQ is considered in matching.
         '''
-        if isinstance(term, Sum) and isinstance(term.body, Sum) and isinstance(term.body.body, OpScal):
+        if isinstance(term, Sum) and isinstance(term.body, Sum) and isinstance(term.body.body, Scal):
             body = term.body.body
             if isinstance(body.args[0], ScalarDot) and\
                 isinstance(body.args[0].args[0], BraBase) and\
@@ -486,7 +404,7 @@ def construct_trs(
                     return body.args[0].args[1].args[0]
     SUM_ELIM_9 = TRSRule(
         "SUM-ELIM-9",
-        lhs = "SUM(i, SUM(j, (BRA(i) DOT (A MLTK KET(j))) SCRO (KET(i) OUTER BRA(j)) ))",
+        lhs = "SUM(i, SUM(j, (BRA(i) DOT (A MLTK KET(j))) SCR (KET(i) OUTER BRA(j)) ))",
         rhs = "A",
         rewrite_method = sum_elim_9_rewrite
     )
@@ -496,7 +414,7 @@ def construct_trs(
         '''
         Note: only SUM-SWAP-EQ is considered in matching.
         '''
-        if isinstance(term, Sum) and isinstance(term.body, Sum) and isinstance(term.body.body, OpScal):
+        if isinstance(term, Sum) and isinstance(term.body, Sum) and isinstance(term.body.body, Scal):
             body = term.body.body
             if isinstance(body.args[0], ScalarDot) and\
                 isinstance(body.args[0].args[0], BraBase) and\
@@ -511,11 +429,11 @@ def construct_trs(
                 if base_j == body.args[1].args[0].args[0] and\
                     base_i == body.args[1].args[1].args[0] and\
                     (term.bind_var == base_i and term.body.bind_var == base_j or term.bind_var == base_j and term.body.bind_var == base_i):
-                    return OpTrans(body.args[0].args[1].args[0])
+                    return Transpose(body.args[0].args[1].args[0])
     SUM_ELIM_10 = TRSRule(
         "SUM-ELIM-10",
-        lhs = "SUM(i, SUM(j, (BRA(i) DOT (A MLTK KET(j))) SCRO (KET(j) OUTER BRA(i)) ))",
-        rhs = "TRANO(A)",
+        lhs = "SUM(i, SUM(j, (BRA(i) DOT (A MLTK KET(j))) SCR (KET(j) OUTER BRA(i)) ))",
+        rhs = "TP(A)",
         rewrite_method = sum_elim_10_rewrite
     )
     rules.append(SUM_ELIM_10)
@@ -562,47 +480,47 @@ def construct_trs(
 
 
     def sum_dist_3_rewrite(rule, term, side_info):
-        if isinstance(term, (KetAdj, BraAdj, OpAdj)) and isinstance(term.args[0], Sum):
-            return Sum(term.args[0].bind_var, type(term)(term.args[0].body))
+        if isinstance(term, Adj) and isinstance(term.args[0], Sum):
+            return Sum(term.args[0].bind_var, Adj(term.args[0].body))
     SUM_DIST_3 = TRSRule(
         "SUM-DIST-3",
-        lhs = "{ADJK/ADJB/ADJO}(SUM(i, A))",
-        rhs = "SUM(i, {ADJK/ADJB/ADJO}(A))",
+        lhs = "ADJ(SUM(i, A))",
+        rhs = "SUM(i, ADJ(A))",
         rewrite_method = sum_dist_3_rewrite
     )
     rules.append(SUM_DIST_3)
 
 
     def sum_dist_4_rewrite(rule, term, side_info):
-        if isinstance(term, (KetTrans, BraTrans, OpTrans)) and isinstance(term.args[0], Sum):
-            return Sum(term.args[0].bind_var, type(term)(term.args[0].body))
+        if isinstance(term, Transpose) and isinstance(term.args[0], Sum):
+            return Sum(term.args[0].bind_var, Transpose(term.args[0].body))
     SUM_DIST_4 = TRSRule(
         "SUM-DIST-4",
-        lhs = "{TRANK/TRANB/TRANO}(SUM(i, A))",
-        rhs = "SUM(i, {TRANK/TRANB/TRANO}(A))",
+        lhs = "TP(SUM(i, A))",
+        rhs = "SUM(i, TP(A))",
         rewrite_method = sum_dist_4_rewrite
     )
     rules.append(SUM_DIST_4)
 
 
     def sum_dist_5_rewrite(rule, term, side_info):
-        if isinstance(term, (KetScal, BraScal, OpScal)) and isinstance(term.args[1], Sum):
-            return Sum(term.args[1].bind_var, type(term)(term.args[0], term.args[1].body))
+        if isinstance(term, Scal) and isinstance(term.args[1], Sum):
+            return Sum(term.args[1].bind_var, Scal(term.args[0], term.args[1].body))
     SUM_DIST_5 = TRSRule(
         "SUM-DIST-5",
-        lhs = "S0 {SCRK/SCRB/SCRO} SUM(i, X)",
-        rhs = "SUM(i, S0 {SCRK/SCRB/SCRO} X)",
+        lhs = "S0 SCR SUM(i, X)",
+        rhs = "SUM(i, S0 SCR X)",
         rewrite_method = sum_dist_5_rewrite
     )
     rules.append(SUM_DIST_5)
 
     def sum_dist_6_rewrite(rule, term, side_info):
-        if isinstance(term, (KetScal, BraScal, OpScal)) and isinstance(term.args[0], Sum):
-            return Sum(term.args[0].bind_var, type(term)(term.args[0].body, term.args[1]))
+        if isinstance(term, Scal) and isinstance(term.args[0], Sum):
+            return Sum(term.args[0].bind_var, Scal(term.args[0].body, term.args[1]))
     SUM_DIST_6 = TRSRule(
         "SUM-DIRAC-6",
-        lhs = "SUM(i, S0) {SCRK/SCRB/SCRO} X",
-        rhs = "SUM(i, S0 {SCRK/SCRB/SCRO} X)",
+        lhs = "SUM(i, S0) SCR X",
+        rhs = "SUM(i, S0 SCR X)",
         rewrite_method = sum_dist_6_rewrite
     )
     rules.append(SUM_DIST_6)
@@ -695,7 +613,7 @@ def construct_trs(
     rules.append(SUM_DIST_10)
 
     def sum_add_1_rewrite(rule, term, side_info):
-        if isinstance(term, (ScalarAdd, KetAdd, BraAdd, OpAdd)):
+        if isinstance(term, (ScalarAdd, Add)):
             for i, itemA in enumerate(term.args):
                 if isinstance(itemA, Sum):
                     for j in range(i+1, len(term.args)):
@@ -716,8 +634,8 @@ def construct_trs(
 
     SUM_ADD_1 = TRSRule(
         "SUM-ADD-1",
-        lhs = "SUM(i, A) {ADDS/ADDK/ADDB/ADDO} SUM(j, B)",
-        rhs = "SUM(k, A[i:=k] {ADDS/ADDK/ADDB/ADDO} B[j:=k])",
+        lhs = "SUM(i, A) {ADDS/ADD} SUM(j, B)",
+        rhs = "SUM(k, A[i:=k] {ADDS/ADD} B[j:=k])",
         rewrite_method = sum_add_1_rewrite
     )
     rules.append(SUM_ADD_1)
@@ -749,7 +667,7 @@ def construct_trs(
     def juxtapose_rewrite(term: TRSTerm) -> TRSTerm:
         if isinstance(term, ScalarDot):
             B, K = term.args[0], term.args[1]
-            return Juxtapose(ScalarDot(B, K), ScalarDot(BraTrans(K), KetTrans(B)))
+            return Juxtapose(ScalarDot(B, K), ScalarDot(Transpose(K), Transpose(B)))
         
         elif isinstance(term, StdTerm):
             return type(term)(*map(juxtapose_rewrite, term.args))

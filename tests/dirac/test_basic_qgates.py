@@ -10,33 +10,33 @@ with wolfram_backend.wolfram_session():
         "bra0" : parse('''BRA('0')'''),
         "ket1" : parse('''KET('1')'''),
         "bra1" : parse('''BRA('1')'''),
-        "ketP" : parse(''' "Sqrt[1/2]" SCRK (ket0 ADDK ket1) '''),
-        "braP" : parse(''' "Sqrt[1/2]" SCRB (bra0 ADDB bra1) '''),
-        "ketM" : parse(''' "Sqrt[1/2]" SCRK (ket0 ADDK ("-1" MLTK ket1)) '''),
-        "braM" : parse(''' "Sqrt[1/2]" SCRB (bra0 ADDB ("-1" MLTB bra1)) '''),
+        "ketP" : parse(''' "Sqrt[1/2]" SCR (ket0 ADD ket1) '''),
+        "braP" : parse(''' "Sqrt[1/2]" SCR (bra0 ADD bra1) '''),
+        "ketM" : parse(''' "Sqrt[1/2]" SCR (ket0 ADD ("-1" MLTK ket1)) '''),
+        "braM" : parse(''' "Sqrt[1/2]" SCR (bra0 ADD ("-1" MLTB bra1)) '''),
 
-        "beta00" : parse(''' "Sqrt[1/2]" SCRK ((ket0 TSRK ket0) ADDK (ket1 TSRK ket1))'''),
+        "beta00" : parse(''' "Sqrt[1/2]" SCR ((ket0 TSRK ket0) ADD (ket1 TSRK ket1))'''),
 
-        "I2" : parse('''(ket0 OUTER bra0) ADDO (ket1 OUTER bra1)'''),
+        "I2" : parse('''(ket0 OUTER bra0) ADD (ket1 OUTER bra1)'''),
 
-        "Z" : parse('''(ket0 OUTER bra0) ADDO ("-1" SCRO (ket1 OUTER bra1))'''),
+        "Z" : parse('''(ket0 OUTER bra0) ADD ("-1" SCR (ket1 OUTER bra1))'''),
 
-        "X" : parse('''(ket0 OUTER bra1) ADDO (ket1 OUTER bra0)'''),
+        "X" : parse('''(ket0 OUTER bra1) ADD (ket1 OUTER bra0)'''),
 
-        "Y" : parse('''("-I" SCRO (ket0 OUTER bra1)) ADDO ("I" SCRO (ket1 OUTER bra0))'''),
+        "Y" : parse('''("-I" SCR (ket0 OUTER bra1)) ADD ("I" SCR (ket1 OUTER bra0))'''),
 
 
-        "H" : parse(''' "Sqrt[1/2]" SCRO ((ket0 OUTER bra0) ADDO (ket0 OUTER bra1) ADDO (ket1 OUTER bra0) ADDO ("-1" SCRO (ket1 OUTER bra1)))'''),
+        "H" : parse(''' "Sqrt[1/2]" SCR ((ket0 OUTER bra0) ADD (ket0 OUTER bra1) ADD (ket1 OUTER bra0) ADD ("-1" SCR (ket1 OUTER bra1)))'''),
 
         "CX": parse(''' ((ket0 TSRK ket0) OUTER (bra0 TSRB bra0))
-                    ADDO ((ket0 TSRK ket1) OUTER (bra0 TSRB bra1)) 
-                    ADDO ((ket1 TSRK ket1) OUTER (bra1 TSRB bra0))
-                    ADDO ((ket1 TSRK ket0) OUTER (bra1 TSRB bra1))'''),
+                    ADD ((ket0 TSRK ket1) OUTER (bra0 TSRB bra1)) 
+                    ADD ((ket1 TSRK ket1) OUTER (bra1 TSRB bra0))
+                    ADD ((ket1 TSRK ket0) OUTER (bra1 TSRB bra1))'''),
 
         "CZ": parse(''' ((ket0 TSRK ket0) OUTER (bra0 TSRB bra0))
-                    ADDO ((ket0 TSRK ket1) OUTER (bra0 TSRB bra1)) 
-                    ADDO ((ket1 TSRK ket0) OUTER (bra1 TSRB bra0))
-                    ADDO ("-1" SCRO ((ket1 TSRK ket1) OUTER (bra1 TSRB bra1)))'''),
+                    ADD ((ket0 TSRK ket1) OUTER (bra0 TSRB bra1)) 
+                    ADD ((ket1 TSRK ket0) OUTER (bra1 TSRB bra0))
+                    ADD ("-1" SCR ((ket1 TSRK ket1) OUTER (bra1 TSRB bra1)))'''),
 
     }).get_idempotent()
 
@@ -55,11 +55,11 @@ def test_XYZ():
         assert trs.normalize(a) == trs.normalize(b)
 
         a = sub(parse(''' X MLTO Y '''))
-        b = sub(parse(''' "I" SCRO Z '''))
+        b = sub(parse(''' "I" SCR Z '''))
         assert trs.normalize(a) == trs.normalize(b)
 
         a = sub(parse(''' Y MLTO X '''))
-        b = sub(parse(''' "-I" SCRO Z '''))
+        b = sub(parse(''' "-I" SCR Z '''))
         assert trs.normalize(a) == trs.normalize(b)
 
 def test_Hadamard():
@@ -98,21 +98,21 @@ def test_QCQI_Theorem_4_1():
 
         # define the rotation gates
         sub_rot = Subst({
-            "Rzbeta" : sub(parse(''' ("Cos[beta/2]" SCRO I2) ADDO ("- Sin[beta/2] I" SCRO Z) ''')),
-            "Rygamma" : sub(parse(''' ("Cos[gamma/2]" SCRO I2) ADDO ("- Sin[gamma/2] I" SCRO Y) ''')),
-            "Rzdelta" : sub(parse(''' ("Cos[delta/2]" SCRO I2) ADDO ("- Sin[delta/2] I" SCRO Z) ''')),
+            "Rzbeta" : sub(parse(''' ("Cos[beta/2]" SCR I2) ADD ("- Sin[beta/2] I" SCR Z) ''')),
+            "Rygamma" : sub(parse(''' ("Cos[gamma/2]" SCR I2) ADD ("- Sin[gamma/2] I" SCR Y) ''')),
+            "Rzdelta" : sub(parse(''' ("Cos[delta/2]" SCR I2) ADD ("- Sin[delta/2] I" SCR Z) ''')),
         })
 
         # get the idempotent operation
         new_sub = sub_rot.composite(sub).get_idempotent()
 
         # RHS - rotations
-        a = new_sub(parse(''' "Exp[I a]" SCRO (Rzbeta MLTO Rygamma MLTO Rzdelta) '''))
+        a = new_sub(parse(''' "Exp[I a]" SCR (Rzbeta MLTO Rygamma MLTO Rzdelta) '''))
         # LHS - U
-        b = new_sub(parse(''' ("Exp[I (a - beta/2 - delta/2)] Cos[gamma/2]" SCRO (ket0 OUTER bra0))
-            ADDO ("- Exp[I (a - beta/2 + delta/2)] Sin[gamma/2]" SCRO (ket0 OUTER bra1)) 
-            ADDO ("Exp[I (a + beta/2 - delta/2)] Sin[gamma/2]" SCRO (ket1 OUTER bra0))
-            ADDO ("Exp[I (a + beta/2 + delta/2)] Cos[gamma/2]" SCRO (ket1 OUTER bra1))'''))
+        b = new_sub(parse(''' ("Exp[I (a - beta/2 - delta/2)] Cos[gamma/2]" SCR (ket0 OUTER bra0))
+            ADD ("- Exp[I (a - beta/2 + delta/2)] Sin[gamma/2]" SCR (ket0 OUTER bra1)) 
+            ADD ("Exp[I (a + beta/2 - delta/2)] Sin[gamma/2]" SCR (ket1 OUTER bra0))
+            ADD ("Exp[I (a + beta/2 + delta/2)] Cos[gamma/2]" SCR (ket1 OUTER bra1))'''))
         
         norm_a = trs.normalize(sub(a), alg = "inner_most")
         norm_b = trs.normalize(sub(b), alg = "inner_most")

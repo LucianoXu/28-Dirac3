@@ -13,54 +13,40 @@ reserved = {
     'CONJS'      : 'CONJS',
     'DOT'        : 'DOT',       # infix binary
 
-    # '0K'         : 'ZEROK',
+    # unified symbol
+    'ADJ'        : 'ADJ',
+    'SCR'        : 'SCR',
+    'ADD'        : 'ADD',
+
     'KET'        : 'KET',
-    'ADJK'       : 'ADJK',
-    'SCRK'       : 'SCRK',      # infix binary
-    'ADDK'       : 'ADDK',      # infix binary
     'MLTK'       : 'MLTK',      # infix binary
     'TSRK'       : 'TSRK',      # infix binary
 
-    # '0B'         : 'ZEROB',
     'BRA'        : 'BRA',
-    'ADJB'       : 'ADJB',
-    'SCRB'       : 'SCRB',      # infix binary
-    'ADDB'       : 'ADDB',      # infix binary
     'MLTB'       : 'MLTB',      # infix binary
     'TSRB'       : 'TSRB',      # infix binary
 
-    # '0O'         : 'ZEROO',
-    # '1O'         : 'ONEO', 
     'OUTER'      : 'OUTER',     # infix binary
-    'ADJO'       : 'ADJO',
-    'SCRO'       : 'SCRO',      # infix binary
-    'ADDO'       : 'ADDO',      # infix binary
     'MLTO'       : 'MLTO',      # infix binary
     'TSRO'       : 'TSRO',      # infix binary
 
-
     ########################################
     # transpose
-    'TRANK'     : 'TRANK',
-    'TRANB'     : 'TRANB',
-    'TRANO'     : 'TRANO',
+    'TP'        : 'TP',
 
     ########################################
     # big-op
-    'SUM'      : 'SUM',
+    'SUM'       : 'SUM',
 
     ########################################
     # abstraction and application
-    'FUN'    : 'LAMBDA',
-    
+    'FUN'       : 'LAMBDA',
 }
 
 tokens = [
     # 'INT', 
     'ID',
-    'ZEROK',
-    'ZEROB',
-    'ZEROO',
+    'ZEROX',
     'ONEO',
 
     # escape to complex scalar
@@ -73,14 +59,12 @@ tokens = [
 
 literals = ['(', ')', ',', '.', '@']
 
-t_ZEROK = '0K'
-t_ZEROB = '0B'
-t_ZEROO = '0O'
+t_ZEROX = '0X'
 t_ONEO = '1O'
 
 
 def t_ID(t):
-    r'[a-zA-Z][a-zA-Z0-9]*'
+    r'[a-zA-Z\_][a-zA-Z0-9\_]*'
     t.type = reserved.get(t.value, 'ID')
     return t
 

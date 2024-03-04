@@ -119,30 +119,63 @@ class ScalarDot(DiracScalar, TRSInfixBinary):
         return rf" ({self.args[0].tex()} \cdot {self.args[1].tex()})"
 
 
-############################################
-# DiracKet
-    
-class DiracKet(DiracSyntax):
+class DiracNotation(DiracSyntax):
     ...
 
-class KetZero(DiracKet, StdTerm):
-    fsymbol_print = "0K"
-    fsymbol = "0K"
-
-    def __init__(self) :
-        super().__init__()
+############################################
+# Unified Symbol
+    
+class Zero(DiracNotation, StdTerm):
+    fsymbol_print = "𝟎"
+    fsymbol_print = "0X"
 
     def __str__(self) -> str:
-        return "0K"
+        return "𝟎"
     
     def __repr__(self) -> str:
-        return "0K"
+        return "0X"
     
     def tex(self) -> str:
-        return r" \mathbf{0}_\mathcal{K}"
+        return r" \mathbf{0}"
+        
+
+class Adj(DiracNotation, StdTerm):
+    fsymbol_print = "ADJ"
+    fsymbol = "ADJ"
+
+    def __init__(self, X: TRSTerm):
+        super().__init__(X)
+
+    def __str__(self) -> str:
+        return str(IndexBlock(str(self.args[0]), UR_index="†"))
     
+    def tex(self) -> str:
+        return rf" {self.args[0].tex()}^\dagger"
     
-class KetBase(DiracKet, StdTerm):
+
+class Scal(DiracNotation, TRSInfixBinary):
+    fsymbol_print = "."
+    fsymbol = "SCR"
+
+    def __init__(self, S: TRSTerm, X: TRSTerm):
+        TRSInfixBinary.__init__(self, S, X)
+
+    def tex(self) -> str:
+        return rf" {self.args[0].tex()} {self.args[1].tex()}"
+
+    
+class Add(DiracNotation, TRS_AC):
+    fsymbol_print = '+'
+    fsymbol = 'ADD'
+
+    def __init__(self, *tup : TRSTerm):
+        TRS_AC.__init__(self, *tup)
+    
+        
+############################################
+# DiracKet
+        
+class KetBase(DiracNotation, StdTerm):
     fsymbol_print = "ket"
     fsymbol = "KET"
 
@@ -156,39 +189,7 @@ class KetBase(DiracKet, StdTerm):
         return rf" |{self.args[0].tex()} \rangle"
     
     
-class KetAdj(DiracKet, StdTerm):
-    fsymbol_print = "ADJK"
-    fsymbol = "ADJK"
-
-    def __init__(self, B: TRSTerm):
-        super().__init__(B)
-
-    def __str__(self) -> str:
-        return str(IndexBlock(str(self.args[0]), UR_index="†"))
-    
-    def tex(self) -> str:
-        return rf" {self.args[0].tex()}^\dagger"
-    
-
-class KetScal(DiracKet, TRSInfixBinary):
-    fsymbol_print = "."
-    fsymbol = "SCRK"
-
-    def __init__(self, S: TRSTerm, K: TRSTerm):
-        TRSInfixBinary.__init__(self, S, K)
-
-    def tex(self) -> str:
-        return rf" {self.args[0].tex()} {self.args[1].tex()}"
-
-    
-class KetAdd(DiracKet, TRS_AC):
-    fsymbol_print = '+'
-    fsymbol = 'ADDK'
-
-    def __init__(self, *tup : TRSTerm):
-        TRS_AC.__init__(self, *tup)
-    
-class KetApply(DiracKet, TRSInfixBinary):
+class KetApply(DiracNotation, TRSInfixBinary):
     fsymbol_print = "·"
     fsymbol = "MLTK"
 
@@ -202,7 +203,7 @@ class KetApply(DiracKet, TRSInfixBinary):
             return rf" {self.args[0].tex()} \cdot {self.args[1].tex()}"
 
 
-class KetTensor(DiracKet, TRSInfixBinary):
+class KetTensor(DiracNotation, TRSInfixBinary):
     fsymbol_print = "⊗"
     fsymbol = "TSRK"
 
@@ -216,26 +217,7 @@ class KetTensor(DiracKet, TRSInfixBinary):
 ############################################
 # DiracBra
         
-class DiracBra(DiracSyntax):
-    ...
-
-class BraZero(DiracBra, StdTerm):
-    fsymbol_print = "0B"
-    fsymbol = "0B"
-
-    def __init__(self) :
-        super().__init__()
-
-    def __str__(self) -> str:
-        return "0B"
-    
-    def __repr__(self) -> str:
-        return "0B"
-    
-    def tex(self) -> str:
-        return r" \mathbf{0}_\mathcal{B}"
-    
-class BraBase(DiracBra, StdTerm):
+class BraBase(DiracNotation, StdTerm):
     fsymbol_print = "bra"
     fsymbol = "BRA"
 
@@ -249,41 +231,7 @@ class BraBase(DiracBra, StdTerm):
         return rf" \langle {self.args[0].tex()} |"
     
 
-
-class BraAdj(DiracBra, StdTerm):
-    fsymbol_print = "ADJB"
-    fsymbol = "ADJB"
-
-    def __init__(self, K: TRSTerm):
-        super().__init__(K)
-
-    def __str__(self) -> str:
-        return str(IndexBlock(str(self.args[0]), UR_index="†"))
-    
-    def tex(self) -> str:
-        return rf" {self.args[0].tex()}^\dagger"
-    
-
-class BraScal(DiracBra, TRSInfixBinary):
-    fsymbol_print = "."
-    fsymbol = "SCRB"
-
-    def __init__(self, S: TRSTerm, B: TRSTerm):
-        TRSInfixBinary.__init__(self, S, B)
-
-    def tex(self) -> str:
-        return rf" {self.args[0].tex()} {self.args[1].tex()}"
-
-    
-class BraAdd(DiracBra, TRS_AC):
-    fsymbol_print = '+'
-    fsymbol = 'ADDB'
-
-    def __init__(self, *tup : TRSTerm):
-        TRS_AC.__init__(self, *tup)
-    
-
-class BraApply(DiracBra, TRSInfixBinary):
+class BraApply(DiracNotation, TRSInfixBinary):
     fsymbol_print = "·"
     fsymbol = "MLTB"
 
@@ -297,8 +245,7 @@ class BraApply(DiracBra, TRSInfixBinary):
             return rf" {self.args[0].tex()} \cdot {self.args[1].tex()}"
 
     
-
-class BraTensor(DiracBra, TRSInfixBinary):
+class BraTensor(DiracNotation, TRSInfixBinary):
     fsymbol_print = "⊗"
     fsymbol = "TSRB"
 
@@ -308,47 +255,28 @@ class BraTensor(DiracBra, TRSInfixBinary):
     def tex(self) -> str:
         return rf" \left ( {self.args[0].tex()} \otimes {self.args[1].tex()} \right )"
 
+
 ############################################
 # DiracOp
     
-class DiracOp(DiracSyntax):
-    ...
-
-
-class OpZero(DiracOp, StdTerm):
-    fsymbol_print = "0O"
-    fsymbol = "0O"
-
-    def __init__(self) :
-        super().__init__()
-
-    def __str__(self) -> str:
-        return "0O"
-    
-    def __repr__(self) -> str:
-        return "0O"
-    
-    def tex(self) -> str:
-        return r" \mathbf{0}_\mathcal{O}"
-
-class OpOne(DiracOp, StdTerm):
-    fsymbol_print = "1O"
+class OpOne(DiracNotation, StdTerm):
+    fsymbol_print = "𝟏"
     fsymbol = "1O"
 
     def __init__(self) :
         super().__init__()
 
     def __str__(self) -> str:
-        return "1O"
+        return "𝟏"
     
     def __repr__(self) -> str:
         return "1O"
     
     def tex(self) -> str:
-        return r" \mathbf{1}_\mathcal{O}"
+        return r" \mathbf{1}"
     
     
-class OpOuter(DiracOp, TRSInfixBinary):
+class OpOuter(DiracNotation, TRSInfixBinary):
     fsymbol_print = "⊗"
     fsymbol = "OUTER"
 
@@ -360,44 +288,9 @@ class OpOuter(DiracOp, TRSInfixBinary):
             return rf" {self.args[0].tex()} {self.args[1].tex()}"
         
         return rf" {self.args[0].tex()} \otimes {self.args[1].tex()}"
-    
-class OpAdj(DiracOp, StdTerm):
-    fsymbol_print = "ADJO"
-    fsymbol = "ADJO"
-
-    def __init__(self, O: TRSTerm) :
-        super().__init__(O)
-
-    def __str__(self) -> str:
-        return str(IndexBlock(str(self.args[0]), UR_index="†"))
-    
-    def __repr__(self) -> str:
-        return f"ADJO({repr(self.args[0])})"
-    
-    def tex(self) -> str:
-        return rf" {self.args[0].tex()}^\dagger"
-    
-    
-class OpScal(DiracOp, TRSInfixBinary):
-    fsymbol_print = "."
-    fsymbol = "SCRO"
-
-    def __init__(self, S: TRSTerm, O: TRSTerm) :
-        TRSInfixBinary.__init__(self, S, O)
-
-    def tex(self) -> str:
-        return rf" {self.args[0].tex()} {self.args[1].tex()}"
 
     
-class OpAdd(DiracOp, TRS_AC):
-    fsymbol_print = '+'
-    fsymbol = 'ADDO'
-
-    def __init__(self, *tup : TRSTerm):
-        TRS_AC.__init__(self, *tup)
-
-    
-class OpApply(DiracOp, TRSInfixBinary):
+class OpApply(DiracNotation, TRSInfixBinary):
     fsymbol_print = "·"
     fsymbol = "MLTO"
 
@@ -408,7 +301,7 @@ class OpApply(DiracOp, TRSInfixBinary):
         return rf" {self.args[0].tex()} \cdot {self.args[1].tex()}"
 
 
-class OpTensor(DiracOp, TRSInfixBinary):
+class OpTensor(DiracNotation, TRSInfixBinary):
     fsymbol_print = "⊗"
     fsymbol = "TSRO"
 
