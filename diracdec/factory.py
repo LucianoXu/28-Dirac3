@@ -6,7 +6,8 @@ The script to construct rewriting systems and corresponding parsers with differe
 # prepare the theories (functors)
 
 
-from .theory.trs import TRSTerm, TRSVar
+from typing import Any
+from .theory.trs import TRSTerm, TRSVar, Subst
 from .components import wolU
 
 #########################
@@ -22,7 +23,7 @@ dirac_parser = dirac.construct_parser(
     wolfram_simple.WolframCScalar,
     wolfram_simple.WolframABase)
 
-def dirac_parse(s: str) -> TRSTerm:
+def dirac_parse(s: str) -> Any:
     return dirac_parser.parse(s)
 
 dirac_trs = dirac.construct_trs(
@@ -38,7 +39,7 @@ def dirac_cime2_file(path: str):
 
 dirac_delta_parser = dirac_parser
 
-def dirac_delta_parse(s: str) -> TRSTerm:
+def dirac_delta_parse(s: str) -> Any:
     return dirac_delta_parser.parse(s)
 
 dirac_delta_trs = delta_ext.modify_trs(
@@ -54,7 +55,7 @@ from .components import wolfram_simple
 
 dirac_bigop_parser = dirac_bigop.construct_parser(wolfram_simple.WolframCScalar, wolfram_simple.WolframABase)
 
-def dirac_bigop_parse(s: str) -> TRSTerm:
+def dirac_bigop_parse(s: str) -> Any:
     return dirac_bigop_parser.parse(s)
 
 dirac_bigop_trs, juxt, sumeq = dirac_bigop.construct_trs(
@@ -67,7 +68,7 @@ dirac_bigop_trs, juxt, sumeq = dirac_bigop.construct_trs(
 
 dirac_bigop_delta_parser = dirac_bigop_parser
 
-def dirac_bigop_delta_parse(s: str) -> TRSTerm:
+def dirac_bigop_delta_parse(s: str) -> Any:
     return dirac_bigop_delta_parser.parse(s)
 
 dirac_bigop_delta_trs = delta_ext.modify_trs(

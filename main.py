@@ -6,7 +6,43 @@
 # session.terminate()
 
 from diracdec import *
+from diracdec import dirac_parse as parse
+
 
 if __name__ == "__main__":
     with wolfram_backend.wolfram_session():
+        a = parse(r'''{
+        ket0 : KET('0');
+        bra0 : BRA('0');
+        ket1 : KET('1');
+        bra1 : BRA('1');
+        ketP :  "Sqrt[1/2]" SCR (ket0 ADD ket1) ;
+        braP :  "Sqrt[1/2]" SCR (bra0 ADD bra1) ;
+        ketM :  "Sqrt[1/2]" SCR (ket0 ADD ("-1" MLTK ket1)) ;
+        braM :  "Sqrt[1/2]" SCR (bra0 ADD ("-1" MLTB bra1)) ;
+
+        beta00 :  "Sqrt[1/2]" SCR ((ket0 TSRK ket0) ADD (ket1 TSRK ket1));
+
+        I2 : (ket0 OUTER bra0) ADD (ket1 OUTER bra1);
+
+        Z : (ket0 OUTER bra0) ADD ("-1" SCR (ket1 OUTER bra1));
+
+        X : (ket0 OUTER bra1) ADD (ket1 OUTER bra0);
+
+        Y : ("-I" SCR (ket0 OUTER bra1)) ADD ("I" SCR (ket1 OUTER bra0));
+
+
+        H :  "Sqrt[1/2]" SCR ((ket0 OUTER bra0) ADD (ket0 OUTER bra1) ADD (ket1 OUTER bra0) ADD ("-1" SCR (ket1 OUTER bra1)));
+
+        CX :  ((ket0 TSRK ket0) OUTER (bra0 TSRB bra0))
+                    ADD ((ket0 TSRK ket1) OUTER (bra0 TSRB bra1)) 
+                    ADD ((ket1 TSRK ket1) OUTER (bra1 TSRB bra0))
+                    ADD ((ket1 TSRK ket0) OUTER (bra1 TSRB bra1));
+
+        CZ :  ((ket0 TSRK ket0) OUTER (bra0 TSRB bra0))
+                    ADD ((ket0 TSRK ket1) OUTER (bra0 TSRB bra1)) 
+                    ADD ((ket1 TSRK ket0) OUTER (bra1 TSRB bra0))
+                    ADD ("-1" SCR ((ket1 TSRK ket1) OUTER (bra1 TSRB bra1)));
+        }''')
+        print(a)
         pass

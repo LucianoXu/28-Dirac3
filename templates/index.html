@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DiracDec Tool</title>
+    <style>
+        .column {
+            float: left;
+            width: 50%;
+        }
+
+        /* Clear floats after the columns */
+        .row:after {
+            content: "";
+            display: table;
+            clear: both;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>DiracDec Tool</h1>
+    Yingte (lucianoxu@foxmail.com) build in 2024
+    <br>
+    GitHub repository: <a href="https://github.com/LucianoXu/28-Dirac3">https://github.com/LucianoXu/28-Dirac3</a>
+    <br>
+    <h2>Guidance</h2>
+    <p>
+        See the GitHub repository for the grammer of the language.
+        <br>
+        Fill in the definitions, the code of term A and term B, and click "Calculate" to check if they are equivalent.
+        <br>
+        If the calculation does not terminate, please restart the app to get a new instance.
+
+    </p>
+    <h3> Language </h3>
+        The parser expects languages of sub or term.
+        <br>
+        The keywords are the symbols in captial letters in the following definition. A variable is a string matching the regex `[a-zA-Z\_][a-zA-Z0-9\_]*` .
+        <br>
+        <br>
+        - sub ::= { subls }
+        <br>
+        - subls ::= \epsilon | subls var : term ;
+        <br>
+        <br>
+        - term ::= base | scal | dirac
+        <br>
+        - base ::= var | 'WOLFRAM-EXPR' | PAIR(base, base) | FST(base) | SND(base)
+        <br>
+        - scal ::= var | "WOLFRAM-EXPR" | DELTA(base, base) | scal ADDS scal | scal MLTS scal | CONJS(scal) | dirac DOT dirac
+        <br>
+        <br>
+        - dirac ::= var 
+        <br>
+                        | 0X | ADJ(dirac) | scal SCR dirac | dirac ADD dirac 
+        <br>
+                        | KET(base) | dirac MLTK dirac | dirac TSRK dirac 
+        <br>
+                        | BRA(base) | dirac MLTB dirac | dirac TSRB dirac  
+        <br>
+                        | 1O | dirac OUTER dirac | dirac MLTO dirac | dirac TSRO dirac
+        <br>
+        <br>
+        
+    <form action="/calculate" method="post">
+
+        <button type="submit" style="font-size: 20px; padding: 10px;">Calculate</button>
+        <h2 style="color: red;">Equivalence: {{ eqres }}</h2>
+        <br>
+
+        <h2>Definitions</h2>
+        <div class="row">
+
+            <div class="column">
+                <h3>Input Code</h3>
+                <textarea name="sub-code" required 
+                    style="
+                    width: 500px; height: 200px; 
+                    font-family:Courier New; 
+                    font-size: 16px;
+                    white-space: pre; 
+                    overflow-x: scroll;">{{subst}}</textarea>
+                </div>
+
+            <div class="column">
+                <h3>Parsing result</h3>
+                <textarea readonly
+                    style="
+                    width: 500px; height: 200px; 
+                    font-family:Courier New; 
+                    font-size: 16px;
+                    white-space: pre; 
+                    overflow-x: scroll;">{{subst_parsed}}</textarea>
+
+                </div>
+            </div>
+        </div>
+
+        <h2>Terms</h2>
+        <div class="row">
+            <div class="column">
+                <h3>Input Code A</h3>
+                <br>
+                
+                <textarea name="termA-code" required 
+                    style="
+                    width: 500px; height: 100px; 
+                    font-family:Courier New; 
+                    font-size: 16px;
+                    white-space: pre; 
+                    overflow-x: scroll;">{{termA}}</textarea>
+
+                <h3>Parsing Result</h3>
+                <textarea readonly 
+                    style="
+                    width: 500px; height: 100px; 
+                    font-family: Courier New; 
+                    font-size: 16px;
+                    white-space: pre; 
+                    overflow-x: scroll;">{{termAstr}}</textarea>
+
+
+                <h3>Normal Form</h3>
+                <!-- use <pre> to print the string as it is -->
+                <textarea readonly 
+                style="
+                width: 500px; height: 100px; 
+                font-family: Courier New; 
+                font-size: 16px;
+                white-space: pre; 
+                overflow-x: scroll;">{{normA}}</textarea>
+
+                <h3>Proof</h3>
+                <textarea readonly 
+                    style="
+                    width: 500px; height: 300px; 
+                    font-family: Courier New; 
+                    font-size: 16px;
+                    white-space: pre; 
+                    overflow-x: scroll;">{{proofA}}</textarea>
+            </div>
+
+            <div class="column">
+                <h3>Input Code B</h3>
+                <br>
+
+                <textarea name="termB-code" required 
+                    style="
+                    width: 500px; height: 100px; 
+                    font-family:Courier New; 
+                    font-size: 16px;
+                    white-space: pre; 
+                    overflow-x: scroll;">{{termB}}</textarea>
+
+                <h3>Parsing Result</h3>
+                <textarea readonly 
+                    style="
+                    width: 500px; height: 100px; 
+                    font-family: Courier New; 
+                    font-size: 16px;
+                    white-space: pre; 
+                    overflow-x: scroll;">{{termBstr}}</textarea>
+
+                <h3>Normal Form</h3>
+                <!-- use <pre> to print the string as it is -->
+                <textarea readonly 
+                style="
+                width: 500px; height: 100px; 
+                font-family: Courier New; 
+                font-size: 16px;
+                white-space: pre; 
+                overflow-x: scroll;">{{normB}}</textarea>
+    
+                <h3>Proof</h3>
+                <textarea readonly 
+                    style="
+                    width: 500px; height: 300px; 
+                    font-family: Courier New; 
+                    font-size: 16px;
+                    white-space: pre; 
+                    overflow-x: scroll;">{{proofB}}</textarea>
+            </div>
+        </div>
+    </form>
+
+</body>
+
+</html>

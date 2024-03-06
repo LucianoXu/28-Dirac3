@@ -5,9 +5,44 @@
 - Install Wolfram Engine from https://www.wolfram.com/engine/.
 Activate the engine as instructed. Note that Python communicates with Wolfram engine through socket connections, which is influenced by network settings. Inappropriate settings (for example, global VPN) may lead to connection failure.
 
+- Install the dependencies by executing
+  ```
+  pip install requirements.txt
+  ```
 
-## Unicode Characters
-× · † ⊗ λ
+The implementation is tested with Python 3.11.
+
+## Manifest
+- `.\diracdec`: the implementation source
+- `.\tests`: the unit tests for the implementation, including the examples
+- `.\demo.ipynb`: a notebook with some demonstrations
+- `.\app.py`: a web application for diracdec written in Flask
+
+## Usage
+- Web UI: execute
+```
+python app.py
+```
+in the root folder and connect to the server.
+
+- In Python: see `.\demo.ipynb` and examples in `.\tests`
+
+
+## Language
+The parser expects languages of $sub$ or $term$.
+
+The keywords are the symbols in captial letters in the following definition. A variable is a string matching the regex `[a-zA-Z\_][a-zA-Z0-9\_]*` .
+
+- sub ::= { subls }
+- subls ::= $\epsilon$ | subls var : term ;
+- term ::= base | scal | dirac
+- base ::= var | '\<WOLFRAM\>' | PAIR(base, base) | FST(base) | SND(base)
+- scal ::= var | "\<WOLFRAM\>" | DELTA(base, base) | scal ADDS scal | scal MLTS scal | CONJS(scal) | dirac DOT dirac
+- dirac ::= var | 0X | ADJ(dirac) | scal SCR dirac | dirac ADD dirac 
+  - | KET(base) | dirac MLTK dirac | dirac TSRK dirac 
+  - | BRA(base) | dirac MLTB dirac | dirac TSRB dirac  
+  - | 1O | dirac OUTER dirac | dirac MLTO dirac | dirac TSRO dirac
+
 
 ## Note
 - the terms are compared first by hash values

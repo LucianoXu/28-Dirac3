@@ -211,11 +211,11 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
 
     def p_sub_list(p):
         '''
-        sub-list    : trs-var ':' trs-item ';'
+        sub-list    :
                     | sub-list trs-var ':' trs-item ';'
         '''
-        if len(p) == 5:
-            p[0] = {p[1].name: p[3]}
+        if len(p) == 1:
+            p[0] = {}
         else:
             p[1][p[2].name] = p[4]
             p[0] = p[1]
