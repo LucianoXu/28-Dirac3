@@ -57,7 +57,8 @@ tokens = [
 
     ] + list(reserved.values())
 
-literals = ['(', ')', ',', '.', '@']
+
+literals = ['(', ')', ',', '{', '}', ';' , ':', '.', '@']
 
 t_ZEROX = '0X'
 t_ONEO = '1O'
@@ -88,7 +89,7 @@ def t_COMMENT(t):
 
 # Define a rule so we can track line numbers
 def t_newline(t):
-    r'\n+'
+    r'[\r\n]+'
     t.lexer.lineno += len(t.value)
 
 

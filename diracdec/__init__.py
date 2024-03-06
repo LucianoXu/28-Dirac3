@@ -21,8 +21,12 @@ try:
     from .factory import dirac_bigop_delta_parser, dirac_bigop_delta_parse, dirac_bigop_delta_trs
 
     # transformers
-    from .components.wolfram_unique import wolU
+    from .components import wolU
     from .factory import juxt, sumeq
+
+
+    # out-of-box interface
+    from .factory import normalize, eq_check
 
 
 except Exception as e:

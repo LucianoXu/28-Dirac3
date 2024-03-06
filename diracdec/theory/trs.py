@@ -3,7 +3,8 @@ The architecture of the term rewriting system
 '''
 
 from __future__ import annotations
-from typing import Callable, Tuple, Any, Dict, List
+import sys
+from typing import Callable, TextIO, Tuple, Any, Dict, List
 
 from abc import ABC, abstractmethod
 
@@ -966,6 +967,7 @@ class TRS:
             term : TRSTerm, 
             side_info : dict[str, Any] = {},
             verbose: bool = False, 
+            stream: TextIO = sys.stdout,
             step_limit : int | None = None,
             alg: str = "inner_most") -> TRSTerm:
 
@@ -973,7 +975,7 @@ class TRS:
         overlap = term.variables() & self.variables()
         if len(overlap) > 0:
             if verbose:
-                print("Renaming rule variables...")
+                stream.write("Renaming rule variables...\n")
 
             subst = {}
             for var in overlap:
@@ -1005,24 +1007,23 @@ class TRS:
                 return current_term
 
             if verbose:
-                print(f"== STEP {step} ==")
-                print("Current Term:")
-                print(str(current_term))
-                print()
+                stream.write(f"== STEP {step} ==\n")
+                stream.write("Current Term:\n")
+                stream.write(str(current_term)+"\n\n")
                 
             # check whether rewrite rules are applicable
-            new_term = rewrite(current_term, side_info, verbose)
+            new_term = rewrite(current_term, side_info, verbose, stream)
 
             if new_term is None:
                 if verbose:
-                    print("It is the normal form.")
+                    stream.write("It is the normal form.")
                 return current_term
             
             current_term = new_term
             
     
 
-    def rewrite_outer_most(self, term : TRSTerm, side_info: dict[str, Any], verbose:bool = False) -> TRSTerm | None:
+    def rewrite_outer_most(self, term : TRSTerm, side_info: dict[str, Any], verbose:bool = False, stream: TextIO = sys.stdout) -> TRSTerm | None:
         '''
         rewrite the term using the rules. Return the result.
         return None when no rewriting is applicable
@@ -1036,39 +1037,38 @@ class TRS:
             if new_term is not None:
                 # output information
                 if verbose:
-                    print(str(
+                    stream.write(str(
                         FrameBlock(
                         HSeqBlock(str(term), ' -> ', str(new_term), v_align='c'),
                         caption=f"apply {rule.rule_name}"
                         )
-                        ))
-                    print("\n")
+                        ) + "\n\n")
 
                 return new_term
                         
         if isinstance(term, StdTerm):
             # try to rewrite the subterms
             for i in range(len(term.args)):
-                new_subterm = self.rewrite_outer_most(term.args[i], side_info, verbose)
+                new_subterm = self.rewrite_outer_most(term.args[i], side_info, verbose, stream)
                 if new_subterm is not None:
                     return type(term)(*term.args[:i], new_subterm, *term.args[i+1:])
                 
         elif isinstance(term, BindVarTerm):
-            new_body = self.rewrite_outer_most(term.body, side_info, verbose)
+            new_body = self.rewrite_outer_most(term.body, side_info, verbose, stream)
             if new_body is not None:
                 # risk exists: term.bind_var may collide with new_body
                 # but normal rewriting rules should not cause this problem because there are no free variables on the RHS
                 return type(term)(term.bind_var, new_body)
             
         elif isinstance(term, MultiBindTerm):
-            new_body = self.rewrite_outer_most(term.body, side_info, verbose)
+            new_body = self.rewrite_outer_most(term.body, side_info, verbose, stream)
             if new_body is not None:
                 return type(term)(term.bind_vars, new_body)
             
         return None
     
 
-    def rewrite_inner_most(self, term : TRSTerm, side_info: dict[str, Any], verbose:bool = False) -> TRSTerm | None:
+    def rewrite_inner_most(self, term : TRSTerm, side_info: dict[str, Any], verbose:bool = False, stream:TextIO = sys.stdout) -> TRSTerm | None:
         '''
         rewrite the term using the rules. Return the result.
         return None when no rewriting is applicable
@@ -1079,19 +1079,19 @@ class TRS:
         if isinstance(term, StdTerm):
             # try to rewrite the subterms
             for i in range(len(term.args)):
-                new_subterm = self.rewrite_inner_most(term.args[i], side_info, verbose)
+                new_subterm = self.rewrite_inner_most(term.args[i], side_info, verbose, stream)
                 if new_subterm is not None:
                     return type(term)(*term.args[:i], new_subterm, *term.args[i+1:])
                 
         elif isinstance(term, BindVarTerm):
-            new_body = self.rewrite_inner_most(term.body, side_info, verbose)
+            new_body = self.rewrite_inner_most(term.body, side_info, verbose, stream)
             if new_body is not None:
                 # risk exists: term.bind_var may collide with new_body
                 # but normal rewriting rules should not cause this problem because there are no free variables on the RHS
                 return type(term)(term.bind_var, new_body)
             
         elif isinstance(term, MultiBindTerm):
-            new_body = self.rewrite_outer_most(term.body, side_info, verbose)
+            new_body = self.rewrite_inner_most(term.body, side_info, verbose, stream)
             if new_body is not None:
                 return type(term)(term.bind_vars, new_body)
 
@@ -1103,13 +1103,12 @@ class TRS:
             if new_term is not None:
                 # output information
                 if verbose:
-                    print(str(
+                    stream.write(str(
                         FrameBlock(
                         HSeqBlock(str(term), ' -> ', str(new_term), v_align='c'),
                         caption=f"apply {rule.rule_name}"
                         )
-                        ))
-                    print("\n")
+                        ) + "\n\n")
                 return new_term
         
         return None

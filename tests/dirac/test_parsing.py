@@ -131,3 +131,15 @@ def test_basic_O():
         a = parse(r''' O1 TSRO O2 ''')
         b = OpTensor(TRSVar('O1'), TRSVar('O2'))
         assert a == b
+
+def test_subst():
+    with wolfram_backend.wolfram_session():
+        a = parse(r'''{
+            s : KET(a);
+            t : BRA(b);
+        }''')
+        b = Subst({
+            "s" : KetBase(TRSVar('a')),
+            "t" : BraBase(TRSVar('b')),
+        })
+        assert a == b

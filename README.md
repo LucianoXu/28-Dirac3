@@ -1,3 +1,10 @@
+# DiracDec Implementation
+
+## Installation
+
+- Install Wolfram Engine from https://www.wolfram.com/engine/.
+Activate the engine as instructed. Note that Python communicates with Wolfram engine through socket connections, which is influenced by network settings. Inappropriate settings (for example, global VPN) may lead to connection failure.
+
 
 ## Unicode Characters
 × · † ⊗ λ
@@ -23,8 +30,6 @@
             assert trs.normalize(a) == trs.normalize(b)
     ```
     It takes about 5 seconds.
-
-- About parameters: there are something not that natural about Rz(beta) Ry(gamma) Rz(delta). We need to incorporate abstractions to represent functions
 
 - Now the variables of dirac notation and wolfram language are unified. Meaning, we can substitute the symbols in wolfram language now. And since we will always operate wolfram expression in the Global context, we delete the "Global`" prefix when calculating the variables. Also, it allowed to substitute the symbols in wolfram language by TRSVar  instances directly.
 

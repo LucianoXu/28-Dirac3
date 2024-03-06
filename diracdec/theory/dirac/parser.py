@@ -16,6 +16,13 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
     precedence = (
     )
 
+    def p_trs_item(p):
+        '''
+        trs-item    : trs-term
+                    | subst
+        '''
+        p[0] = p[1]
+
     def p_term(p):
         '''
         trs-term    : trs-var
@@ -195,7 +202,23 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
         '''
         p[0] = OpTensor(p[1], p[3])
 
+    # substitution
+    def p_sub(p):
+        '''
+        subst   : '{' sub-list '}'
+        '''
+        p[0] = Subst(p[2])
 
+    def p_sub_list(p):
+        '''
+        sub-list    : trs-var ':' trs-item ';'
+                    | sub-list trs-var ':' trs-item ';'
+        '''
+        if len(p) == 5:
+            p[0] = {p[1].name: p[3]}
+        else:
+            p[1][p[2].name] = p[4]
+            p[0] = p[1]
 
 
     def p_error(p):
