@@ -216,6 +216,14 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
 
     ##############################
     # big-op
+        
+    def p_dirac_sums(p):
+        '''
+        diracnotation : SUMS '(' trs-var ',' trs-term ')'
+        '''
+        p[0] = SumS(p[3], p[5])
+
+
     def p_dirac_sum(p):
         '''
         diracnotation : SUM '(' trs-var ',' trs-term ')'

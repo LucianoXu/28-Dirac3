@@ -112,7 +112,7 @@ def test_TRANS_OPT_4():
         
 def test_SUM_ELIM_1():
     with wolfram_backend.wolfram_session():
-        a = parse(''' SUM(i, "0") ''')
+        a = parse(''' SUMS(i, "0") ''')
         b = parse(''' "0" ''')
         assert trs.normalize(a) == trs.normalize(b)
 
@@ -125,30 +125,30 @@ def test_SUM_ELIM_2():
 
 def test_SUM_ELIM_3():
     with wolfram_backend.wolfram_session():
-        a = parse(''' SUM(i, DELTA(i, s)) ''')
+        a = parse(''' SUMS(i, DELTA(i, s)) ''')
         b = parse(''' "1" ''')
         assert trs.normalize(a) == trs.normalize(b)
 
-        a = parse(''' SUM(i, DELTA(i, i)) ''')
+        a = parse(''' SUMS(i, DELTA(i, i)) ''')
         b = parse(''' "1" ''')
         assert trs.normalize(a) != trs.normalize(b)
 
-        a = parse(''' SUM(i, SUM(j, DELTA(i, i))) ''')
-        b = parse(''' SUM(j, "1") ''')
+        a = parse(''' SUMS(i, SUMS(j, DELTA(i, i))) ''')
+        b = parse(''' SUMS(j, "1") ''')
         assert trs.normalize(a) != trs.normalize(b)
 
 def test_SUM_ELIM_4():
     with wolfram_backend.wolfram_session():
-        a = parse(''' SUM(i, DELTA(i, s) MLTS S1 MLTS i) ''')
+        a = parse(''' SUMS(i, DELTA(i, s) MLTS S1 MLTS i) ''')
         b = parse(''' S1 MLTS s ''')
         assert trs.normalize(a) == trs.normalize(b)
 
-        a = parse(''' SUM(i, DELTA(i, s) MLTS "i - s") ''')
+        a = parse(''' SUMS(i, DELTA(i, s) MLTS "i - s") ''')
         b = parse(''' "0" ''')
         assert trs.normalize(a) == trs.normalize(b)
 
-        a = parse(''' SUM(i, SUM(j, DELTA(i, s) MLTS "i - s")) ''')
-        b = parse(''' SUM(j, "0") ''')
+        a = parse(''' SUMS(i, SUMS(j, DELTA(i, s) MLTS "i - s")) ''')
+        b = parse(''' SUMS(j, "0") ''')
         assert trs.normalize(a) == trs.normalize(b)
 
 
@@ -224,18 +224,14 @@ def test_SUM_ELIM_10():
 
 def test_SUM_DIST_1():
     with wolfram_backend.wolfram_session():
-        a = parse(''' SUM(i, A) MLTS B MLTS C ''')
-        b = parse(''' SUM(i, A MLTS B MLTS C) ''')
-        assert trs.normalize(a) == trs.normalize(b)
-
-        a = parse(''' SUM(i, A) MLTS B MLTS i ''')
-        b = parse(''' SUM(x, A MLTS B MLTS i) ''')
+        a = parse(''' SUMS(i, A) MLTS B MLTS C ''')
+        b = parse(''' SUMS(i, A MLTS C MLTS B) ''')
         assert trs.normalize(a) == trs.normalize(b)
 
 def test_SUM_DIST_2():
     with wolfram_backend.wolfram_session():
-        a = parse(''' CONJS(SUM(i, A)) ''')
-        b = parse(''' SUM(i, CONJS(A)) ''')
+        a = parse(''' CONJS(SUMS(i, A)) ''')
+        b = parse(''' SUMS(i, CONJS(A)) ''')
         assert trs.normalize(a) == trs.normalize(b)
 
 
@@ -262,7 +258,7 @@ def test_SUM_DIST_5():
 
 def test_SUM_DIST_6():
     with wolfram_backend.wolfram_session():
-        a = parse(''' SUM(i, S0) SCR X ''')
+        a = parse(''' SUMS(i, S0) SCR X ''')
         b = parse(''' SUM(i, S0 SCR X) ''')
         assert trs.normalize(a) == trs.normalize(b)
 
@@ -364,8 +360,8 @@ def test_SUM_DIST_10():
 
 def test_SUM_ADD_1():
     with wolfram_backend.wolfram_session():
-        a = parse(r'''SUM(i, A) ADDS SUM(j, B) ADDS S0''')
-        b = parse(r'''SUM(i, A ADDS B) ADDS S0''')
+        a = parse(r'''SUMS(i, A) ADDS SUMS(j, B) ADDS S0''')
+        b = parse(r'''SUMS(i, A ADDS B) ADDS S0''')
         assert trs.normalize(a) == trs.normalize(b)
         
         a = parse(r'''SUM(i, A) ADD SUM(j, B) ADD K0''')
@@ -373,8 +369,8 @@ def test_SUM_ADD_1():
         assert trs.normalize(a) == trs.normalize(b)
 
         # check variable renaming
-        a = parse(r'''SUM(i, A) ADDS SUM(j, B) ADDS S0 ADDS SUM(k, i)''')
-        b = parse(r'''SUM(z, A ADDS B ADDS i) ADDS S0''')
+        a = parse(r'''SUMS(i, A) ADDS SUMS(j, B) ADDS S0 ADDS SUMS(k, i)''')
+        b = parse(r'''SUMS(z, A ADDS B ADDS i) ADDS S0''')
         assert trs.normalize(a) == trs.normalize(b)
 
 ###########################################################

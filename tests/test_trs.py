@@ -25,3 +25,8 @@ def test_bind_substitute():
     b = BindVarTerm(TRSVar("c"), TRSVar("z"))
     assert sub(a) == b
 
+
+    a = BindVarTerm(TRSVar("z"), TRSVar("a"))
+    b = BindVarTerm(TRSVar("y"), TRSVar("z"))
+    assert sub(a) == b
+

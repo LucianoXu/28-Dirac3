@@ -865,7 +865,7 @@ def check_special_symbol(term : TRSTerm) -> bool:
             return False
 
 
-def normal_rewrite(self, term : TRSTerm, side_info : dict[str, Any]) -> TRSTerm | None:
+def normal_rewrite(self, trs: TRS, term : TRSTerm, side_info : dict[str, Any]) -> TRSTerm | None:
         '''
         The rewrite method for normal rules.
 
@@ -882,7 +882,7 @@ class TRSRule:
                  rule_name:str,
                  lhs: TRSTerm|str, 
                  rhs: TRSTerm|str,
-                 rewrite_method : Callable[[TRSRule, TRSTerm, Dict[str, Any]], TRSTerm|None] = normal_rewrite,
+                 rewrite_method : Callable[[TRSRule, TRS, TRSTerm, Dict[str, Any]], TRSTerm|None] = normal_rewrite,
                  rule_repr: str|None = None):
         '''
         note: the rewrite_method checks whether the current rule can rewrite the given term (not including subterms)
@@ -987,8 +987,17 @@ class TRS:
             renamed_trs = self
 
         # execute the preprocess of side information
+        final_side_info = side_info.copy()
         for proc in self.side_info_procs:
-            side_info = proc(side_info)
+            final_side_info = proc(final_side_info)
+
+        final_side_info['trs-args'] = {
+            'side_info': side_info, 
+            'verbose': verbose, 
+            'stream': stream,
+            'step_limit': step_limit,
+            'alg': alg
+            }
 
         current_term = term          
 
@@ -1012,7 +1021,7 @@ class TRS:
                 stream.write(str(current_term)+"\n\n")
                 
             # check whether rewrite rules are applicable
-            new_term = rewrite(current_term, side_info, verbose, stream)
+            new_term = rewrite(current_term, final_side_info, verbose, stream)
 
             if new_term is None:
                 if verbose:
@@ -1033,7 +1042,7 @@ class TRS:
 
         # try to rewrite the term using the rules
         for rule in self.rules:
-            new_term = rule.rewrite_method(rule, term, side_info)
+            new_term = rule.rewrite_method(rule, self, term, side_info)
             if new_term is not None:
                 # output information
                 if verbose:
@@ -1099,7 +1108,7 @@ class TRS:
 
         # try to rewrite the term using the rules
         for rule in self.rules:
-            new_term = rule.rewrite_method(rule, term, side_info)
+            new_term = rule.rewrite_method(rule, self, term, side_info)
             if new_term is not None:
                 # output information
                 if verbose:

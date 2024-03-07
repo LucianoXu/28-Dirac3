@@ -48,6 +48,18 @@ class Apply(StdTerm):
     def tex(self) -> str:
         return rf" \left ({self.args[0].tex()} {self.args[1].tex()} \right)"
 
+
+class SumS(DiracNotation, BindVarTerm):
+    fsymbol_print = "sums"
+    fsymbol = "SUMS"
+
+    def __str__(self) -> str:
+        return str(HSeqBlock(
+            IndexBlock('__\n\\ \n/ \n‾‾', D_index=self.bind_var.name), " ", str(self.body)))
+
+    def tex(self) -> str:
+        return rf" \left ( \sum_{{{self.bind_var.name}}} {self.body.tex()} \right )"
+
 class Sum(DiracNotation, BindVarTerm):
     fsymbol_print = "sum"
     fsymbol = "SUM"

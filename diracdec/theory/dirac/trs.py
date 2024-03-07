@@ -42,7 +42,7 @@ def construct_trs(
     #################################################
     # reducing basis and complex scalars
 
-    def atomic_base_rewrite(rule, term, side_info):
+    def atomic_base_rewrite(rule, trs, term, side_info):
         if isinstance(term, ABase):
             return term.reduce()
     ATOMIC_BASE = TRSRule(
@@ -54,7 +54,7 @@ def construct_trs(
     )
     rules.append(ATOMIC_BASE)
 
-    def complex_scalar_rewrite(rule, term, side_info):
+    def complex_scalar_rewrite(rule, trs, term, side_info):
         if isinstance(term, CScalar):
             return term.reduce()
     COMPLEX_SCALAR = TRSRule(
@@ -92,7 +92,7 @@ def construct_trs(
 
     #################################################
     # Delta
-    def delta_1_rewrite(rule, term, side_info):
+    def delta_1_rewrite(rule, trs, term, side_info):
         if isinstance(term, ScalarDelta):
             if isinstance(term.args[0], BasePair):
                 return ScalarMlt(
@@ -113,7 +113,7 @@ def construct_trs(
     rules.append(DELTA_1)
 
 
-    def delta_2_rewrite(rule, term, side_info):
+    def delta_2_rewrite(rule, trs, term, side_info):
         if isinstance(term, ScalarMlt):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], ScalarDelta) \
@@ -141,7 +141,7 @@ def construct_trs(
     #################################################
     # Scalar
 
-    def scr_cop_1_rewrite(rule, term, side_info):
+    def scr_cop_1_rewrite(rule, trs, term, side_info):
         if isinstance(term, ScalarAdd):
             for i in range(len(term.args)):
                 if term.args[i] == C0:
@@ -156,7 +156,7 @@ def construct_trs(
     rules.append(SCR_COP_1)
 
 
-    def scr_cop_2_rewrite(rule, term, side_info):
+    def scr_cop_2_rewrite(rule, trs, term, side_info):
         if isinstance(term, ScalarAdd):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], ComplexScalar):
@@ -175,7 +175,7 @@ def construct_trs(
     )
     rules.append(SCR_COP_2)
 
-    def scr_cop_3_rewrite(rule, term, side_info):
+    def scr_cop_3_rewrite(rule, trs, term, side_info):
         if isinstance(term, ScalarAdd):
             for i in range(len(term.args)):
                 for j in range(i+1, len(term.args)):
@@ -191,7 +191,7 @@ def construct_trs(
     )
     rules.append(SCR_COP_3)
 
-    def scr_cop_4_rewrite(rule, term, side_info):
+    def scr_cop_4_rewrite(rule, trs, term, side_info):
         if isinstance(term, ScalarAdd):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], ScalarMlt):
@@ -212,7 +212,7 @@ def construct_trs(
     )
     rules.append(SCR_COP_4)
 
-    def scr_cop_5_rewrite(rule, term, side_info):
+    def scr_cop_5_rewrite(rule, trs, term, side_info):
         if isinstance(term, ScalarAdd):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], ScalarMlt):
@@ -237,7 +237,7 @@ def construct_trs(
     )
     rules.append(SCR_COP_5)
 
-    def scr_cop_6_rewrite(rule, term, side_info):
+    def scr_cop_6_rewrite(rule, trs, term, side_info):
         if isinstance(term, ScalarMlt):
             for i in range(len(term.args)):
                 if term.args[i] == C0:
@@ -251,7 +251,7 @@ def construct_trs(
     )
     rules.append(SCR_COP_6)
 
-    def scr_cop_7_rewrite(rule, term, side_info):
+    def scr_cop_7_rewrite(rule, trs, term, side_info):
         if isinstance(term, ScalarMlt):
             for i in range(len(term.args)):
                 if term.args[i] == C1:
@@ -265,7 +265,7 @@ def construct_trs(
     rules.append(SCR_COP_7)
 
 
-    def scr_cop_8_rewrite(rule, term, side_info):
+    def scr_cop_8_rewrite(rule, trs, term, side_info):
         if isinstance(term, ScalarMlt):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], ComplexScalar):
@@ -284,7 +284,7 @@ def construct_trs(
     )
     rules.append(SCR_COP_8)
 
-    def scr_cop_9_rewrite(rule, term, side_info):
+    def scr_cop_9_rewrite(rule, trs, term, side_info):
         if isinstance(term, ScalarMlt):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], ScalarAdd):
@@ -300,7 +300,7 @@ def construct_trs(
     rules.append(SCR_COP_9)
 
 
-    def scr_cop_10_rewrite(rule, term, side_info):
+    def scr_cop_10_rewrite(rule, trs, term, side_info):
         if isinstance(term, ScalarConj):
             if isinstance(term.args[0], ComplexScalar):
                 return CScalar.conj(term.args[0])
@@ -313,7 +313,7 @@ def construct_trs(
     rules.append(SCR_COP_10)
         
 
-    def scr_cop_11_rewrite(rule, term, side_info):
+    def scr_cop_11_rewrite(rule, trs, term, side_info):
         if isinstance(term, ScalarConj):
             if isinstance(term.args[0], ScalarDelta):
                 return term.args[0]
@@ -327,7 +327,7 @@ def construct_trs(
     rules.append(SCR_COP_11)
 
 
-    def scr_cop_12_rewrite(rule, term, side_info):
+    def scr_cop_12_rewrite(rule, trs, term, side_info):
         if isinstance(term, ScalarConj):
             if isinstance(term.args[0], ScalarAdd):
                 new_args = tuple(ScalarConj(arg) for arg in term.args[0].args)
@@ -341,7 +341,7 @@ def construct_trs(
     rules.append(SCR_COP_12)
 
 
-    def scr_cop_13_rewrite(rule, term, side_info):
+    def scr_cop_13_rewrite(rule, trs, term, side_info):
         if isinstance(term, ScalarConj):
             if isinstance(term.args[0], ScalarMlt):
                 new_args = tuple(ScalarConj(arg) for arg in term.args[0].args)
@@ -401,7 +401,7 @@ def construct_trs(
     )
     rules.append(SCR_DOT_4)
 
-    def scr_dot_5(rule, term, side_info):
+    def scr_dot_5_rewrite(rule, trs, term, side_info):
         if isinstance(term, ScalarDot):
             if isinstance(term.args[0], Add):
                 new_args = tuple(ScalarDot(arg, term.args[1]) for arg in term.args[0].args)
@@ -410,11 +410,11 @@ def construct_trs(
         "SCR-DOT-5",
         lhs = "(B1 ADD B2) DOT K0",
         rhs = "(B1 DOT K0) ADDS (B2 DOT K0)",
-        rewrite_method=scr_dot_5
+        rewrite_method=scr_dot_5_rewrite
     )
     rules.append(SCR_DOT_5)
 
-    def scr_dot_6(rule, term, side_info):
+    def scr_dot_6_rewrite(rule, trs, term, side_info):
         if isinstance(term, ScalarDot):
             if isinstance(term.args[1], Add):
                 new_args = tuple(ScalarDot(term.args[0], arg) for arg in term.args[1].args)
@@ -423,7 +423,7 @@ def construct_trs(
         "SCR-DOT-6",
         lhs = "B0 DOT (K1 ADD K2)",
         rhs = "(B0 DOT K1) ADDS (B0 DOT K2)",
-        rewrite_method=scr_dot_6
+        rewrite_method=scr_dot_6_rewrite
     )
     rules.append(SCR_DOT_6)
 
@@ -506,7 +506,7 @@ def construct_trs(
     rules.append(ADJ_UNI_3)
 
     
-    def adj_uni_4_rewrite(rule, term, side_info):
+    def adj_uni_4_rewrite(rule, trs, term, side_info):
         if isinstance(term, Adj):
             if isinstance(term.args[0], Add):
                 new_args = tuple(Adj(arg) for arg in term.args[0].args)
@@ -627,7 +627,7 @@ def construct_trs(
     rules.append(SCR_4)
 
 
-    def scr_5_rewrite(rule, term, side_info):
+    def scr_5_rewrite(rule, trs, term, side_info):
         if isinstance(term, Scal):
             if isinstance(term.args[1], Add):
                 new_args = tuple(Scal(term.args[0], arg) for arg in term.args[1].args)
@@ -643,7 +643,7 @@ def construct_trs(
 
 
 
-    def add_1_rewrite(rule, term, side_info):
+    def add_1_rewrite(rule, trs, term, side_info):
         if isinstance(term, Add):
             for i in range(len(term.args)):
                 if term.args[i] == Zero():
@@ -656,7 +656,7 @@ def construct_trs(
     )
     rules.append(ADD_1)
 
-    def add_2_rewrite(rule, term, side_info):
+    def add_2_rewrite(rule, trs, term, side_info):
         if isinstance(term, Add):
             for i in range(len(term.args)):
                 for j in range(i+1, len(term.args)):
@@ -671,7 +671,7 @@ def construct_trs(
     )
     rules.append(ADD_2)
 
-    def add_3_rewrite(rule, term, side_info):
+    def add_3_rewrite(rule, trs, term, side_info):
         if isinstance(term, Add):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], Scal):
@@ -688,7 +688,7 @@ def construct_trs(
     )
     rules.append(ADD_3)
 
-    def add_4_rewrite(rule, term, side_info):
+    def add_4_rewrite(rule, trs, term, side_info):
         if isinstance(term, Add):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], Scal):
@@ -746,7 +746,7 @@ def construct_trs(
     rules.append(KET_MLT_5)
 
 
-    def ket_mlt_6_rewrite(rule, term, side_info):
+    def ket_mlt_6_rewrite(rule, trs, term, side_info):
         if isinstance(term, KetApply) and isinstance(term.args[0], Add):
             new_args = tuple(KetApply(arg, term[1]) for arg in term.args[0].args)
             return Add(*new_args)
@@ -759,7 +759,7 @@ def construct_trs(
     rules.append(KET_MLT_6)
 
 
-    def ket_mlt_7_rewrite(rule, term, side_info):
+    def ket_mlt_7_rewrite(rule, trs, term, side_info):
         if isinstance(term, KetApply) and isinstance(term.args[1], Add):
             new_args = tuple(KetApply(term[0], arg) for arg in term.args[1].args)
             return Add(*new_args)
@@ -842,7 +842,7 @@ def construct_trs(
     )
     rules.append(KET_TSR_5)
 
-    def ket_tsr_6_rewrite(rule, term, side_info):
+    def ket_tsr_6_rewrite(rule, trs, term, side_info):
         if isinstance(term, KetTensor) and isinstance(term.args[0], Add):
             new_args = tuple(KetTensor(arg, term[1]) for arg in term.args[0].args)
             return Add(*new_args)
@@ -854,7 +854,7 @@ def construct_trs(
     )
     rules.append(KET_TSR_6)
 
-    def ket_tsr_7_rewrite(rule, term, side_info):
+    def ket_tsr_7_rewrite(rule, trs, term, side_info):
         if isinstance(term, KetTensor) and isinstance(term.args[1], Add):
             new_args = tuple(KetTensor(term[0], arg) for arg in term.args[1].args)
             return Add(*new_args)
@@ -906,7 +906,7 @@ def construct_trs(
     rules.append(BRA_MLT_5)
 
 
-    def bra_mlt_6_rewrite(rule, term, side_info):
+    def bra_mlt_6_rewrite(rule, trs, term, side_info):
         if isinstance(term, BraApply) and isinstance(term.args[1], Add):
             new_args = tuple(BraApply(term[0], arg) for arg in term.args[1].args)
             return Add(*new_args)
@@ -919,7 +919,7 @@ def construct_trs(
     rules.append(BRA_MLT_6)
 
 
-    def bra_mlt_7_rewrite(rule, term, side_info):
+    def bra_mlt_7_rewrite(rule, trs, term, side_info):
         if isinstance(term, BraApply) and isinstance(term.args[0], Add):
             new_args = tuple(BraApply(arg, term[1]) for arg in term.args[0].args)
             return Add(*new_args)
@@ -1004,7 +1004,7 @@ def construct_trs(
     )
     rules.append(BRA_TSR_5)
 
-    def bra_tsr_6_rewrite(rule, term, side_info):
+    def bra_tsr_6_rewrite(rule, trs, term, side_info):
         if isinstance(term, BraTensor) and isinstance(term.args[0], Add):
             new_args = tuple(BraTensor(arg, term[1]) for arg in term.args[0].args)
             return Add(*new_args)
@@ -1016,7 +1016,7 @@ def construct_trs(
     )
     rules.append(BRA_TSR_6)
 
-    def bra_tsr_7_rewrite(rule, term, side_info):
+    def bra_tsr_7_rewrite(rule, trs, term, side_info):
         if isinstance(term, BraTensor) and isinstance(term.args[1], Add):
             new_args = tuple(BraTensor(term[0], arg) for arg in term.args[1].args)
             return Add(*new_args)
@@ -1060,7 +1060,7 @@ def construct_trs(
     )
     rules.append(OPT_OUTER_4)
 
-    def opt_outer_5_rewrite(rule, term, side_info):
+    def opt_outer_5_rewrite(rule, trs, term, side_info):
         if isinstance(term, OpOuter) and isinstance(term.args[0], Add):
             new_args = tuple(OpOuter(arg, term[1]) for arg in term.args[0].args)
             return Add(*new_args)
@@ -1072,7 +1072,7 @@ def construct_trs(
     )
     rules.append(OPT_OUTER_5)
 
-    def opt_outer_6_rewrite(rule, term, side_info):
+    def opt_outer_6_rewrite(rule, trs, term, side_info):
         if isinstance(term, OpOuter) and isinstance(term.args[1], Add):
             new_args = tuple(OpOuter(term[0], arg) for arg in term.args[1].args)
             return Add(*new_args)
@@ -1141,7 +1141,7 @@ def construct_trs(
     )
     rules.append(OPT_MLT_8)
 
-    def opt_mlt_9_rewrite(rule, term, side_info):
+    def opt_mlt_9_rewrite(rule, trs, term, side_info):
         if isinstance(term, OpApply) and isinstance(term.args[0], Add):
             new_args = tuple(OpApply(arg, term[1]) for arg in term.args[0].args)
             return Add(*new_args)
@@ -1153,7 +1153,7 @@ def construct_trs(
     )
     rules.append(OPT_MLT_9)
 
-    def opt_mlt_10_rewrite(rule, term, side_info):
+    def opt_mlt_10_rewrite(rule, trs, term, side_info):
         if isinstance(term, OpApply) and isinstance(term.args[1], Add):
             new_args = tuple(OpApply(term[0], arg) for arg in term.args[1].args)
             return Add(*new_args)
@@ -1222,7 +1222,7 @@ def construct_trs(
     )
     rules.append(OPT_TSR_5)
 
-    def opt_tsr_6_rewrite(rule, term, side_info):
+    def opt_tsr_6_rewrite(rule, trs, term, side_info):
         if isinstance(term, OpTensor) and isinstance(term.args[0], Add):
             new_args = tuple(OpTensor(arg, term[1]) for arg in term.args[0].args)
             return Add(*new_args)
@@ -1234,7 +1234,7 @@ def construct_trs(
     )
     rules.append(OPT_TSR_6)
 
-    def opt_tsr_7_rewrite(rule, term, side_info):
+    def opt_tsr_7_rewrite(rule, trs, term, side_info):
         if isinstance(term, OpTensor) and isinstance(term.args[1], Add):
             new_args = tuple(OpTensor(term[0], arg) for arg in term.args[1].args)
             return Add(*new_args)
