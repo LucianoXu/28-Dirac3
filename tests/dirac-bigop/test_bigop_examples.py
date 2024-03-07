@@ -195,4 +195,4 @@ def test_choi_unchoi():
         a = sub(parse(r'''FUN A . unchoi @ (choi @ A) '''))
         b = parse(r'''FUN A . A''')
 
-        assert trs.normalize(a) == trs.normalize(b)
+        assert entry_trs.normalize(trs.normalize(a)) == trs.normalize(b)

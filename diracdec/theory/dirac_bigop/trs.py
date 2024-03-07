@@ -348,96 +348,6 @@ def construct_trs(
     )
     rules.append(SUM_ELIM_6)
 
-    def sum_elim_7_rewrite(rule, trs, term, side_info):
-        if isinstance(term, Sum):
-            if isinstance(term.body, Scal) and\
-                isinstance(term.body.args[0], ScalarDot) and\
-                isinstance(term.body.args[0].args[0], BraBase) and\
-                isinstance(term.body.args[1], KetBase) and\
-                term.body.args[0].args[0].args[0] == term.bind_var and\
-                term.body.args[1].args[0] == term.bind_var:
-                return term.body.args[0].args[1]
-    SUM_ELIM_7 = TRSRule(
-        "SUM-ELIM-7",
-        lhs = "SUM(i, (BRA(i) DOT K0) SCR KET(i))",
-        rhs = "K0",
-        rewrite_method = sum_elim_7_rewrite
-    )
-    rules.append(SUM_ELIM_7)
-
-    def sum_elim_8_rewrite(rule, trs, term, side_info):
-        if isinstance(term, Sum):
-            if isinstance(term.body, Scal) and\
-                isinstance(term.body.args[0], ScalarDot) and\
-                isinstance(term.body.args[0].args[1], KetBase) and\
-                isinstance(term.body.args[1], BraBase) and\
-                term.body.args[0].args[1].args[0] == term.bind_var and\
-                term.body.args[1].args[0] == term.bind_var:
-                return term.body.args[0].args[0]
-    SUM_ELIM_8 = TRSRule(
-        "SUM-ELIM-8",
-        lhs = "SUM(i, (B0 DOT KET(i)) SCR BRA(i))",
-        rhs = "B0",
-        rewrite_method = sum_elim_8_rewrite
-    )
-    rules.append(SUM_ELIM_8)
-
-    def sum_elim_9_rewrite(rule, trs, term, side_info):
-        '''
-        Note: only SUM-SWAP-EQ is considered in matching.
-        '''
-        if isinstance(term, Sum) and isinstance(term.body, Sum) and isinstance(term.body.body, Scal):
-            body = term.body.body
-            if isinstance(body.args[0], ScalarDot) and\
-                isinstance(body.args[0].args[0], BraBase) and\
-                isinstance(body.args[0].args[1], KetApply) and\
-                isinstance(body.args[0].args[1].args[1], KetBase) and\
-                isinstance(body.args[1], OpOuter) and\
-                isinstance(body.args[1].args[0], KetBase) and\
-                isinstance(body.args[1].args[1], BraBase):
-                base_i = body.args[0].args[0].args[0]
-                base_j = body.args[0].args[1].args[1].args[0]
-
-                if base_i == body.args[1].args[0].args[0] and\
-                    base_j == body.args[1].args[1].args[0] and\
-                    (term.bind_var == base_i and term.body.bind_var == base_j or term.bind_var == base_j and term.body.bind_var == base_i):
-                    return body.args[0].args[1].args[0]
-    SUM_ELIM_9 = TRSRule(
-        "SUM-ELIM-9",
-        lhs = "SUM(i, SUM(j, (BRA(i) DOT (A MLTK KET(j))) SCR (KET(i) OUTER BRA(j)) ))",
-        rhs = "A",
-        rewrite_method = sum_elim_9_rewrite
-    )
-    rules.append(SUM_ELIM_9)
-
-    def sum_elim_10_rewrite(rule, trs, term, side_info):
-        '''
-        Note: only SUM-SWAP-EQ is considered in matching.
-        '''
-        if isinstance(term, Sum) and isinstance(term.body, Sum) and isinstance(term.body.body, Scal):
-            body = term.body.body
-            if isinstance(body.args[0], ScalarDot) and\
-                isinstance(body.args[0].args[0], BraBase) and\
-                isinstance(body.args[0].args[1], KetApply) and\
-                isinstance(body.args[0].args[1].args[1], KetBase) and\
-                isinstance(body.args[1], OpOuter) and\
-                isinstance(body.args[1].args[0], KetBase) and\
-                isinstance(body.args[1].args[1], BraBase):
-                base_i = body.args[0].args[0].args[0]
-                base_j = body.args[0].args[1].args[1].args[0]
-
-                if base_j == body.args[1].args[0].args[0] and\
-                    base_i == body.args[1].args[1].args[0] and\
-                    (term.bind_var == base_i and term.body.bind_var == base_j or term.bind_var == base_j and term.body.bind_var == base_i):
-                    return Transpose(body.args[0].args[1].args[0])
-    SUM_ELIM_10 = TRSRule(
-        "SUM-ELIM-10",
-        lhs = "SUM(i, SUM(j, (BRA(i) DOT (A MLTK KET(j))) SCR (KET(j) OUTER BRA(i)) ))",
-        rhs = "TP(A)",
-        rewrite_method = sum_elim_10_rewrite
-    )
-    rules.append(SUM_ELIM_10)
-
 
 
     def sum_dist_1_rewrite(rule, trs, term, side_info):
@@ -627,7 +537,10 @@ def construct_trs(
             combined_term = type(term)(renamed_sum.body, term.args[1])
             norm_term = trs.normalize(combined_term, **side_info['trs-args'])
             if norm_term != combined_term:
-                return Sum(renamed_sum.bind_var, norm_term)
+                if type(term) == ScalarDot:
+                    return SumS(renamed_sum.bind_var, norm_term)
+                else:
+                    return Sum(renamed_sum.bind_var, norm_term)
     SUM_COMP_1 = TRSRule(
         "SUM-COMP-1",
         lhs = "SUM(i, A) {DOT/MLTK/MLTB/MLTO} X (with side condition)",
@@ -649,7 +562,10 @@ def construct_trs(
             combined_term = type(term)(term.args[0], renamed_sum.body)
             norm_term = trs.normalize(combined_term, **side_info['trs-args'])
             if norm_term != combined_term:
-                return Sum(renamed_sum.bind_var, norm_term)
+                if type(term) == ScalarDot:
+                    return SumS(renamed_sum.bind_var, norm_term)
+                else:
+                    return Sum(renamed_sum.bind_var, norm_term)
     SUM_COMP_2 = TRSRule(
         "SUM-COMP-2",
         lhs = "X {DOT/MLTK/MLTB/MLTO} SUM(i, A) (with side condition)",
@@ -815,3 +731,119 @@ def construct_trs(
     # build the trs
     rules = rules + dirac_trs.rules
     return TRS(rules), juxtapose_rewrite, sumeq_rewrite
+
+
+
+def construct_entry_trs(
+        CScalar: Type[ComplexScalar], 
+        ABase: Type[AtomicBase], 
+        parser: yacc.LRParser|None = None) -> TRS:
+    '''
+    Return:
+        - the first TRS is the trs for the bigop theory
+        - the second function transform the term to apply juxtapose rule once.
+        - the thrid function applies the sumeq extension.
+    '''
+
+    # construct the parser
+    if parser is None:
+        parser = construct_parser(CScalar, ABase)
+
+    def parse(s: str) -> TRSTerm:
+        return parser.parse(s)
+    
+    rules = []
+
+    def sum_elim_7_rewrite(rule, trs, term, side_info):
+        if isinstance(term, Sum):
+            if isinstance(term.body, Scal) and\
+                isinstance(term.body.args[0], ScalarDot) and\
+                isinstance(term.body.args[0].args[0], BraBase) and\
+                isinstance(term.body.args[1], KetBase) and\
+                term.body.args[0].args[0].args[0] == term.bind_var and\
+                term.body.args[1].args[0] == term.bind_var:
+                return term.body.args[0].args[1]
+    SUM_ELIM_7 = TRSRule(
+        "SUM-ELIM-7",
+        lhs = "SUM(i, (BRA(i) DOT K0) SCR KET(i))",
+        rhs = "K0",
+        rewrite_method = sum_elim_7_rewrite
+    )
+    rules.append(SUM_ELIM_7)
+
+    def sum_elim_8_rewrite(rule, trs, term, side_info):
+        if isinstance(term, Sum):
+            if isinstance(term.body, Scal) and\
+                isinstance(term.body.args[0], ScalarDot) and\
+                isinstance(term.body.args[0].args[1], KetBase) and\
+                isinstance(term.body.args[1], BraBase) and\
+                term.body.args[0].args[1].args[0] == term.bind_var and\
+                term.body.args[1].args[0] == term.bind_var:
+                return term.body.args[0].args[0]
+    SUM_ELIM_8 = TRSRule(
+        "SUM-ELIM-8",
+        lhs = "SUM(i, (B0 DOT KET(i)) SCR BRA(i))",
+        rhs = "B0",
+        rewrite_method = sum_elim_8_rewrite
+    )
+    rules.append(SUM_ELIM_8)
+
+    def sum_elim_9_rewrite(rule, trs, term, side_info):
+        '''
+        Note: only SUM-SWAP-EQ is considered in matching.
+        '''
+        if isinstance(term, Sum) and isinstance(term.body, Sum) and isinstance(term.body.body, Scal):
+            body = term.body.body
+            if isinstance(body.args[0], ScalarDot) and\
+                isinstance(body.args[0].args[0], BraBase) and\
+                isinstance(body.args[0].args[1], KetApply) and\
+                isinstance(body.args[0].args[1].args[1], KetBase) and\
+                isinstance(body.args[1], OpOuter) and\
+                isinstance(body.args[1].args[0], KetBase) and\
+                isinstance(body.args[1].args[1], BraBase):
+                base_i = body.args[0].args[0].args[0]
+                base_j = body.args[0].args[1].args[1].args[0]
+
+                if base_i == body.args[1].args[0].args[0] and\
+                    base_j == body.args[1].args[1].args[0] and\
+                    (term.bind_var == base_i and term.body.bind_var == base_j or term.bind_var == base_j and term.body.bind_var == base_i):
+                    return body.args[0].args[1].args[0]
+    SUM_ELIM_9 = TRSRule(
+        "SUM-ELIM-9",
+        lhs = "SUM(i, SUM(j, (BRA(i) DOT (A MLTK KET(j))) SCR (KET(i) OUTER BRA(j)) ))",
+        rhs = "A",
+        rewrite_method = sum_elim_9_rewrite
+    )
+    rules.append(SUM_ELIM_9)
+
+    def sum_elim_10_rewrite(rule, trs, term, side_info):
+        '''
+        Note: only SUM-SWAP-EQ is considered in matching.
+        '''
+        if isinstance(term, Sum) and isinstance(term.body, Sum) and isinstance(term.body.body, Scal):
+            body = term.body.body
+            if isinstance(body.args[0], ScalarDot) and\
+                isinstance(body.args[0].args[0], BraBase) and\
+                isinstance(body.args[0].args[1], KetApply) and\
+                isinstance(body.args[0].args[1].args[1], KetBase) and\
+                isinstance(body.args[1], OpOuter) and\
+                isinstance(body.args[1].args[0], KetBase) and\
+                isinstance(body.args[1].args[1], BraBase):
+                base_i = body.args[0].args[0].args[0]
+                base_j = body.args[0].args[1].args[1].args[0]
+
+                if base_j == body.args[1].args[0].args[0] and\
+                    base_i == body.args[1].args[1].args[0] and\
+                    (term.bind_var == base_i and term.body.bind_var == base_j or term.bind_var == base_j and term.body.bind_var == base_i):
+                    return Transpose(body.args[0].args[1].args[0])
+    SUM_ELIM_10 = TRSRule(
+        "SUM-ELIM-10",
+        lhs = "SUM(i, SUM(j, (BRA(i) DOT (A MLTK KET(j))) SCR (KET(j) OUTER BRA(i)) ))",
+        rhs = "TP(A)",
+        rewrite_method = sum_elim_10_rewrite
+    )
+    rules.append(SUM_ELIM_10)
+
+    # build the trs
+    rules = rules + rules
+    return TRS(rules)

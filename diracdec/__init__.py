@@ -18,7 +18,7 @@ try:
 
     from .factory import dirac_bigop_parser, dirac_bigop_parse, dirac_bigop_trs
 
-    from .factory import dirac_bigop_delta_parser, dirac_bigop_delta_parse, dirac_bigop_delta_trs
+    from .factory import dirac_bigop_delta_parser, dirac_bigop_delta_parse, dirac_bigop_delta_trs, entry_trs
 
     # transformers
     from .components import wolU

@@ -77,7 +77,11 @@ dirac_bigop_delta_trs = delta_ext.modify_trs(
     wolfram_simple.WolframABase
     )
 
-
+entry_trs = dirac_bigop.construct_entry_trs(
+    wolfram_simple.WolframCScalar, 
+    wolfram_simple.WolframABase, 
+    dirac_bigop_parser
+)
 
 ###############################################
 # out-of-box interface
