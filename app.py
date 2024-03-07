@@ -92,6 +92,7 @@ def calculate():
     # normalize term A
     proofA_stream = io.StringIO()
 
+    termA = None
     try:
         termA = parse(termA_code).substitute(sub_idempotent)
         norm_termA = wolU(trs.normalize(juxt(sumeq(trs.normalize(termA, verbose=True, stream=proofA_stream)))))
@@ -105,6 +106,7 @@ def calculate():
     # normalize term B
     proofB_stream = io.StringIO()
 
+    termB = None
     try:
         termB = parse(termB_code).substitute(sub_idempotent)
         norm_termB = wolU(trs.normalize(juxt(sumeq(trs.normalize(termB, verbose=True, stream=proofB_stream)))))
@@ -132,8 +134,8 @@ def calculate():
                            subst_parsed = sub_parsed,
                            termA=termA_code,
                            termB=termB_code,
-                           termAstr = str(termA),
-                           termBstr = str(termB),
+                           termAstr = "Error" if termA is None else str(termA),
+                           termBstr = "Error" if termB is None else str(termB),
                            normA=norm_termA_text,
                            normB=norm_termB_text,
                            proofA = proofA_stream.read(),
