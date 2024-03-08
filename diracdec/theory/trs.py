@@ -1025,7 +1025,7 @@ class TRS:
 
             if new_term is None:
                 if verbose:
-                    stream.write("It is the normal form.")
+                    stream.write("It is the normal form.\n")
                 return current_term
             
             current_term = new_term
