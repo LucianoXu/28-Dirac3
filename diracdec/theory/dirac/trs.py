@@ -124,9 +124,11 @@ def construct_trs(
                             continue
                         if isinstance(term.args[j], ScalarDelta) \
                             and isinstance(term.args[j].args[0], BaseSnd) \
-                            and isinstance(term.args[j].args[1], BaseSnd):
+                            and isinstance(term.args[j].args[1], BaseSnd) \
+                            and term.args[i].args[0].args[0] == term.args[j].args[0].args[0] \
+                            and term.args[i].args[1].args[0] == term.args[j].args[1].args[0]:
 
-                            deltauv = ScalarDelta(term.args[i].args[0].args[0], term.args[j].args[0].args[0])
+                            deltauv = ScalarDelta(term.args[i].args[0].args[0], term.args[i].args[1].args[0])
 
                             return ScalarMlt(deltauv, *term.remained_terms(i, j))
     DELTA_2 = TRSRule(
