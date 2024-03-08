@@ -479,51 +479,6 @@ def construct_trs(
     )
     rules.append(SUM_DIST_10)
 
-    def sum_comp_3_rewrite(rule, trs, term, side_info):
-        if isinstance(term, (KetTensor, BraTensor, OpOuter, OpTensor)) and isinstance(term.args[0], Sum):
-
-            # we have to rename if necessary
-            if term.args[0].bind_var.name in term.args[1].free_variables():
-                new_var = var_rename(term.args[0].variables() | term.args[1].free_variables())
-                renamed_sum = term.args[0].rename_bind(TRSVar(new_var))
-            else:
-                renamed_sum = term.args[0]
-
-            combined_term = type(term)(renamed_sum.body, term.args[1])
-            norm_term = trs.normalize(combined_term)
-            if norm_term != combined_term:
-                return Sum(renamed_sum.bind_var, norm_term)
-    SUM_COMP_3 = TRSRule(
-        "SUM-COMP-3",
-        lhs = "SUM(i, A) {TSRK/TSRB/OUTER/TSRO} X (with side condition)",
-        rhs = "SUM(i, A {TSRK/TSRB/OUTER/TSRO} X)",
-        rewrite_method = sum_comp_3_rewrite
-    )
-    rules.append(SUM_COMP_3)
-
-    def sum_comp_4_rewrite(rule, trs, term, side_info):
-        if isinstance(term, (KetTensor, BraTensor, OpOuter, OpTensor)) and isinstance(term.args[1], Sum):
-
-            # we have to rename if necessary
-            if term.args[1].bind_var.name in term.args[0].free_variables():
-                new_var = var_rename(term.args[1].variables() | term.args[0].free_variables())
-                renamed_sum = term.args[1].rename_bind(TRSVar(new_var))
-            else:
-                renamed_sum = term.args[1]
-
-            combined_term = type(term)(term.args[0], renamed_sum.body)
-            norm_term = trs.normalize(combined_term)
-            if norm_term != combined_term:
-                return Sum(renamed_sum.bind_var, norm_term)
-    SUM_COMP_4 = TRSRule(
-        "SUM-COMP-4",
-        lhs = "X {TSRK/TSRB/OUTER/TSRO} SUM(i, A) (with side condition)",
-        rhs = "SUM(i, X {TSRK/TSRB/OUTER/TSRO} A)",
-        rewrite_method = sum_comp_4_rewrite
-    )
-    rules.append(SUM_COMP_4)
-
-
     def sum_comp_1_rewrite(rule, trs, term, side_info):
         if isinstance(term, (ScalarDot, KetApply, BraApply, OpApply)) and isinstance(term.args[0], Sum):
 
@@ -573,6 +528,51 @@ def construct_trs(
         rewrite_method = sum_comp_2_rewrite
     )
     rules.append(SUM_COMP_2)
+
+
+    def sum_comp_3_rewrite(rule, trs, term, side_info):
+        if isinstance(term, (KetTensor, BraTensor, OpOuter, OpTensor)) and isinstance(term.args[0], Sum):
+
+            # we have to rename if necessary
+            if term.args[0].bind_var.name in term.args[1].free_variables():
+                new_var = var_rename(term.args[0].variables() | term.args[1].free_variables())
+                renamed_sum = term.args[0].rename_bind(TRSVar(new_var))
+            else:
+                renamed_sum = term.args[0]
+
+            combined_term = type(term)(renamed_sum.body, term.args[1])
+            norm_term = trs.normalize(combined_term, **side_info['trs-args'])
+            if norm_term != combined_term:
+                return Sum(renamed_sum.bind_var, norm_term)
+    SUM_COMP_3 = TRSRule(
+        "SUM-COMP-3",
+        lhs = "SUM(i, A) {TSRK/TSRB/OUTER/TSRO} X (with side condition)",
+        rhs = "SUM(i, A {TSRK/TSRB/OUTER/TSRO} X)",
+        rewrite_method = sum_comp_3_rewrite
+    )
+    rules.append(SUM_COMP_3)
+
+    def sum_comp_4_rewrite(rule, trs, term, side_info):
+        if isinstance(term, (KetTensor, BraTensor, OpOuter, OpTensor)) and isinstance(term.args[1], Sum):
+
+            # we have to rename if necessary
+            if term.args[1].bind_var.name in term.args[0].free_variables():
+                new_var = var_rename(term.args[1].variables() | term.args[0].free_variables())
+                renamed_sum = term.args[1].rename_bind(TRSVar(new_var))
+            else:
+                renamed_sum = term.args[1]
+
+            combined_term = type(term)(term.args[0], renamed_sum.body)
+            norm_term = trs.normalize(combined_term, **side_info['trs-args'])
+            if norm_term != combined_term:
+                return Sum(renamed_sum.bind_var, norm_term)
+    SUM_COMP_4 = TRSRule(
+        "SUM-COMP-4",
+        lhs = "X {TSRK/TSRB/OUTER/TSRO} SUM(i, A) (with side condition)",
+        rhs = "SUM(i, X {TSRK/TSRB/OUTER/TSRO} A)",
+        rewrite_method = sum_comp_4_rewrite
+    )
+    rules.append(SUM_COMP_4)
 
     def sum_comp_5_rewrite(rule, trs, term, side_info):
         if isinstance(term, SumS) and term.bind_var.name not in term.body.free_variables():

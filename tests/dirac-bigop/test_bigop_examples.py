@@ -46,7 +46,6 @@ def test_1():
             "a" : parse(''' "1" '''),
         })
         assert a == sub(a)
-        assert hash(a) == hash(sub(a))
 
 def test_sum_swap():
     with wolfram_backend.wolfram_session():

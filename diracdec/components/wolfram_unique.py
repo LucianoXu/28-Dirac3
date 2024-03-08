@@ -26,7 +26,7 @@ import hashlib
 class WolABaseUnique(AtomicBase):
 
     # this list of all complex scalars constructed
-    table : List[WolABaseUnique] = []
+    table : set[WolABaseUnique] = set()
 
     def __new__(cls, expr : str | Any):
         '''
@@ -45,7 +45,7 @@ class WolABaseUnique(AtomicBase):
         expr = session.evaluate(wl.FullSimplify(expr))
         obj = object.__new__(cls)
         obj.expr = expr
-        WolABaseUnique.table.append(obj)
+        WolABaseUnique.table.add(obj)
         return obj
         
     def __init__(self, expr : str | Any):
@@ -124,7 +124,7 @@ class WolABaseUnique(AtomicBase):
 class WolCScalarUnique(ComplexScalar):
 
     # this list of all complex scalars constructed
-    table : List[WolCScalarUnique] = []
+    table : set[WolCScalarUnique] = set()
 
     def __new__(cls, expr : str | Any):
         '''
@@ -143,7 +143,7 @@ class WolCScalarUnique(ComplexScalar):
         expr = session.evaluate(wl.FullSimplify(expr))
         obj = object.__new__(cls)
         obj.expr = expr
-        WolCScalarUnique.table.append(obj)
+        WolCScalarUnique.table.add(obj)
         return obj
         
     def __init__(self, expr : str | Any):

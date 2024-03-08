@@ -45,7 +45,6 @@ The keywords are the symbols in captial letters in the following definition. A v
 
 
 ## Note
-- the terms are compared first by hash values
 - The syntax of Dirac notation already incorperate the equivalence of AC symbols. Expressions with AC leading symbols will be flattened and stored as a list when constructed.
 - The syntax for the parser is very close to that of a term rewriting system. The only modification is that we allow the chain of infix binary such as ```a ADDS b ADDS c```, which is supported by the preference setting of **ply**.
 - In the trs, every term is considered as immutable.
@@ -85,3 +84,4 @@ This is implemented in the backend "wolfram_unique". We transform terms in simpl
 
 - summation with index set
 - C(0) -> \mathbf{0} (necessary for summation with index set)
+- update the unit tests

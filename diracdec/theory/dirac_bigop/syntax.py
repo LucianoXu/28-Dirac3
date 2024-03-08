@@ -1,6 +1,3 @@
-
-from ..trs import TRS_AC_safe, TRSCommBinary_safe
-
 from ..dirac.syntax import *
 
 from ..trs import BindVarTerm
@@ -75,7 +72,7 @@ class Sum(DiracNotation, BindVarTerm):
 #####################################
 # section-2 syntax
     
-class Juxtapose(DiracScalar, TRSCommBinary_safe):
+class Juxtapose(DiracScalar, TRSCommBinary):
     '''
     Note: this rule is only for internal representation, and should not be used in the user interface or parsing
     '''
@@ -97,7 +94,7 @@ class Juxtapose(DiracScalar, TRSCommBinary_safe):
         '''
         return self.args[0].tex()
     
-class SumEq(TRS_AC_safe):
+class SumEq(TRS_AC):
     '''
     Note: this rule is only for internal representation, and should not be used in the user interface or parsing
     '''
@@ -105,7 +102,7 @@ class SumEq(TRS_AC_safe):
     fsymbol = "SUMEQ"
 
     def __init__(self, *tup : TRSTerm):
-        TRS_AC_safe.__init__(self, *tup)
+        TRS_AC.__init__(self, *tup)
 
     def __str__(self) -> str:
         '''

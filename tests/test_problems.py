@@ -19,4 +19,4 @@ def test_problem_2():
     with wolfram_backend.wolfram_session():
         a = parse('''X TSRK SUM(i, (BRA(i) DOT K0) SCR KET(i))''')
         b = parse('''X TSRK K0''')
-        assert trs.normalize(a) == trs.normalize(b)
+        assert entry_trs.normalize(trs.normalize(a)) == entry_trs.normalize(trs.normalize(b))

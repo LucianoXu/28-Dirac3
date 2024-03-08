@@ -190,38 +190,6 @@ def test_SUM_ELIM_6():
         b = parse(''' SUM(j, (S1 MLTS S2) SCR (KET(s) OUTER BRA(s))) ''')
         assert trs.normalize(a) == trs.normalize(b)
 
-def test_SUM_ELIM_7():
-    with wolfram_backend.wolfram_session():
-        a = parse('''SUM(i, (BRA(i) DOT K0) SCR KET(i))''')
-        b = parse('''K0''')
-        assert trs.normalize(a) == trs.normalize(b)
-
-def test_SUM_ELIM_8():
-    with wolfram_backend.wolfram_session():
-        a = parse('''SUM(i, (B0 DOT KET(i)) SCR BRA(i))''')
-        b = parse('''B0''')
-        assert trs.normalize(a) == trs.normalize(b)
-
-def test_SUM_ELIM_9():
-    with wolfram_backend.wolfram_session():
-        a = parse(''' SUM(i, SUM(j, (BRA(i) DOT (A MLTK KET(j))) SCR (KET(i) OUTER BRA(j)) )) ''')
-        b = parse('''A''')
-        assert trs.normalize(a) == trs.normalize(b)
-
-        a = parse(''' SUM(j, SUM(i, (BRA(i) DOT (A MLTK KET(j))) SCR (KET(i) OUTER BRA(j)) )) ''')
-        b = parse('''A''')
-        assert trs.normalize(a) == trs.normalize(b)
-
-def test_SUM_ELIM_10():
-    with wolfram_backend.wolfram_session():
-        a = parse(''' SUM(i, SUM(j, (BRA(j) DOT (A MLTK KET(i))) SCR (KET(i) OUTER BRA(j)) )) ''')
-        b = parse('''TP(A)''')
-        assert trs.normalize(a) == trs.normalize(b)
-
-        a = parse(''' SUM(j, SUM(i, (BRA(i) DOT (A MLTK KET(j))) SCR (KET(j) OUTER BRA(i)) )) ''')
-        b = parse('''TP(A)''')
-        assert trs.normalize(a) == trs.normalize(b)
-
 def test_SUM_DIST_1():
     with wolfram_backend.wolfram_session():
         a = parse(''' SUMS(i, A) MLTS B MLTS C ''')
@@ -373,7 +341,42 @@ def test_SUM_ADD_1():
         b = parse(r'''SUMS(z, A ADDS B ADDS i) ADDS S0''')
         assert trs.normalize(a) == trs.normalize(b)
 
-###########################################################
+##################################
+        
+
+def test_SUM_ELIM_7():
+    with wolfram_backend.wolfram_session():
+        a = parse('''SUM(i, (BRA(i) DOT K0) SCR KET(i))''')
+        b = parse('''K0''')
+        assert entry_trs.normalize(trs.normalize(a)) == entry_trs.normalize(trs.normalize(b))
+
+def test_SUM_ELIM_8():
+    with wolfram_backend.wolfram_session():
+        a = parse('''SUM(i, (B0 DOT KET(i)) SCR BRA(i))''')
+        b = parse('''B0''')
+        assert entry_trs.normalize(trs.normalize(a)) == entry_trs.normalize(trs.normalize(b))
+
+def test_SUM_ELIM_9():
+    with wolfram_backend.wolfram_session():
+        a = parse(''' SUM(i, SUM(j, (BRA(i) DOT (A MLTK KET(j))) SCR (KET(i) OUTER BRA(j)) )) ''')
+        b = parse('''A''')
+        assert entry_trs.normalize(trs.normalize(a)) == entry_trs.normalize(trs.normalize(b))
+
+        a = parse(''' SUM(j, SUM(i, (BRA(i) DOT (A MLTK KET(j))) SCR (KET(i) OUTER BRA(j)) )) ''')
+        b = parse('''A''')
+        assert entry_trs.normalize(trs.normalize(a)) == entry_trs.normalize(trs.normalize(b))
+
+def test_SUM_ELIM_10():
+    with wolfram_backend.wolfram_session():
+        a = parse(''' SUM(i, SUM(j, (BRA(j) DOT (A MLTK KET(i))) SCR (KET(i) OUTER BRA(j)) )) ''')
+        b = parse('''TP(A)''')
+        assert entry_trs.normalize(trs.normalize(a)) == entry_trs.normalize(trs.normalize(b))
+
+        a = parse(''' SUM(j, SUM(i, (BRA(i) DOT (A MLTK KET(j))) SCR (KET(j) OUTER BRA(i)) )) ''')
+        b = parse('''TP(A)''')
+        assert entry_trs.normalize(trs.normalize(a)) == entry_trs.normalize(trs.normalize(b))
+
+#########################
 # beta reduction
 
 def test_BETA_REDUCTION():

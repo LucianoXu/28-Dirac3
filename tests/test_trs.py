@@ -7,12 +7,10 @@ def test_bind_alpha_conv():
     a = BindVarTerm(TRSVar("x"), TRSVar("x"))
     b = BindVarTerm(TRSVar("y"), TRSVar("y"))
     assert a == b
-    assert hash(a) == hash(b)
 
     a = BindVarTerm(TRSVar("x"), TRSVar("z"))
     b = BindVarTerm(TRSVar("y"), TRSVar("z"))
     assert a == b
-    assert hash(a) == hash(b)
 
 def test_bind_substitute():
     sub = Subst({

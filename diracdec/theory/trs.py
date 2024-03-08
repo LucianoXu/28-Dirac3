@@ -4,7 +4,7 @@ The architecture of the term rewriting system
 
 from __future__ import annotations
 import sys
-from typing import Callable, TextIO, Tuple, Any, Dict, List
+from typing import Callable, TextIO, Tuple, Any, Dict, List, Sequence
 
 from abc import ABC, abstractmethod
 
@@ -14,7 +14,6 @@ from ..backends.formprint import *
 from ..backends import render_tex, render_tex_to_svg
 
 
-import hashlib
 import itertools
 
 def var_rename(vars: set[str], prefix: str = "x") -> str:
@@ -34,6 +33,21 @@ def var_rename_ls(vars: set[str], count:int, prefix: str = "x") -> tuple[str, ..
             res.append(prefix + str(i))
         i += 1
     return tuple(res)
+
+def seq_content_eq(ls1: Sequence, ls2: Sequence) -> bool:
+    '''
+    check whether the contents of the sequences are equal up to permutations
+    '''
+    if len(ls1) != len(ls2):
+        return False
+    else:
+        remain = list(ls2)
+        for item in ls1:
+            try:
+                remain.remove(item)
+            except ValueError:
+                return False
+        return True
 
 class TRSTerm(ABC):
     '''
@@ -66,19 +80,6 @@ class TRSTerm(ABC):
         This method calculates the equivalence in pure syntactic level.
         '''
         return super().__eq__(__value)
-    
-    @abstractmethod
-    def __hash__(self) -> int:
-        pass
-
-
-    def __lt__(self, other: TRSTerm) -> bool:
-        h_self = hash(self)
-        h_other = hash(other)
-        if h_self == h_other:
-            return repr(self) < repr(other)
-        else:
-            return h_self < h_other
         
     @abstractmethod
     def size(self) -> int:
@@ -135,10 +136,6 @@ class TRSVar(TRSTerm):
     def __eq__(self, other: TRSVar) -> bool:
         return isinstance(other, TRSVar) and self.name == other.name
     
-    def __hash__(self) -> int:
-        h = hashlib.md5(("var" + self.name).encode())
-        return int(h.hexdigest(), 16)
-    
     def size(self) -> int:
         return 1
     
@@ -177,14 +174,6 @@ class StdTerm(TRSTerm):
             return True
         
         return isinstance(other, type(self)) and self.args == other.args
-
-
-    def __hash__(self) -> int:
-        h = hashlib.md5(self.fsymbol.encode())
-        for arg in self.args:
-            h.update(abs(hash(arg)).to_bytes(16, 'big'))
-
-        return int(h.hexdigest(), 16)
     
     def __getitem__(self, index) -> TRSTerm:
         return self.args[index]
@@ -256,22 +245,6 @@ class BindVarTerm(TRSTerm):
         else:
             return False
     
-    def __hash__(self) -> int:
-        '''
-        To make the hash value of the term unique, we need to consider the alpha-conversion of the bind variable.
-        '''
-        canonical_var = var_rename(self.free_variables())
-        h = hashlib.md5(self.fsymbol.encode())
-        h.update(canonical_var.encode())
-        h.update(abs(
-            hash(
-                self.body.substitute(
-                    Subst({self.bind_var.name: TRSVar(canonical_var)})
-                    )
-                )).to_bytes(16, 'big')
-            )
-        return int(h.hexdigest(), 16)
-    
     def size(self) -> int:
         return self.body.size() + 2
     
@@ -330,8 +303,7 @@ class MultiBindTerm(TRSTerm):
             bind_vars = bind_vars + body.bind_vars
             body = body.body
 
-        # the bind variables are sorted
-        self.bind_vars = tuple(sorted(bind_vars))
+        self.bind_vars = tuple(bind_vars)
         self.body = body
 
     def __str__(self) -> str:
@@ -374,30 +346,7 @@ class MultiBindTerm(TRSTerm):
         
         else:
             return False
-    
-    def __hash__(self) -> int:
-        '''
-        To make the hash value of the term unique, we need to consider the alpha-conversion of the bind variable.
-        '''
-        h = int(hashlib.md5(self.fsymbol.encode()).hexdigest(), 16)
 
-        # first find common bind variable renaming list
-        new_vars : list[str] = []
-        for i in range(len(self.bind_vars)):
-            new_v = var_rename(self.free_variables() | set(new_vars))
-            new_vars.append(new_v)
-
-        # iterate through all possible bind variable sequences and sum up as the hash value
-            
-        for perm in itertools.permutations(new_vars):
-            self_renamed = self.rename_bind(tuple(TRSVar(v) for v in perm))
-            h_self = hashlib.md5(self_renamed.fsymbol.encode())
-            h_self.update(abs(
-                hash(self_renamed.body)).to_bytes(16, 'big')
-                )
-            h += int(h_self.hexdigest(), 16)
-
-        return h
     
     def size(self) -> int:
         return self.body.size() + len(self.bind_vars) + 1
@@ -449,6 +398,111 @@ class MultiBindTerm(TRSTerm):
             return type(self)(new_vars, self.body.substitute(new_sigma))
             
             
+
+##################################################################
+# other specified terms (Commutative, AC, infix binary, ...)
+    
+class TRSInfixBinary(StdTerm):
+    def __init__(self, L : TRSTerm, R : TRSTerm):
+        super().__init__(L, R)
+
+    def __str__(self) -> str:
+        return str(ParenBlock(HSeqBlock(
+            str(self.args[0]), self.fsymbol_print, str(self.args[1])
+        )))
+
+    def __repr__(self) -> str:
+        return f'({repr(self.args[0])} {self.fsymbol} {repr(self.args[1])})'
+    
+    def substitute(self, sigma: Subst) -> TRSTerm:
+        return super().substitute(sigma)
+    
+class TRSCommBinary(StdTerm):
+    '''
+    (not infix)
+    '''
+    def __init__(self, L : Any, R : Any):
+        super().__init__(L, R)
+
+    def __eq__(self, other) -> bool:
+        if self is other:
+            return True
+        
+        if isinstance(other, type(self)):
+            return seq_content_eq(self.args, other.args)
+        
+        return False
+
+    def __repr__(self) -> str:
+        return f'{self.fsymbol}({repr(self.args[0])}, {repr(self.args[1])})'
+    
+    def substitute(self, sigma: Subst) -> TRSTerm:
+        return super().substitute(sigma)
+
+class TRS_AC(StdTerm):
+
+    def __new__(cls, *tup: Any):
+        '''
+        return the element directly when tuple has only one element
+        '''
+        if len(tup) == 0:
+            raise ValueError("The tuple lengh should be at least 1.")
+        elif len(tup) == 1:
+            return tup[0]
+        else:
+            obj = object.__new__(cls)
+            TRS_AC.__init__(obj, *tup)
+            return obj
+        
+    def __init__(self, *tup: Any):
+        '''
+        The method of flatten the tuple of arguments for the ac_symbol.
+        Assume that the items in tup are already flattened.
+        '''
+        if len(tup) < 2:
+            raise ValueError("The tuple lengh should be at least 2.")
+
+        new_ls = []
+        for item in tup:
+            if isinstance(item, type(self)):
+                new_ls.extend(item.args)
+            else:
+                new_ls.append(item)
+
+        self.args = tuple(new_ls)
+
+    def __eq__(self, other) -> bool:
+        if self is other:
+            return True
+        
+        if isinstance(other, type(self)):
+            return seq_content_eq(self.args, other.args)
+        
+        return False
+
+
+    def __str__(self) -> str:
+        blocks = [str(self.args[0])]
+        for arg in self.args[1:]:
+            blocks.append(f" {self.fsymbol_print} ")
+            blocks.append(str(arg))
+
+        return str(ParenBlock(HSeqBlock(*blocks, v_align='c')))
+    
+    def __repr__(self) -> str:
+        return f'({f" {self.fsymbol} ".join(map(repr, self.args))})'
+    
+    def tex(self) -> str:
+        return rf' \left ({f" {self.fsymbol_print} ".join(map(lambda x: x.tex(), self.args))} \right )'
+    
+    def substitute(self, sigma: Subst) -> TRSTerm:
+        return type(self)(*tuple(arg.substitute(sigma) for arg in self.args))
+    
+    def remained_terms(self, *idx: int):
+        '''
+        collect the terms that are not in the idx, and return as a new tuple.
+        '''
+        return tuple(self.args[i] for i in range(len(self.args)) if i not in idx)
 
 ################################################################################
 # universal algebra methods
@@ -622,224 +676,7 @@ class Matching:
     @staticmethod
     def single_match(lhs : TRSTerm, rhs : TRSTerm) -> Subst | None:
         return Matching.solve_matching([(lhs, rhs)])
-
-
-##################################################################
-# other specified terms (Commutative, AC, infix binary, ...)
     
-class TRSInfixBinary(StdTerm):
-    def __init__(self, L : TRSTerm, R : TRSTerm):
-        super().__init__(L, R)
-
-    def __str__(self) -> str:
-        return str(ParenBlock(HSeqBlock(
-            str(self.args[0]), self.fsymbol_print, str(self.args[1])
-        )))
-
-    def __repr__(self) -> str:
-        return f'({repr(self.args[0])} {self.fsymbol} {repr(self.args[1])})'
-    
-    def substitute(self, sigma: Subst) -> TRSTerm:
-        return super().substitute(sigma)
-    
-class TRSCommBinary(StdTerm):
-    '''
-    (not infix)
-    '''
-    def __init__(self, L : Any, R : Any):
-        if L > R:
-            L, R = R, L
-        super().__init__(L, R)
-
-    def __repr__(self) -> str:
-        return f'{self.fsymbol}({repr(self.args[0])}, {repr(self.args[1])})'
-    
-    def substitute(self, sigma: Subst) -> TRSTerm:
-        return super().substitute(sigma)
-    
-
-class TRSCommBinary_safe(StdTerm):
-    '''
-    TRSCommBinary_safe does not try to sort the operands, but compare them one by one. The hash value calculation is adjusted accordingly.
-
-    This is less efficient but more robust.
-    '''
-    def __init__(self, L : Any, R : Any):
-        super().__init__(L, R)
-
-    def __repr__(self) -> str:
-        return f'{self.fsymbol}({repr(self.args[0])}, {repr(self.args[1])})'
-    
-    def substitute(self, sigma: Subst) -> TRSTerm:
-        return super().substitute(sigma)
-
-    def __eq__(self, other):
-        if self is other:
-            return True
-        
-        if isinstance(other, TRSCommBinary_safe):
-            if self.args[0] == other.args[0] and self.args[1] == other.args[1]:
-                return True
-            
-            if self.args[0] == other.args[1] and self.args[1] == other.args[0]:
-                return True
-            
-            return False
-        
-        else:
-            return False
-        
-    def __hash__(self) -> int:
-        h = int(hashlib.md5(self.fsymbol.encode()).hexdigest(), 16)
-
-        return h + hash(self.args[0]) + hash(self.args[1])
-    
-
-class TRS_AC(StdTerm):
-
-    def __new__(cls, *tup: Any):
-        '''
-        return the element directly when tuple has only one element
-        '''
-        if len(tup) == 0:
-            raise ValueError("The tuple lengh should be at least 1.")
-        elif len(tup) == 1:
-            return tup[0]
-        else:
-            obj = object.__new__(cls)
-            TRS_AC.__init__(obj, *tup)
-            return obj
-        
-    def __init__(self, *tup: Any):
-        '''
-        The method of flatten the tuple of arguments for the ac_symbol.
-        Assume that the items in tup are already flattened.
-        '''
-        if len(tup) < 2:
-            raise ValueError("The tuple lengh should be at least 2.")
-
-        new_ls = []
-        for item in tup:
-            if isinstance(item, type(self)):
-                new_ls.extend(item.args)
-            else:
-                new_ls.append(item)
-
-        self.args = tuple(sorted(new_ls))
-
-    def __str__(self) -> str:
-        blocks = [str(self.args[0])]
-        for arg in self.args[1:]:
-            blocks.append(f" {self.fsymbol_print} ")
-            blocks.append(str(arg))
-
-        return str(ParenBlock(HSeqBlock(*blocks, v_align='c')))
-    
-    def __repr__(self) -> str:
-        return f'({f" {self.fsymbol} ".join(map(repr, self.args))})'
-    
-    def tex(self) -> str:
-        return rf' \left ({f" {self.fsymbol_print} ".join(map(lambda x: x.tex(), self.args))} \right )'
-    
-    def substitute(self, sigma: Subst) -> TRSTerm:
-        return type(self)(*tuple(arg.substitute(sigma) for arg in self.args))
-    
-    def remained_terms(self, *idx: int):
-        '''
-        collect the terms that are not in the idx, and return as a new tuple.
-        '''
-        return tuple(self.args[i] for i in range(len(self.args)) if i not in idx)
-    
-
-class TRS_AC_safe(StdTerm):
-    '''
-    TRS_AC_safe does not try to sort the operands, but compare them one by one. The hash value calculation is adjusted accordingly.
-
-    This is less efficient but more robust.
-    '''
-
-    def __new__(cls, *tup: Any):
-        '''
-        return the element directly when tuple has only one element
-        '''
-        if len(tup) == 0:
-            raise ValueError("The tuple lengh should be at least 1.")
-        elif len(tup) == 1:
-            return tup[0]
-        else:
-            obj = object.__new__(cls)
-            TRS_AC_safe.__init__(obj, *tup)
-            return obj
-        
-    def __init__(self, *tup: Any):
-        '''
-        The method of flatten the tuple of arguments for the ac_symbol.
-        Assume that the items in tup are already flattened.
-        '''
-        if len(tup) < 2:
-            raise ValueError("The tuple lengh should be at least 2.")
-
-        new_ls = []
-        for item in tup:
-            if isinstance(item, type(self)):
-                new_ls.extend(item.args)
-            else:
-                new_ls.append(item)
-
-        self.args = tuple(new_ls)
-
-    def __str__(self) -> str:
-        blocks = [str(self.args[0])]
-        for arg in self.args[1:]:
-            blocks.append(f" {self.fsymbol_print} ")
-            blocks.append(str(arg))
-
-        return str(ParenBlock(HSeqBlock(*blocks, v_align='c')))
-    
-    def __repr__(self) -> str:
-        return f'({f" {self.fsymbol} ".join(map(repr, self.args))})'
-    
-    def tex(self) -> str:
-        return rf' \left ({f" {self.fsymbol_print} ".join(map(lambda x: x.tex(), self.args))} \right )'
-    
-    def substitute(self, sigma: Subst) -> TRSTerm:
-        return type(self)(*tuple(arg.substitute(sigma) for arg in self.args))
-    
-    def remained_terms(self, *idx: int):
-        '''
-        collect the terms that are not in the idx, and return as a new tuple.
-        '''
-        return tuple(self.args[i] for i in range(len(self.args)) if i not in idx)
-    
-    def __eq__(self, other):
-        if self is other:
-            return True
-        
-        if isinstance(other, TRS_AC_safe):
-            if len(self.args) != len(other.args):
-                return False
-            
-            ls_self = list(self.args)
-            ls_other = list(other.args)
-
-            for i in range(len(ls_self)):
-                if ls_self[i] in ls_other:
-                    ls_other.remove(ls_self[i])
-                else:
-                    return False
-                
-            return True
-        
-        else:
-            return False
-        
-    def __hash__(self) -> int:
-        h = int(hashlib.md5(self.fsymbol.encode()).hexdigest(), 16)
-        for arg in self.args:
-            h += hash(arg)
-
-        return h
-
 ############################################################################
 # term rewriting rules
 # note that there are different mechanisms for matching the rules and the terms
