@@ -22,7 +22,7 @@ try:
 
     # transformers
     from .components import wolU
-    from .factory import juxt, sumeq
+    from .factory import juxt
 
 
     # out-of-box interface

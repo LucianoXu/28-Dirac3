@@ -77,6 +77,8 @@ This is implemented in the backend "wolfram_unique". We transform terms in simpl
 
 - I implemented `sum_i sum_j <i|A|j> |i><j| -> A`, but the matching is far from complete. Now I believe the rule for sum is not well designed - in the opposite direction actually. We should try to pull things out of the sum instead of pushing them in.
 
+- Now we use `MultiBindTerm` to characterize successive big-op.
+
 ## TODO
 - consider the case of teleportation after we have indices
 - reconsider how to deal with equivalence

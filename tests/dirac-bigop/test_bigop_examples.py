@@ -1,6 +1,6 @@
 from diracdec import *
 from diracdec.theory.dirac_bigop import *
-from diracdec import dirac_bigop_delta_parse as parse, dirac_bigop_delta_trs as trs, juxt, sumeq
+from diracdec import dirac_bigop_delta_parse as parse, dirac_bigop_delta_trs as trs, juxt
 
 with wolfram_backend.wolfram_session():
     sub = Subst({
@@ -136,7 +136,7 @@ def test_ASigma_bigop():
         norm_a = trs.normalize(a)
         norm_b = trs.normalize(b)
 
-        assert trs.normalize(juxt(sumeq(norm_a))) == trs.normalize(juxt(sumeq(norm_b)))
+        assert trs.normalize(juxt(norm_a)) == trs.normalize(juxt(norm_b))
 
 def test_choi():
     with wolfram_backend.wolfram_session():

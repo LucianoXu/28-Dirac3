@@ -413,18 +413,6 @@ def test_juxt_rewrite():
         b_ = trs.normalize(juxt(trs.normalize(b)))
         assert a_ == b_
 
-def test_sumeq_rewrite():
-    with wolfram_backend.wolfram_session():
-        a = parse(''' SUM(a, SUM(b, "a / b")) ''')
-        b = parse(''' SUM(b, SUM(a, "a / b")) ''')
-
-        assert not a == b
-
-        a_ = sumeq(trs.normalize(a))
-        b_ = sumeq(trs.normalize(b))
-
-        assert a_ == b_
-
 #############################################################
 # other tests
         

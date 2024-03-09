@@ -1,6 +1,6 @@
 from diracdec import *
 from diracdec.theory.dirac_bigop import *
-from diracdec import dirac_bigop_delta_parse as parse, dirac_bigop_delta_trs as trs, juxt, sumeq
+from diracdec import dirac_bigop_delta_parse as parse, dirac_bigop_delta_trs as trs, juxt
 
 def test_problem_1():
     '''

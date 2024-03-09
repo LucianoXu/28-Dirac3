@@ -58,7 +58,7 @@ dirac_bigop_parser = dirac_bigop.construct_parser(wolfram_simple.WolframCScalar,
 def dirac_bigop_parse(s: str) -> Any:
     return dirac_bigop_parser.parse(s)
 
-dirac_bigop_trs, juxt, sumeq = dirac_bigop.construct_trs(
+dirac_bigop_trs, juxt = dirac_bigop.construct_trs(
     wolfram_simple.WolframCScalar, 
     wolfram_simple.WolframABase, 
     dirac_bigop_parser
@@ -106,7 +106,7 @@ def eq_check(s1: str, s2: str) -> bool:
     norm_t1 = dirac_bigop_delta_trs.normalize(t1)
     norm_t2 = dirac_bigop_delta_trs.normalize(t2)
 
-    post_proc_t1 = wolU(juxt(sumeq(norm_t1)))
-    post_proc_t2 = wolU(juxt(sumeq(norm_t2)))
+    post_proc_t1 = wolU(juxt(norm_t1))
+    post_proc_t2 = wolU(juxt(norm_t2))
 
     return post_proc_t1 == post_proc_t2

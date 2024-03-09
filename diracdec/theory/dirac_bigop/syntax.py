@@ -1,7 +1,6 @@
 from ..dirac.syntax import *
 
-from ..trs import BindVarTerm
-
+from ..trs import BindVarTerm, MultiBindTerm
 
 #####################################
 # transpose
@@ -46,27 +45,32 @@ class Apply(StdTerm):
         return rf" \left ({self.args[0].tex()} {self.args[1].tex()} \right)"
 
 
-class SumS(DiracNotation, BindVarTerm):
+class SumS(DiracNotation, MultiBindTerm):
     fsymbol_print = "sums"
     fsymbol = "SUMS"
 
     def __str__(self) -> str:
+        vars_names = ", ".join([v.name for v in self.bind_vars])
         return str(HSeqBlock(
-            IndexBlock('__\n\\ \n/ \n‾‾', D_index=self.bind_var.name), " ", str(self.body)))
+            IndexBlock('__\n\\ \n/ \n‾‾', D_index=vars_names), " ", str(self.body)))
 
     def tex(self) -> str:
-        return rf" \left ( \sum_{{{self.bind_var.name}}} {self.body.tex()} \right )"
+        vars_names = ", ".join([v.name for v in self.bind_vars])
+        return rf" \left ( \sum_{{{vars_names}}} {self.body.tex()} \right )"
+    
 
-class Sum(DiracNotation, BindVarTerm):
+class Sum(DiracNotation, MultiBindTerm):
     fsymbol_print = "sum"
     fsymbol = "SUM"
 
     def __str__(self) -> str:
+        vars_names = ", ".join([v.name for v in self.bind_vars])
         return str(HSeqBlock(
-            IndexBlock('__\n\\ \n/ \n‾‾', D_index=self.bind_var.name), " ", str(self.body)))
+            IndexBlock('__\n\\ \n/ \n‾‾', D_index=vars_names), " ", str(self.body)))
 
     def tex(self) -> str:
-        return rf" \left ( \sum_{{{self.bind_var.name}}} {self.body.tex()} \right )"
+        vars_names = ", ".join([v.name for v in self.bind_vars])
+        return rf" \left ( \sum_{{{vars_names}}} {self.body.tex()} \right )"
     
 
 #####################################
@@ -81,28 +85,6 @@ class Juxtapose(DiracScalar, TRSCommBinary):
 
     def __init__(self, A: TRSTerm, B: TRSTerm):
         super().__init__(A, B)
-
-    def __str__(self) -> str:
-        '''
-        use the first one to represent
-        '''
-        return str(self.args[0])
-    
-    def tex(self) -> str:
-        '''
-        use the first one to represent
-        '''
-        return self.args[0].tex()
-    
-class SumEq(TRS_AC):
-    '''
-    Note: this rule is only for internal representation, and should not be used in the user interface or parsing
-    '''
-    fsymbol_print = "SUMEQ"
-    fsymbol = "SUMEQ"
-
-    def __init__(self, *tup : TRSTerm):
-        TRS_AC.__init__(self, *tup)
 
     def __str__(self) -> str:
         '''

@@ -19,7 +19,7 @@ def test_trans():
 def test_sum():
     with wolfram_backend.wolfram_session():
         a = parse(r''' SUM(x, x)''')
-        b = Sum(TRSVar("x"), TRSVar("x"))
+        b = Sum((TRSVar("x"),), TRSVar("x"))
         assert a == b
 
 def test_abstraction():
