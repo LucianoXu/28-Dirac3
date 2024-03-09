@@ -329,10 +329,7 @@ class MultiBindTerm(TRSTerm):
                 return False
             
             # first find common bind variable renaming list
-            new_vars : list[str] = []
-            for i in range(len(self.bind_vars)):
-                new_v = var_rename(self.variables() | __value.variables() | set(new_vars))
-                new_vars.append(new_v)
+            new_vars = var_rename_ls(self.variables() | __value.variables(), len(self.bind_vars))
 
             self_renamed = self.rename_bind(tuple(TRSVar(v) for v in new_vars))
 
@@ -383,10 +380,7 @@ class MultiBindTerm(TRSTerm):
         if len(bind_vars_set & vset) == 0:
             return type(self)(self.bind_vars, self.body.substitute(sigma))
         else:
-            new_vars = []
-            for i in range(len(self.bind_vars)):
-                new_v = var_rename(vset | set(new_vars))
-                new_vars.append(new_v)
+            new_vars = var_rename_ls(vset, len(self.bind_vars))
 
             new_vars = tuple(TRSVar(v) for v in new_vars)
 
@@ -566,6 +560,7 @@ class Subst:
     def composite(self, other : Subst) -> Subst:
         '''
         return the composition `self(other)`.
+        The `other` substitution is applied first.
         '''
         new_data = {}
 
