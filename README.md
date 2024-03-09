@@ -86,4 +86,3 @@ This is implemented in the backend "wolfram_unique". We transform terms in simpl
 
 - summation with index set
 - C(0) -> \mathbf{0} (necessary for summation with index set)
-- update the unit tests

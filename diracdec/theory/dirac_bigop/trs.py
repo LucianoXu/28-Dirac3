@@ -535,7 +535,7 @@ def construct_trs(
     SUM_COMP_6 = TRSRule(
         "SUM-COMP-6",
         lhs = "SUM(i, A)",
-        rhs = "SUM(i, C(1)) SCR A",
+        rhs = "SUMS(i, C(1)) SCR A",
         rewrite_method = sum_comp_6_rewrite
     )
     rules.append(SUM_COMP_6)
