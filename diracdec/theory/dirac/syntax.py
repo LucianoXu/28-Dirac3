@@ -127,7 +127,7 @@ class DiracNotation(DiracSyntax):
     
 class Zero(DiracNotation, StdTerm):
     fsymbol_print = "𝟎"
-    fsymbol_print = "0X"
+    fsymbol = "0X"
 
     def __str__(self) -> str:
         return "𝟎"

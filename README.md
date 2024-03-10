@@ -79,6 +79,8 @@ This is implemented in the backend "wolfram_unique". We transform terms in simpl
 
 - Now we use `MultiBindTerm` to characterize successive big-op.
 
+- I want to add index sets to the summation, but the problem is that it can be hard to decide whether the term belongs to the set when applying SUM-ELIM rules involving delta. So now we have universal set for this purpose.
+
 ## TODO
 - consider the case of teleportation after we have indices
 - reconsider how to deal with equivalence

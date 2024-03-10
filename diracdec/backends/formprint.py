@@ -341,8 +341,11 @@ class ParenBlock(FormBlock):
             block = BaseBlock(block)
 
         self._block = block
+
+        if len(block._lines) == 0:
+            lines = ('()',)
         
-        if len(block._lines) == 1:
+        elif len(block._lines) == 1:
             lines = (f'({block._lines[0]})',)
         
         else:

@@ -35,6 +35,12 @@ reserved = {
     'TP'        : 'TP',
 
     ########################################
+    # for set
+    'ESET'      : 'ESET',
+    'USET'      : 'USET',
+    'UNION'     : 'UNION',
+
+    ########################################
     # big-op
     'SUMS'      : 'SUMS',
     'SUM'       : 'SUM',
