@@ -113,23 +113,23 @@ def test_ASigma_bigop():
         a = parse(''' 
                         (
                             (
-                                SUM(i, KET(i) OUTER BRA(i)) TSRO 1O
+                                SUM(i, T, KET(i) OUTER BRA(i)) TSRO 1O
                             ) 
                             MLTO (A TSRO 1O)
                         ) 
                         MLTK 
                         (
-                            SUM(i, KET(PAIR(i, i)))
+                            SUM(i, T, KET(PAIR(i, i)))
                         ) 
                     ''')
 
         b = parse(''' 
                         (
-                            (1O TSRO SUM(i, KET(i) OUTER BRA(i))) MLTO (1O TSRO TP(A))
+                            (1O TSRO SUM(i, T, KET(i) OUTER BRA(i))) MLTO (1O TSRO TP(A))
                         ) 
                         MLTK 
                         (
-                            SUM(i, KET(PAIR(i, i)))
+                            SUM(i, T, KET(PAIR(i, i)))
                         ) 
                     ''')
 

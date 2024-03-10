@@ -703,7 +703,8 @@ def construct_entry_trs(
                 isinstance(term.body.args[1], KetBase):
                     for i, (v, T) in enumerate(term.bind_vars):
                         if v == term.body.args[0].args[0].args[0] and\
-                            term.body.args[1].args[0] == v:
+                            term.body.args[1].args[0] == v and \
+                            T == UniversalSet():
                             return Sum(term.bind_vars[:i]+term.bind_vars[i+1:], term.body.args[0].args[1])
     SUM_ELIM_7 = TRSRule(
         "SUM-ELIM-7",
@@ -721,7 +722,8 @@ def construct_entry_trs(
                 isinstance(term.body.args[1], BraBase):
                     for i, (v, T) in enumerate(term.bind_vars):
                         if v == term.body.args[0].args[1].args[0] and\
-                            term.body.args[1].args[0] == v:
+                            term.body.args[1].args[0] == v and \
+                            T == UniversalSet():
                             return Sum(term.bind_vars[:i]+term.bind_vars[i+1:], term.body.args[0].args[0])
     SUM_ELIM_8 = TRSRule(
         "SUM-ELIM-8",
@@ -748,9 +750,9 @@ def construct_entry_trs(
                 if base_i == term.body.args[1].args[0].args[0] and\
                     base_j == term.body.args[1].args[1].args[0]:
                         for i, (vi, Ti) in enumerate(term.bind_vars):
-                            if vi == base_i:
+                            if vi == base_i and Ti == UniversalSet():
                                 for j, (vj, Tj) in enumerate(term.bind_vars):
-                                    if vj == base_j:
+                                    if vj == base_j and Tj == UniversalSet():
                                         if j < i:
                                             i, j = j, i
                                         return Sum(term.bind_vars[:i]+term.bind_vars[i+1:j]+term.bind_vars[j+1:], term.body.args[0].args[1].args[0])
@@ -780,9 +782,9 @@ def construct_entry_trs(
                 if base_j == term.body.args[1].args[0].args[0] and\
                     base_i == term.body.args[1].args[1].args[0]:
                         for i, (vi, Ti) in enumerate(term.bind_vars):
-                            if vi == base_i:
+                            if vi == base_i and Ti == UniversalSet():
                                 for j, (vj, Tj) in enumerate(term.bind_vars):
-                                    if vj == base_j:
+                                    if vj == base_j and Tj == UniversalSet():
                                         if j < i:
                                             i, j = j, i
                                         return Sum(term.bind_vars[:i]+term.bind_vars[i+1:j]+term.bind_vars[j+1:], Transpose(term.body.args[0].args[1].args[0]))
