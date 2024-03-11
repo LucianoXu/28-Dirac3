@@ -2,7 +2,7 @@
 
 from diracdec import *
 
-from diracdec import dirac_delta_parse as parse, dirac_delta_trs as trs
+from diracdec import parse, dirac_delta_trs as trs
 
 
 def test_DELTA_AST_1():

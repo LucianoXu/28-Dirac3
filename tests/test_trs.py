@@ -1,7 +1,7 @@
 from diracdec import *
 from diracdec.theory.trs import *
 
-from diracdec import dirac_parse as parse
+from diracdec import parse
 
 def test_bind_alpha_conv():
     a = BindVarTerm(TRSVar("x"), TRSVar("x"))

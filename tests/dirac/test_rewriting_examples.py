@@ -1,6 +1,6 @@
 from diracdec import *
 
-from diracdec import dirac_parse as parse, dirac_trs as trs
+from diracdec import parse, dirac_trs as trs
 
 
 # these tests are based on wolfram engine for complex and basis

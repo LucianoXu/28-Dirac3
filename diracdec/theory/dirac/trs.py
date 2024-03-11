@@ -15,17 +15,11 @@ from .syntax import *
 from ..atomic_base import AtomicBase
 from ..complex_scalar import ComplexScalar
 
-from .parser import construct_parser
-
 def construct_trs(
         CScalar: Type[ComplexScalar], 
         ABase: Type[AtomicBase], 
-        parser: yacc.LRParser|None = None) -> TRS:
-
-    # construct the parser
-    if parser is None:
-        parser = construct_parser(CScalar, ABase)
-
+        parser: yacc.LRParser) -> TRS:
+    
     def parse(s: str) -> TRSTerm:
         return parser.parse(s)
 

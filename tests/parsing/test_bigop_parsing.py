@@ -1,6 +1,6 @@
 from diracdec import *
 from diracdec.theory.dirac_bigop import *
-from diracdec import dirac_bigop_parse as parse
+from diracdec import parse
 
 def test_trans():
     with wolfram_backend.wolfram_session():

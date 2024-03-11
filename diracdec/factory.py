@@ -14,33 +14,29 @@ from .components import wolU
 # build some parser
 
 from .theory import dirac, delta_ext
-
-### ALL WOLFRAM BACKEND
-
 from .components import wolfram_simple
+from .theory.parser import construct_parser
 
-dirac_parser = dirac.construct_parser(
+parser = construct_parser(
     wolfram_simple.WolframCScalar,
     wolfram_simple.WolframABase)
 
-def dirac_parse(s: str) -> Any:
-    return dirac_parser.parse(s)
+def parse(s: str) -> Any:
+    return parser.parse(s)
+
+### ALL WOLFRAM BACKEND
+
 
 dirac_trs = dirac.construct_trs(
     wolfram_simple.WolframCScalar,
     wolfram_simple.WolframABase, 
-    dirac_parser
+    parser
     )
 
 def dirac_cime2_file(path: str):
     dirac.dirac_cime2_file(dirac_trs, path)
     
 ### with delta extensions
-
-dirac_delta_parser = dirac_parser
-
-def dirac_delta_parse(s: str) -> Any:
-    return dirac_delta_parser.parse(s)
 
 dirac_delta_trs = delta_ext.modify_trs(
     dirac_trs, 
@@ -53,23 +49,13 @@ dirac_delta_trs = delta_ext.modify_trs(
 from .theory import dirac_bigop, delta_ext
 from .components import wolfram_simple
 
-dirac_bigop_parser = dirac_bigop.construct_parser(wolfram_simple.WolframCScalar, wolfram_simple.WolframABase)
-
-def dirac_bigop_parse(s: str) -> Any:
-    return dirac_bigop_parser.parse(s)
-
 dirac_bigop_trs, juxt = dirac_bigop.construct_trs(
     wolfram_simple.WolframCScalar, 
     wolfram_simple.WolframABase, 
-    dirac_bigop_parser
+    parser
     )
     
 ### with delta extensions
-
-dirac_bigop_delta_parser = dirac_bigop_parser
-
-def dirac_bigop_delta_parse(s: str) -> Any:
-    return dirac_bigop_delta_parser.parse(s)
 
 dirac_bigop_delta_trs = delta_ext.modify_trs(
     dirac_bigop_trs, 
@@ -80,7 +66,7 @@ dirac_bigop_delta_trs = delta_ext.modify_trs(
 entry_trs = dirac_bigop.construct_entry_trs(
     wolfram_simple.WolframCScalar, 
     wolfram_simple.WolframABase, 
-    dirac_bigop_parser
+    parser
 )
 
 ###############################################
@@ -90,7 +76,7 @@ def normalize(s : str) -> dict:
     '''
     The most powerful interface to normalize a term.
     '''
-    t = dirac_bigop_delta_parse(s)
+    t = parse(s)
     norm_t = dirac_bigop_delta_trs.normalize(t)
     res = {}
     res['norm-term'] = str(norm_t)
@@ -101,8 +87,8 @@ def eq_check(s1: str, s2: str) -> bool:
     The most powerful interface to check the equality of two terms.
     '''
 
-    t1 = dirac_bigop_delta_parse(s1)
-    t2 = dirac_bigop_delta_parse(s2)
+    t1 = parse(s1)
+    t2 = parse(s2)
     norm_t1 = dirac_bigop_delta_trs.normalize(t1)
     norm_t2 = dirac_bigop_delta_trs.normalize(t2)
 

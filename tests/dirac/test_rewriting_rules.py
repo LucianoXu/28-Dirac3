@@ -2,7 +2,7 @@
 
 from diracdec import *
 
-from diracdec import dirac_parse as parse, dirac_trs as trs
+from diracdec import parse, dirac_trs as trs
 
 def test_ATOMIC_BASE():
     with wolfram_backend.wolfram_session():

@@ -1,6 +1,6 @@
 from diracdec import *
 from diracdec.theory.dirac import *
-from diracdec import dirac_parse as parse
+from diracdec import parse
 
 def test_basic_base():
     with wolfram_backend.wolfram_session():

@@ -1,7 +1,7 @@
 
 from diracdec import *
 from diracdec.theory.dirac import *
-from diracdec import dirac_delta_parse as parse
+from diracdec import parse
 
 def test_1():
     with wolfram_backend.wolfram_session():

@@ -1,6 +1,6 @@
 from diracdec import *
 
-from diracdec import dirac_parse as parse
+from diracdec import parse
 
 from diracdec.components.wolfram_simple import WolframCScalar, WolframABase
 

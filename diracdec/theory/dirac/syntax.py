@@ -27,7 +27,6 @@ class BasePair(DiracBase, StdTerm):
             str(self.args[0]), ', ', str(self.args[1]),
             v_align='b')))
 
-    
     def tex(self) -> str:
         return f"( {self.args[0].tex()} , {self.args[1].tex()} )"
     

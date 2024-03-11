@@ -1,7 +1,7 @@
 
 from diracdec import *
 
-from diracdec import dirac_bigop_parse as parse, dirac_bigop_trs as trs
+from diracdec import parse, dirac_bigop_trs as trs
 
 def test_TRANS_UNI_1():
     with wolfram_backend.wolfram_session():

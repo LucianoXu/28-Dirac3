@@ -13,14 +13,12 @@ from .syntax import *
 from ..atomic_base import AtomicBase
 from ..complex_scalar import ComplexScalar
 
-from .parser import construct_parser
-
 from ..dirac.trs import construct_trs as dirac_construct_trs
 
 def construct_trs(
         CScalar: Type[ComplexScalar], 
         ABase: Type[AtomicBase], 
-        parser: yacc.LRParser|None = None) -> Tuple[TRS, Callable[[TRSTerm], TRSTerm]]:
+        parser: yacc.LRParser) -> Tuple[TRS, Callable[[TRSTerm], TRSTerm]]:
     '''
     Return:
         - the first TRS is the trs for the bigop theory
@@ -28,15 +26,11 @@ def construct_trs(
         - the thrid function applies the sumeq extension.
     '''
 
-    # construct the parser
-    if parser is None:
-        parser = construct_parser(CScalar, ABase)
-
     def parse(s: str) -> TRSTerm:
         return parser.parse(s)
     
     # inherit the rules from dirac
-    dirac_trs = dirac_construct_trs(CScalar, ABase)
+    dirac_trs = dirac_construct_trs(CScalar, ABase, parser)
     rules = []
 
     #####################################################

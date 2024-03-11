@@ -4,7 +4,8 @@ import ply.yacc as yacc
 
 from typing import Type
 
-from .syntax import *
+from ..dirac.syntax import *
+from ..dirac_bigop.syntax import *
 
 from .lexer import *
 
@@ -29,6 +30,7 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
                     | diracbase
                     | diracscalar
                     | diracnotation
+                    | set
         '''
         p[0] = p[1]
 
@@ -202,6 +204,80 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
         '''
         p[0] = OpTensor(p[1], p[3])
 
+
+
+
+    ##############################
+    # transpose
+        
+    def p_dirac_tp(p):
+        '''
+        diracnotation    : TP '(' trs-term ')'
+        '''
+        p[0] = Transpose(p[3])
+
+    ##############################
+    # set
+    def p_set_eset(p):
+        '''
+        set : ESET
+        '''
+        p[0] = EmptySet()
+
+    def p_set_uset(p):
+        '''
+        set : USET
+        '''
+        p[0] = UniversalSet()
+    
+    def p_set_union(p):
+        '''
+        set : trs-term UNION trs-term
+        '''
+        p[0] = UnionSet(p[1], p[3])
+
+    ##############################
+    # big-op
+        
+    def p_dirac_sums(p):
+        '''
+        diracnotation : SUMS '(' trs-var ',' trs-term ',' trs-term ')'
+                        | SUMS '(' trs-var ',' trs-term ')'
+        '''
+        if len(p) == 9:
+            p[0] = SumS(((p[3], p[5]),), p[7])
+        elif len(p) == 7:
+            p[0] = SumS(((p[3], UniversalSet()),), p[5])
+        else:
+            raise Exception()
+
+
+    def p_dirac_sum(p):
+        '''
+        diracnotation : SUM '(' trs-var ',' trs-term ',' trs-term ')'
+                        | SUM '(' trs-var ',' trs-term ')'
+        '''
+        if len(p) == 9:
+            p[0] = Sum(((p[3], p[5]),), p[7])
+        elif len(p) == 7:
+            p[0] = Sum(((p[3], UniversalSet()),), p[5])
+        else:
+            raise Exception()
+
+    ##############################
+    # abstraction and application
+    def p_abstract(p):
+        '''
+        trs-term    : LAMBDA trs-var '.' trs-term
+        '''
+        p[0] = Abstract(p[2], p[4])
+
+    def p_apply(p):
+        '''
+        trs-term    : trs-term '@' trs-term
+        '''
+        p[0] = Apply(p[1], p[3])
+
     # substitution
     def p_sub(p):
         '''
@@ -221,6 +297,7 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
             p[0] = p[1]
 
 
+    
     def p_error(p):
         if p is None:
             raise RuntimeError("Syntax error: unexpected end of file.")
