@@ -672,18 +672,14 @@ def construct_trs(
 def construct_entry_trs(
         CScalar: Type[ComplexScalar], 
         ABase: Type[AtomicBase], 
-        parser: yacc.LRParser|None = None) -> TRS:
+        parser: yacc.LRParser) -> TRS:
     '''
     Return:
         - the first TRS is the trs for the bigop theory
         - the second function transform the term to apply juxtapose rule once.
         - the thrid function applies the sumeq extension.
     '''
-
-    # construct the parser
-    if parser is None:
-        parser = construct_parser(CScalar, ABase)
-
+    
     def parse(s: str) -> TRSTerm:
         return parser.parse(s)
     

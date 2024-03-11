@@ -6,6 +6,7 @@ from typing import Type
 
 from ..dirac.syntax import *
 from ..dirac_bigop.syntax import *
+from ..dirac_labelled.syntax import *
 
 from .lexer import *
 
@@ -31,6 +32,8 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
                     | diracscalar
                     | diracnotation
                     | set
+                    | qreg
+                    | qregset
         '''
         p[0] = p[1]
 
@@ -263,6 +266,57 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
             p[0] = Sum(((p[3], UniversalSet()),), p[5])
         else:
             raise Exception()
+        
+
+    #####################################
+    # quantum register
+        
+    def p_qreg1(p):
+        '''
+        qreg    : RPAIR '(' trs-term ',' trs-term ')'
+        '''
+        p[0] = QRegPair(p[3], p[5])
+
+    def p_qreg2(p):
+        '''
+        qreg   : RFST '(' trs-term ')'
+        '''
+        p[0] = QRegFst(p[3])
+
+    def p_qreg3(p):
+        '''
+        qreg   : RSND '(' trs-term ')'
+        '''
+        p[0] = QRegSnd(p[3])
+
+    #####################################
+    # qreg set
+        
+    def p_qregset1(p):
+        '''
+        qregset : ESETR
+        '''
+        p[0] = EmptyRSet()
+
+    def p_qregset2(p):
+        '''
+        qregset : SETR '(' trs-term ')'
+        '''
+        p[0] = RegRSet(p[3])
+
+    def p_qregset3(p):
+        '''
+        qregset : trs-term UNIONR trs-term
+        '''
+        p[0] = UnionRSet(p[1], p[3])
+
+    def p_qregset4(p):
+        '''
+        qregset : trs-term SUBR trs-term
+        '''
+        p[0] = SubRSet(p[1], p[3])
+
+
 
     ##############################
     # abstraction and application

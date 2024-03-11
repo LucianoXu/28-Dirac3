@@ -70,3 +70,4 @@ def test_apply():
         a = parse(r''' A @ B ''')
         b = Apply(TRSVar("A"), TRSVar("B"))
         assert a == b
+

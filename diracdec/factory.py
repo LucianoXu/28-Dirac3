@@ -70,6 +70,16 @@ entry_trs = dirac_bigop.construct_entry_trs(
 )
 
 ###############################################
+# TRS for labels
+
+from .theory import dirac_labelled
+label_trs = dirac_labelled.construct_trs(
+    wolfram_simple.WolframCScalar, 
+    wolfram_simple.WolframABase, 
+    parser
+)
+
+###############################################
 # out-of-box interface
 
 def normalize(s : str) -> dict:

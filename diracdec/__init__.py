@@ -22,6 +22,8 @@ try:
 
     from .factory import dirac_bigop_delta_trs, entry_trs
 
+    from .factory import label_trs
+
     # transformers
     from .components import wolU
     from .factory import juxt

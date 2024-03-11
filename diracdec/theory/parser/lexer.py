@@ -48,6 +48,19 @@ reserved = {
     ########################################
     # abstraction and application
     'FUN'       : 'LAMBDA',
+
+    ########################################
+    # qregister
+    'RPAIR'     : 'RPAIR',
+    'RFST'      : 'RFST',
+    'RSND'      : 'RSND',
+
+    ########################################
+    # qreg set
+    'ESETR'     : 'ESETR',
+    'SETR'      : 'SETR',
+    'UNIONR'    : 'UNIONR',
+    'SUBR'      : 'SUBR',
 }
 
 tokens = [
