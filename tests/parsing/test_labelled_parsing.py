@@ -5,15 +5,15 @@ from diracdec import parse
 
 def test_qreg():
     with wolfram_backend.wolfram_session():
-        a = parse(r''' RPAIR(s, t) ''')
+        a = parse(r''' PAIRR(s, t) ''')
         b = QRegPair(TRSVar('s'), TRSVar('t'))
         assert a == b
 
-        a = parse(r''' RFST(s) ''')
+        a = parse(r''' FSTR(s) ''')
         b = QRegFst(TRSVar('s'))
         assert a == b
 
-        a = parse(r''' RSND(s) ''')
+        a = parse(r''' SNDR(s) ''')
         b = QRegSnd(TRSVar('s'))
         assert a == b
 

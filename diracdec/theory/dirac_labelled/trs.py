@@ -29,21 +29,21 @@ def construct_trs(
 
     REG_1 = TRSRule(
         "REG-1",
-        lhs = parse("RFST(RPAIR(s, t))"),
+        lhs = parse("FSTR(PAIRR(s, t))"),
         rhs = parse("s")
     )
     rules.append(REG_1)
 
     REG_2 = TRSRule(
         "REG-2",
-        lhs = parse("RSND(RPAIR(s, t))"),
+        lhs = parse("SNDR(PAIRR(s, t))"),
         rhs = parse("t")
     )
     rules.append(REG_2)
 
     REG_3 = TRSRule(
         "REG-3",
-        lhs = parse("RPAIR(RFST(s), RSND(s))"),
+        lhs = parse("PAIRR(FSTR(s), SNDR(s))"),
         rhs = parse("s")
     )
     rules.append(REG_3)
@@ -145,6 +145,65 @@ def construct_trs(
         rewrite_method=rset_8_rewrite
     )
     rules.append(RSET_8)
+
+    def rset_9_rewrite(rule, trs, term, side_info):
+        if isinstance(term, UnionRSet):
+            for i, si in enumerate(term.args):
+                if isinstance(si, RegRSet):
+                    for j, sj in enumerate(term.args):
+                        if i == j:
+                            continue
+                        if isinstance(sj, RegRSet):
+                            if QReg.is_in(si.args[0], sj.args[0]):
+                                return UnionRSet(*term.remained_terms(i))
+    RSET_9 = TRSRule(
+        "RSET-9",
+        lhs = " SETR(R1) UNIONR SETR(R2) (R1 is in R2) ",
+        rhs = "SETR(R2)",
+        rewrite_method=rset_9_rewrite
+    )
+    rules.append(RSET_9)
+
+    def rset_10_rewrite(rule, trs, term, side_info):
+        if isinstance(term, SubRSet) and isinstance(term.args[0], RegRSet) and isinstance(term.args[1], RegRSet):
+            if QReg.is_in(term.args[0].args[0], term.args[1].args[0]):
+                return EmptyRSet()
+    RSET_10 = TRSRule(
+        "RSET-10",
+        lhs = " SETR(R1) SUBR SETR(R2) (R1 is in R2) ",
+        rhs = "ESETR",
+        rewrite_method=rset_10_rewrite
+    )
+    rules.append(RSET_10)
+
+
+    def rset_11_rewrite(rule, trs, term, side_info):
+        if isinstance(term, SubRSet) and isinstance(term.args[0], RegRSet) and isinstance(term.args[1], RegRSet):
+            if QReg.is_in(term.args[1].args[0], term.args[0].args[0]):
+                return UnionRSet(
+                    SubRSet(RegRSet(QRegFst(term.args[0].args[0])), term.args[1]),
+                    SubRSet(RegRSet(QRegSnd(term.args[0].args[0])), term.args[1]),
+                    )
+    RSET_11 = TRSRule(
+        "RSET-11",
+        lhs = " SETR(R2) SUBR SETR(R1) (R1 is in R2) ",
+        rhs = " SETR(FSTR(R2) SUBR SETR(R1)) UNIONR SETR(SNDR(R2) SUBR SETR(R1)) ",
+        rewrite_method=rset_11_rewrite
+    )
+    rules.append(RSET_11)
+
+    def rset_12_rewrite(rule, trs, term, side_info):
+        if isinstance(term, SubRSet) and isinstance(term.args[0], RegRSet) and isinstance(term.args[1], RegRSet):
+            if QReg.is_disj(term.args[0].args[0], term.args[1].args[0]):
+                return term.args[0]
+    RSET_12 = TRSRule(
+        "RSET-12",
+        lhs = " SETR(R1) SUBR SETR(R2) (R1 || R2) ",
+        rhs = " SETR(R1) ",
+        rewrite_method=rset_12_rewrite
+    )
+    rules.append(RSET_12)
+
 
     # build the trs
     return TRS(rules)

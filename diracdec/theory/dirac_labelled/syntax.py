@@ -7,12 +7,85 @@ from ..trs import BindVarTerm, MultiBindTerm, var_rename, var_rename_ls, seq_con
 import itertools
 
 class QReg(TRSTerm):
-    ...
+    @staticmethod
+    def normalize(A: TRSTerm) -> TRSTerm:
+        '''
+        Get the REG-normal form.
+        '''
+        # depth first
+        if isinstance(A, QRegFst):
+            A = QRegFst(QReg.normalize(A.args[0]))
+        elif isinstance(A, QRegSnd):
+            A = QRegSnd(QReg.normalize(A.args[0]))
+        elif isinstance(A, QRegPair):
+            A = QRegPair(QReg.normalize(A.args[0]), QReg.normalize(A.args[1]))
+        
+        # apply the rules
+        if isinstance(A, QRegFst) and isinstance(A.args[0], QRegPair):
+            return A.args[0].args[0]
+        elif isinstance(A, QRegSnd) and isinstance(A.args[0], QRegPair):
+            return A.args[0].args[1]
+        elif isinstance(A, QRegPair) and isinstance(A.args[0], QRegFst) and isinstance(A.args[1], QRegSnd) and A.args[0].args[0] == A.args[1].args[0]:
+            return A.args[0].args[0]
+        
+        return A
+
+
+    @staticmethod
+    def is_in(A: TRSTerm, B: TRSTerm) -> bool:
+        '''
+        Check whether the qreg A is in the qreg B.
+        For example, `FSTR(R)` is in `R`, and `SND(FST(R))` is in `FST(R)`.
+
+        This function will automatically calculated the REG-normal form before deciding.
+        '''
+
+        A = QReg.normalize(A)
+        B = QReg.normalize(B)
+
+        # R is in R
+        if A == B:
+            return True
+        
+        # X is in R -> FSTR(X) is in R /\ SNDR(X) is in R
+        if isinstance(A, (QRegFst, QRegSnd)):
+            return QReg.is_in(A.args[0], B)
+        
+        # A is in R /\ B is in R -> PAIRR(A, B) is in R
+        if isinstance(A, QRegPair):
+            return QReg.is_in(A.args[0], B) and QReg.is_in(A.args[1], B)
+        
+        # X is in R1 \/ X is in R2 -> X is in PAIRR(R1, R2)
+        if isinstance(B, QRegPair):
+            return QReg.is_in(A, B.args[0]) or QReg.is_in(A, B.args[1])
+        
+        
+        return False
+    
+    @staticmethod
+    def is_disj(A: TRSTerm, B: TRSTerm) -> bool:
+        '''
+        Check whether the qreg A and B are disjoint
+        '''
+
+        A = QReg.normalize(A)
+        B = QReg.normalize(B)
+
+        # the algorithm relies on the speical normal form: pairs will not appear inside FSTR or SNDR
+        
+        if isinstance(A, QRegPair):
+            return QReg.is_disj(A.args[0], B) and QReg.is_disj(A.args[1], B)
+        
+        if isinstance(B, QRegPair):
+            return QReg.is_disj(A, B.args[0]) and QReg.is_disj(A, B.args[1])
+    
+        return not QReg.is_in(A, B) and not QReg.is_in(B, A)
+
 
 
 class QRegPair(QReg, StdTerm):
-    fsymbol_print = "RPAIR"
-    fsymbol = "RPAIR"
+    fsymbol_print = "PAIRR"
+    fsymbol = "PAIRR"
 
     def __init__(self, left: TRSTerm, right: TRSTerm):
         super().__init__(left, right)
@@ -27,8 +100,8 @@ class QRegPair(QReg, StdTerm):
     
 
 class QRegFst(DiracBase, StdTerm):
-    fsymbol_print = "rfst"
-    fsymbol = "RFST"
+    fsymbol_print = "fstR"
+    fsymbol = "FSTR"
 
     def __init__(self, p: TRSTerm):
         super().__init__(p)
@@ -37,8 +110,8 @@ class QRegFst(DiracBase, StdTerm):
         return rf" \mathrm{{fst}} {self.args[0].tex()}"
     
 class QRegSnd(DiracBase, StdTerm):
-    fsymbol_print = "rsnd"
-    fsymbol = "RSND"
+    fsymbol_print = "sndR"
+    fsymbol = "SNDR"
 
     def __init__(self, p: TRSTerm):
         super().__init__(p)

@@ -51,9 +51,9 @@ reserved = {
 
     ########################################
     # qregister
-    'RPAIR'     : 'RPAIR',
-    'RFST'      : 'RFST',
-    'RSND'      : 'RSND',
+    'PAIRR'     : 'PAIRR',
+    'FSTR'      : 'FSTR',
+    'SNDR'      : 'SNDR',
 
     ########################################
     # qreg set

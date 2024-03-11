@@ -273,19 +273,19 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
         
     def p_qreg1(p):
         '''
-        qreg    : RPAIR '(' trs-term ',' trs-term ')'
+        qreg    : PAIRR '(' trs-term ',' trs-term ')'
         '''
         p[0] = QRegPair(p[3], p[5])
 
     def p_qreg2(p):
         '''
-        qreg   : RFST '(' trs-term ')'
+        qreg   : FSTR '(' trs-term ')'
         '''
         p[0] = QRegFst(p[3])
 
     def p_qreg3(p):
         '''
-        qreg   : RSND '(' trs-term ')'
+        qreg   : SNDR '(' trs-term ')'
         '''
         p[0] = QRegSnd(p[3])
 
