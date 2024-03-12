@@ -205,5 +205,282 @@ def construct_trs(
     rules.append(RSET_12)
 
 
+    ######################################################
+    # labelled dirac notation rules
+    
+    TSR_DECOMP_1 = TRSRule(
+        "TSR-DECOMP-1",
+        lhs = parse(''' KET(PAIR(s, t))[PAIRR(Q, R)] '''),
+        rhs = parse(''' KET(s)[Q] TSRKL KET(t)[R] ''')
+    )
+    rules.append(TSR_DECOMP_1)
+
+
+    TSR_DECOMP_2 = TRSRule(
+        "TSR-DECOMP-2",
+        lhs = parse(''' BRA(PAIR(s, t))[PAIRR(Q, R)] '''),
+        rhs = parse(''' BRA(s)[Q] TSRBL BRA(t)[R] ''')
+    )
+    rules.append(TSR_DECOMP_2)
+
+    TSR_DECOMP_3 = TRSRule(
+        "TSR-DECOMP-3",
+        lhs = parse(''' (A TSRO B)[PAIRR(Q1, Q2); R] '''),
+        rhs = parse(''' (A[Q1; FSTR(R)]) TSROL (B[Q2; SNDR(R)]) ''')
+    )
+    rules.append(TSR_DECOMP_3)
+
+    TSR_DECOMP_4 = TRSRule(
+        "TSR-DECOMP-4",
+        lhs = parse(''' (A TSRO B)[Q; PAIRR(R1, R2)] '''),
+        rhs = parse(''' (A[FSTR(Q); R1]) TSROL (B[SNDR(Q); R2]) ''')
+    )
+    rules.append(TSR_DECOMP_4)
+
+    def tsr_comp_1_rewrite(rule, trs, term, side_info):
+        if isinstance(term, OpTensorL):
+            for i, oi in enumerate(term.args):
+                if isinstance(oi, Labelled2) and isinstance(oi.args[1], QRegFst) and isinstance(oi.args[2], QRegFst):
+                    for j, oj in enumerate(term.args):
+                        if isinstance(oj, Labelled2) and isinstance(oj.args[1], QRegSnd) and isinstance(oj.args[2], QRegSnd):
+                            if oi.args[1].args[0] == oj.args[1].args[0] and oi.args[2].args[0] == oj.args[2].args[0]:
+                                return OpTensorL(
+                                    Labelled2(
+                                        OpTensor(oi.args[0], oj.args[0]), 
+                                        oi.args[1].args[0], oi.args[2].args[0]
+                                        ),
+                                    *term.remained_terms(i, j))
+    TSR_COMP_1 = TRSRule(
+        "TSR-COMP-1",
+        lhs = " (A[FSTR(Q); FSTR(R)]) TSROL (B[SNDR(Q); SNDR(R)]) ",
+        rhs = " (A TSRO B)[Q; R] ",
+        rewrite_method = tsr_comp_1_rewrite
+    )
+    rules.append(TSR_COMP_1)
+
+    def tsr_comp_2_rewrite(rule, trs, term, side_info):
+        if isinstance(term, (KetTensorL, BraTensorL, OpTensorL)):
+            for i, oi in enumerate(term.args):
+                if isinstance(oi, Labelled1) and isinstance(oi.args[1], QRegFst):
+                    for j, oj in enumerate(term.args):
+                        if isinstance(oj, Labelled1) and isinstance(oj.args[1], QRegSnd):
+                            if oi.args[1].args[0] == oj.args[1].args[0]:
+                                if isinstance(term, KetTensorL):
+                                    T = KetTensor
+                                elif isinstance(term, BraTensorL):
+                                    T = BraTensor
+                                else:
+                                    T = OpTensor
+
+                                return type(term)(
+                                    Labelled1(
+                                        T(oi.args[0], oj.args[0]), 
+                                        oi.args[1].args[0]),
+                                    *term.remained_terms(i, j))
+    TSR_COMP_2 = TRSRule(
+        "TSR-COMP-2",
+        lhs = " (A[FSTR(Q)]) {TSRKL/TSRBL/TSROL} (B[SNDR(Q)]) ",
+        rhs = " (A {TSRK/TSRB/TSRO} B)[Q] ",
+        rewrite_method = tsr_comp_2_rewrite
+    )
+    rules.append(TSR_COMP_2)
+
+    def dot_tsr_1_rewrite(rule, trs, term, side_info):
+        if isinstance(term, OpApplyL) and isinstance(term.args[0], Labelled2) and isinstance(term.args[1], Labelled2):
+            if QReg.is_disj(term.args[0].args[2], term.args[1].args[1]):
+                return OpTensorL(term.args[0], term.args[1])
+    DOT_TSR_1 = TRSRule(
+        "DOT-TSR-1",
+        lhs = " (A[Q;R]) MLTOL (B[S;T]) (R || S) ",
+        rhs = " (A[Q;R]) TSROL (B[S;T]) ",
+        rewrite_method = dot_tsr_1_rewrite
+    )
+    rules.append(DOT_TSR_1)
+
+
+    LABEL_LIFT_1 = TRSRule(
+        "LABEL-LIFT-1",
+        lhs = parse(''' ADJL(A[R]) '''),
+        rhs = parse(''' (ADJ(A))[R]''')
+    )
+    rules.append(LABEL_LIFT_1)
+
+    LABEL_LIFT_2 = TRSRule(
+        "LABEL-LIFT-2",
+        lhs = parse(''' ADJL(A[Q; R]) '''),
+        rhs = parse(''' (ADJ(A))[Q; R]''')
+    )
+    rules.append(LABEL_LIFT_2)
+
+
+    LABEL_LIFT_3 = TRSRule(
+        "LABEL-LIFT-3",
+        lhs = parse(''' (S SCR A)[R] '''),
+        rhs = parse(''' S SCR (A[R])''')
+    )
+    rules.append(LABEL_LIFT_3)
+
+    LABEL_LIFT_4 = TRSRule(
+        "LABEL-LIFT-4",
+        lhs = parse(''' (S SCR A)[Q; R] '''),
+        rhs = parse(''' S SCR (A[Q; R])''')
+    )
+    rules.append(LABEL_LIFT_4)
+
+    def label_lift_5_rewrite(rule, trs, term, side_info):
+        if isinstance(term, AddL):
+            for i in range(len(term.args)):
+                ti = term.args[i]
+                if isinstance(ti, Labelled1):
+                    for j in range(i + 1, len(term.args)):
+                        tj = term.args[j]
+                        if isinstance(tj, Labelled1) and ti.args[1] == tj.args[1]:
+                            return AddL(
+                                Labelled1(Add(ti.args[0], tj.args[0]), ti.args[1]),
+                                *term.remained_terms(i, j))
+    LABEL_LIFT_5 = TRSRule(
+        "LABEL-LIFT-5",
+        lhs = " (A[R]) ADDL (B[R]) ",
+        rhs = " (A ADD B)[R] ",
+        rewrite_method = label_lift_5_rewrite
+    )
+    rules.append(LABEL_LIFT_5)
+
+    def label_lift_6_rewrite(rule, trs, term, side_info):
+        if isinstance(term, AddL):
+            for i in range(len(term.args)):
+                ti = term.args[i]
+                if isinstance(ti, Labelled2):
+                    for j in range(i + 1, len(term.args)):
+                        tj = term.args[j]
+                        if isinstance(tj, Labelled2) and ti.args[1] == tj.args[1] and ti.args[2] == tj.args[2]:
+                            return AddL(
+                                Labelled2(Add(ti.args[0], tj.args[0]), ti.args[1], ti.args[2]),
+                                *term.remained_terms(i, j))
+    LABEL_LIFT_6 = TRSRule(
+        "LABEL-LIFT-6",
+        lhs = " (A[Q; R]) ADDL (B[Q; R]) ",
+        rhs = " (A ADD B)[Q; R] ",
+        rewrite_method = label_lift_6_rewrite
+    )
+    rules.append(LABEL_LIFT_6)
+
+    def label_lift_7_rewrite(rule, trs, term, side_info):
+        if isinstance(term, AddL):
+            for i in range(len(term.args)):
+                ti = term.args[i]
+                for j in range(i + 1, len(term.args)):
+                    tj = term.args[j]
+                    if ti == tj:
+                        return AddL(
+                            ScalL(
+                                CScalar.add(CScalar.one(), CScalar.one()),
+                                ti),
+                            *term.remained_terms(i, j)
+                        )
+    LAEBL_LIFT_7 = TRSRule(
+        "LABEL-LIFT-7",
+        lhs = " A ADDL A ",
+        rhs = " C(1+1) SCRL A ",
+        rewrite_method = label_lift_7_rewrite
+    )
+    rules.append(LAEBL_LIFT_7)
+
+
+    def label_lift_8_rewrite(rule, trs, term, side_info):
+        if isinstance(term, AddL):
+            for i in range(len(term.args)):
+                ti = term.args[i]
+                if isinstance(ti, ScalL):
+                    for j in range(i + 1, len(term.args)):
+                        tj = term.args[j]
+                        if ti.args[1] == tj:
+                            return AddL(
+                                ScalL(
+                                    ScalarAdd(CScalar.one(), ti.args[0]),
+                                    tj),
+                                *term.remained_terms(i, j)
+                            )
+    LAEBL_LIFT_8 = TRSRule(
+        "LABEL-LIFT-8",
+        lhs = " (S SCRL A) ADDL A ",
+        rhs = " (S ADDS C(1)) SCRL A ",
+        rewrite_method = label_lift_8_rewrite
+    )
+    rules.append(LAEBL_LIFT_8)
+
+    def label_lift_9_rewrite(rule, trs, term, side_info):
+        if isinstance(term, AddL):
+            for i in range(len(term.args)):
+                ti = term.args[i]
+                if isinstance(ti, ScalL):
+                    for j in range(i + 1, len(term.args)):
+                        tj = term.args[j]
+                        if isinstance(tj, ScalL) and ti.args[1] == tj.args[1]:
+                            return AddL(
+                                ScalL(
+                                    ScalarAdd(ti.args[0], tj.args[0]),
+                                    ti.args[1]),
+                                *term.remained_terms(i, j)
+                            )
+    LAEBL_LIFT_9 = TRSRule(
+        "LABEL-LIFT-9",
+        lhs = " (S1 SCRL A) ADDL (S2 SCRL A) ",
+        rhs = " (S1 ADDS S2) SCRL A ",
+        rewrite_method = label_lift_9_rewrite
+    )
+    rules.append(LAEBL_LIFT_9)
+
+    LABEL_LIFT_10 = TRSRule(
+        "LABEL-LIFT-10",
+        lhs = parse(''' (A[Q; R]) MLTOL (B[R; S]) '''),
+        rhs = parse(''' (A MLTO B)[Q; S] ''')
+    )
+    rules.append(LABEL_LIFT_10)
+
+    LABEL_LIFT_11 = TRSRule(
+        "LABEL-LIFT-11",
+        lhs = parse(''' (A[Q; R]) MLTOL (B[R]) '''),
+        rhs = parse(''' (A MLTO B)[Q; R] ''')
+    )
+    rules.append(LABEL_LIFT_11)
+
+    LABEL_LIFT_12 = TRSRule(
+        "LABEL-LIFT-12",
+        lhs = parse(''' (A[Q]) MLTOL (B[Q; R]) '''),
+        rhs = parse(''' (A MLTO B)[Q; R] ''')
+    )
+    rules.append(LABEL_LIFT_12)
+
+    LABEL_LIFT_13 = TRSRule(
+        "LABEL-LIFT-13",
+        lhs = parse(''' (A[Q; R]) MLTKL (B[R]) '''),
+        rhs = parse(''' (A MLTK B)[Q] ''')
+    )
+    rules.append(LABEL_LIFT_13)
+
+    LABEL_LIFT_14 = TRSRule(
+        "LABEL-LIFT-14",
+        lhs = parse(''' (A[Q]) MLTBL (B[Q; R]) '''),
+        rhs = parse(''' (A MLTB B)[R] ''')
+    )
+    rules.append(LABEL_LIFT_14)
+
+    LABEL_LIFT_15 = TRSRule(
+        "LABEL-LIFT-15",
+        lhs = parse(''' (A[R]) MLTOL (B[R]) '''),
+        rhs = parse(''' (A MLTO B)[R] ''')
+    )
+    rules.append(LABEL_LIFT_15)
+
+
+    LABEL_LIFT_16 = TRSRule(
+        "LABEL-LIFT-16",
+        lhs = parse(''' (A[R]) DOTL (B[R]) '''),
+        rhs = parse(''' A DOT B ''')
+    )
+    rules.append(LABEL_LIFT_16)
+
+
     # build the trs
     return TRS(rules)
