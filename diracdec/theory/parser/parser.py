@@ -34,6 +34,7 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
                     | set
                     | qreg
                     | qregset
+                    | diracnotationL
         '''
         p[0] = p[1]
 
@@ -268,6 +269,39 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
             raise Exception()
         
 
+    ##############################
+    # abstraction and application
+    def p_abstract(p):
+        '''
+        trs-term    : LAMBDA trs-var '.' trs-term
+        '''
+        p[0] = Abstract(p[2], p[4])
+
+    def p_apply(p):
+        '''
+        trs-term    : trs-term '@' trs-term
+        '''
+        p[0] = Apply(p[1], p[3])
+
+    # substitution
+    def p_sub(p):
+        '''
+        subst   : '{' sub-list '}'
+        '''
+        p[0] = Subst(p[2])
+
+    def p_sub_list(p):
+        '''
+        sub-list    :
+                    | sub-list trs-var ':' trs-item ';'
+        '''
+        if len(p) == 1:
+            p[0] = {}
+        else:
+            p[1][p[2].name] = p[4]
+            p[0] = p[1]
+
+
     #####################################
     # quantum register
         
@@ -317,41 +351,88 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
         p[0] = SubRSet(p[1], p[3])
 
 
+    #########################################
+    # labelled Dirac notation
+    def p_diracscalar7(p):
+        '''
+        diracscalar : trs-term DOTL trs-term
+        '''
+        p[0] = ScalarDotL(p[1], p[3])
 
-    ##############################
-    # abstraction and application
-    def p_abstract(p):
+    def p_diracnotationL1(p):
         '''
-        trs-term    : LAMBDA trs-var '.' trs-term
+        diracnotationL  : trs-term '[' trs-term ']'
         '''
-        p[0] = Abstract(p[2], p[4])
+        p[0] = Labelled1(p[1], p[3])
 
-    def p_apply(p):
+    def p_diracnotationL2(p):
         '''
-        trs-term    : trs-term '@' trs-term
+        diracnotationL  : trs-term '[' trs-term ';' trs-term ']'
         '''
-        p[0] = Apply(p[1], p[3])
+        p[0] = Labelled2(p[1], p[3], p[5])
 
-    # substitution
-    def p_sub(p):
+    def p_diracnotationL3(p):
         '''
-        subst   : '{' sub-list '}'
+        diracnotationL  : ADJL '(' trs-term ')'
         '''
-        p[0] = Subst(p[2])
+        p[0] = AdjL(p[3])
 
-    def p_sub_list(p):
+    def p_diracnotationL4(p):
         '''
-        sub-list    :
-                    | sub-list trs-var ':' trs-item ';'
+        diracnotationL  : trs-term SCRL trs-term
         '''
-        if len(p) == 1:
-            p[0] = {}
-        else:
-            p[1][p[2].name] = p[4]
-            p[0] = p[1]
+        p[0] = ScalL(p[1], p[3])
+
+    def p_diracnotationL5(p):
+        '''
+        diracnotationL  : trs-term ADDL trs-term
+        '''
+        p[0] = AddL(p[1], p[3])
 
 
-    
+    def p_dirac_ketL1(p):
+        '''
+        diracnotationL : trs-term MLTKL trs-term
+        '''
+        p[0] = KetApplyL(p[1], p[3])
+
+    def p_dirac_ketL2(p):
+        '''
+        diracnotationL : trs-term TSRKL trs-term
+        '''
+        p[0] = KetTensorL(p[1], p[3])
+
+    def p_dirac_braL1(p):
+        '''
+        diracnotationL : trs-term MLTBL trs-term
+        '''
+        p[0] = BraApplyL(p[1], p[3])
+
+    def p_dirac_braL2(p):
+        '''
+        diracnotationL : trs-term TSRBL trs-term
+        '''
+        p[0] = BraTensorL(p[1], p[3])
+
+    def p_dirac_opL1(p):
+        '''
+        diracnotationL : trs-term OUTERL trs-term
+        '''
+        p[0] = OpOuterL(p[1], p[3])
+
+    def p_dirac_opL2(p):
+        '''
+        diracnotationL : trs-term MLTOL trs-term
+        '''
+        p[0] = OpApplyL(p[1], p[3])
+
+    def p_dirac_opL3(p):
+        '''
+        diracnotationL : trs-term TSROL trs-term
+        '''
+        p[0] = OpTensorL(p[1], p[3])
+
+
     def p_error(p):
         if p is None:
             raise RuntimeError("Syntax error: unexpected end of file.")

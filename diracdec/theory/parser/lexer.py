@@ -61,6 +61,20 @@ reserved = {
     'SETR'      : 'SETR',
     'UNIONR'    : 'UNIONR',
     'SUBR'      : 'SUBR',
+
+    ########################################
+    # labeleld Dirac
+    'DOTL'      : 'DOTL',
+    'ADJL'      : 'ADJL',
+    'SCRL'      : 'SCRL',
+    'ADDL'      : 'ADDL',
+    'MLTKL'     : 'MLTKL',
+    'TSRKL'     : 'TSRKL',
+    'MLTBL'     : 'MLTBL',
+    'TSRBL'     : 'TSRBL',
+    'MLTOL'     : 'MLTOL',
+    'TSROL'     : 'TSROL',
+    'OUTERL'    : 'OUTERL',
 }
 
 tokens = [
@@ -78,7 +92,7 @@ tokens = [
     ] + list(reserved.values())
 
 
-literals = ['(', ')', ',', '{', '}', ';' , ':', '.', '@']
+literals = ['(', ')', ',', '{', '}', ';' , ':', '.', '@', '[', ']', ';']
 
 t_ZEROX = '0X'
 t_ONEO = '1O'

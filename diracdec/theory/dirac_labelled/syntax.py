@@ -170,3 +170,149 @@ class SubRSet(QRegSet, TRSInfixBinary):
 
     def tex(self) -> str:
         return r" \left ( " + self.args[0].tex() + r" \setminus " + self.args[1].tex() + r" \right )"
+    
+
+###################################################################
+# Labelled Dirac Notation
+    
+class ScalarDotL(DiracScalar, StdTerm):
+    fsymbol_print = "·"
+    fsymbol = "DOTL"
+
+    def __init__(self, B: TRSTerm, K: TRSTerm):
+        super().__init__(B, K)
+
+    def tex(self) -> str:
+        
+        return rf" ({self.args[0].tex()} \cdot {self.args[1].tex()})"
+
+class LDiracNotation(TRSTerm):
+    ...
+
+class Labelled1(LDiracNotation, StdTerm):
+    fsymbol_print = "LABELLED1"
+    fsymbol = "LABELLED1"
+
+    def __init__(self, dirac: TRSTerm, label: TRSTerm):
+        super().__init__(dirac, label)
+
+    def __str__(self) -> str:
+        return str(HSeqBlock(str(self.args[0]), '[', str(self.args[1]), ']'))
+
+    def tex(self) -> str:
+        return rf" {self.args[0].tex()}_{{ {self.args[1].tex()} }}"
+
+class Labelled2(LDiracNotation, StdTerm):
+    fsymbol_print = "LABELLED2"
+    fsymbol = "LABELLED2"
+
+    def __init__(self, dirac: TRSTerm, labelL: TRSTerm, labelR: TRSTerm):
+        super().__init__(dirac, labelL, labelR)
+
+    def __str__(self) -> str:
+        return str(HSeqBlock(str(self.args[0]), '[', str(self.args[1]), ';', str(self.args[2]), ']'))
+
+    def tex(self) -> str:
+        return rf" {self.args[0].tex()}_{{ {self.args[1].tex()}; {self.args[2].tex()} }}"
+
+class AdjL(LDiracNotation, StdTerm):
+    fsymbol_print = "ADJL"
+    fsymbol = "ADJL"
+
+    def __init__(self, X: TRSTerm):
+        super().__init__(X)
+
+    def __str__(self) -> str:
+        return str(IndexBlock(str(self.args[0]), UR_index="†"))
+    
+    def tex(self) -> str:
+        return rf" {self.args[0].tex()}^\dagger"
+
+class ScalL(LDiracNotation, TRSInfixBinary):
+    fsymbol_print = "."
+    fsymbol = "SCRL"
+
+    def __init__(self, S: TRSTerm, X: TRSTerm):
+        TRSInfixBinary.__init__(self, S, X)
+
+    def tex(self) -> str:
+        return rf" {self.args[0].tex()} {self.args[1].tex()}"
+    
+class AddL(LDiracNotation, TRS_AC):
+    fsymbol_print = '+'
+    fsymbol = 'ADDL'
+
+    def __init__(self, *tup : TRSTerm):
+        TRS_AC.__init__(self, *tup)
+
+class KetApplyL(LDiracNotation, TRSInfixBinary):
+    fsymbol_print = "·"
+    fsymbol = "MLTKL"
+
+    def __init__(self, O: TRSTerm, K: TRSTerm) :
+        TRSInfixBinary.__init__(self, O, K)
+
+    def tex(self) -> str:
+        return rf" {self.args[0].tex()} \cdot {self.args[1].tex()}"
+
+class KetTensorL(LDiracNotation, TRS_AC):
+    fsymbol_print = "⊗"
+    fsymbol = "TSRKL"
+
+    def __init__(self, K1: TRSTerm, K2: TRSTerm) :
+        TRS_AC.__init__(self, K1, K2)
+
+    def tex(self) -> str:
+        return r" \left ( " + " \\otimes ".join([s.tex() for s in self.args]) + r" \right )"
+    
+
+class BraApplyL(LDiracNotation, TRSInfixBinary):
+    fsymbol_print = "·"
+    fsymbol = "MLTBL"
+
+    def __init__(self, B: TRSTerm, O: TRSTerm) :
+        TRSInfixBinary.__init__(self, B, O)
+
+    def tex(self) -> str:
+        return rf" {self.args[0].tex()} \cdot {self.args[1].tex()}"
+
+class BraTensorL(LDiracNotation, TRS_AC):
+    fsymbol_print = "⊗"
+    fsymbol = "TSRBL"
+
+    def __init__(self, B1: TRSTerm, B2: TRSTerm) :
+        TRS_AC.__init__(self, B1, B2)
+
+    def tex(self) -> str:
+        return r" \left ( " + " \\otimes ".join([s.tex() for s in self.args]) + r" \right )"
+    
+
+class OpOuterL(LDiracNotation, TRSInfixBinary):
+    fsymbol_print = "⊗"
+    fsymbol = "OUTERL"
+
+    def __init__(self, K: TRSTerm, B: TRSTerm) :
+        TRSInfixBinary.__init__(self, K, B)
+
+    def tex(self) -> str:
+        return rf" {self.args[0].tex()} \otimes {self.args[1].tex()}"
+
+class OpApplyL(LDiracNotation, TRSInfixBinary):
+    fsymbol_print = "·"
+    fsymbol = "MLTOL"
+
+    def __init__(self, O1: TRSTerm, O2: TRSTerm) :
+        TRSInfixBinary.__init__(self, O1, O2)
+
+    def tex(self) -> str:
+        return rf" {self.args[0].tex()} \cdot {self.args[1].tex()}"
+
+class OpTensorL(LDiracNotation, TRS_AC):
+    fsymbol_print = "⊗"
+    fsymbol = "TSROL"
+
+    def __init__(self, O1: TRSTerm, O2: TRSTerm) :
+        TRS_AC.__init__(self, O1, O2)
+
+    def tex(self) -> str:
+        return r" \left ( " + " \\otimes ".join([s.tex() for s in self.args]) + r" \right )"
