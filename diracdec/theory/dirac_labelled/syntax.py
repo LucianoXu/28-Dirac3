@@ -224,17 +224,6 @@ class SubRSet(QRegSet, TRSInfixBinary):
 
 ###################################################################
 # Labelled Dirac Notation
-    
-class ScalarDotL(DiracScalar, StdTerm):
-    fsymbol_print = "·"
-    fsymbol = "DOTL"
-
-    def __init__(self, B: TRSTerm, K: TRSTerm):
-        super().__init__(B, K)
-
-    def tex(self) -> str:
-        
-        return rf" ({self.args[0].tex()} \cdot {self.args[1].tex()})"
 
 class LDiracNotation(TRSTerm):
     ...
@@ -265,36 +254,6 @@ class Labelled2(LDiracNotation, StdTerm):
     def tex(self) -> str:
         return rf" {self.args[0].tex()}_{{ {self.args[1].tex()}; {self.args[2].tex()} }}"
 
-class AdjL(LDiracNotation, StdTerm):
-    fsymbol_print = "ADJL"
-    fsymbol = "ADJL"
-
-    def __init__(self, X: TRSTerm):
-        super().__init__(X)
-
-    def __str__(self) -> str:
-        return str(IndexBlock(str(self.args[0]), UR_index="†"))
-    
-    def tex(self) -> str:
-        return rf" {self.args[0].tex()}^\dagger"
-
-class ScalL(LDiracNotation, TRSInfixBinary):
-    fsymbol_print = "."
-    fsymbol = "SCRL"
-
-    def __init__(self, S: TRSTerm, X: TRSTerm):
-        TRSInfixBinary.__init__(self, S, X)
-
-    def tex(self) -> str:
-        return rf" {self.args[0].tex()} {self.args[1].tex()}"
-    
-class AddL(LDiracNotation, TRS_AC):
-    fsymbol_print = '+'
-    fsymbol = 'ADDL'
-
-    def __init__(self, *tup : TRSTerm):
-        TRS_AC.__init__(self, *tup)
-
 class TensorL(LDiracNotation, TRS_AC):
     fsymbol_print = "⊗"
     fsymbol = "TSRL"
@@ -304,46 +263,3 @@ class TensorL(LDiracNotation, TRS_AC):
 
     def tex(self) -> str:
         return r" \left ( " + " \\otimes ".join([s.tex() for s in self.args]) + r" \right )"
-    
-
-class KetApplyL(LDiracNotation, TRSInfixBinary):
-    fsymbol_print = "·"
-    fsymbol = "MLTKL"
-
-    def __init__(self, O: TRSTerm, K: TRSTerm) :
-        TRSInfixBinary.__init__(self, O, K)
-
-    def tex(self) -> str:
-        return rf" {self.args[0].tex()} \cdot {self.args[1].tex()}"
-
-    
-
-class BraApplyL(LDiracNotation, TRSInfixBinary):
-    fsymbol_print = "·"
-    fsymbol = "MLTBL"
-
-    def __init__(self, B: TRSTerm, O: TRSTerm) :
-        TRSInfixBinary.__init__(self, B, O)
-
-    def tex(self) -> str:
-        return rf" {self.args[0].tex()} \cdot {self.args[1].tex()}"
-
-class OpOuterL(LDiracNotation, TRSInfixBinary):
-    fsymbol_print = "⊗"
-    fsymbol = "OUTERL"
-
-    def __init__(self, K: TRSTerm, B: TRSTerm) :
-        TRSInfixBinary.__init__(self, K, B)
-
-    def tex(self) -> str:
-        return rf" {self.args[0].tex()} \otimes {self.args[1].tex()}"
-
-class OpApplyL(LDiracNotation, TRSInfixBinary):
-    fsymbol_print = "·"
-    fsymbol = "MLTOL"
-
-    def __init__(self, O1: TRSTerm, O2: TRSTerm) :
-        TRSInfixBinary.__init__(self, O1, O2)
-
-    def tex(self) -> str:
-        return rf" {self.args[0].tex()} \cdot {self.args[1].tex()}"

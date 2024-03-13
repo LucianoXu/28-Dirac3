@@ -340,12 +340,7 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
 
     #########################################
     # labelled Dirac notation
-    def p_diracscalar7(p):
-        '''
-        diracscalar : trs-term DOTL trs-term
-        '''
-        p[0] = ScalarDotL(p[1], p[3])
-
+        
     def p_diracnotationL1(p):
         '''
         diracnotationL  : trs-term '[' trs-term ']'
@@ -358,57 +353,12 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
         '''
         p[0] = Labelled2(p[1], p[3], p[5])
 
-    def p_diracnotationL3(p):
-        '''
-        diracnotationL  : ADJL '(' trs-term ')'
-        '''
-        p[0] = AdjL(p[3])
-
-    def p_diracnotationL4(p):
-        '''
-        diracnotationL  : trs-term SCRL trs-term
-        '''
-        p[0] = ScalL(p[1], p[3])
-
-    def p_diracnotationL5(p):
-        '''
-        diracnotationL  : trs-term ADDL trs-term
-        '''
-        p[0] = AddL(p[1], p[3])
 
     def p_diracnotationL6(p):
         '''
         diracnotationL  : trs-term TSRL trs-term
         '''
         p[0] = TensorL(p[1], p[3])
-
-
-    def p_dirac_ketL1(p):
-        '''
-        diracnotationL : trs-term MLTKL trs-term
-        '''
-        p[0] = KetApplyL(p[1], p[3])
-
-
-    def p_dirac_braL1(p):
-        '''
-        diracnotationL : trs-term MLTBL trs-term
-        '''
-        p[0] = BraApplyL(p[1], p[3])
-
-    def p_dirac_opL1(p):
-        '''
-        diracnotationL : trs-term OUTERL trs-term
-        '''
-        p[0] = OpOuterL(p[1], p[3])
-
-    def p_dirac_opL2(p):
-        '''
-        diracnotationL : trs-term MLTOL trs-term
-        '''
-        p[0] = OpApplyL(p[1], p[3])
-
-
 
     def p_error(p):
         if p is None:

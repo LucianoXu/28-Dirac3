@@ -63,15 +63,6 @@ reserved = {
     ########################################
     # labeleld Dirac
     'TSRL'     : 'TSRL',
-
-    'DOTL'      : 'DOTL',
-    'ADJL'      : 'ADJL',
-    'SCRL'      : 'SCRL',
-    'ADDL'      : 'ADDL',
-    'MLTKL'     : 'MLTKL',
-    'MLTBL'     : 'MLTBL',
-    'MLTOL'     : 'MLTOL',
-    'OUTERL'    : 'OUTERL',
 }
 
 tokens = [
