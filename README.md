@@ -85,8 +85,8 @@ This is implemented in the backend "wolfram_unique". We transform terms in simpl
 
 ## TODO
 - consider the case of teleportation after we have indices
-- reconsider how to deal with equivalence
-- consider parsing latex input
 
 - summation with index set
 - C(0) -> \mathbf{0} (necessary for summation with index set)
+
+- set of quantum registers should be reconsidered.

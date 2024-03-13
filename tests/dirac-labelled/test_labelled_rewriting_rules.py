@@ -124,6 +124,37 @@ def test_TSR_DECOMP_2():
         b = parse(r''' BRA(s)[Q] TSRBL BRA(t)[R] ''')
         assert label_trs.normalize(a) == label_trs.normalize(b)
 
+def test_TSR_DECOMP_3A():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' 0X[PAIRR(Q1, Q2); R] ''')
+        b = parse(r''' (0X[Q1; FSTR(R)]) TSROL (0X[Q2; SNDR(R)]) ''')
+        assert label_trs.normalize(a) == label_trs.normalize(b)
+
+def test_TSR_DECOMP_3B():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' 0X[Q; PAIRR(R1, R2)] ''')
+        b = parse(r''' (0X[FSTR(Q); R1]) TSROL (0X[SNDR(Q2); R2]) ''')
+        assert label_trs.normalize(a) == label_trs.normalize(b)
+
+def test_TSR_DECOMP_3C():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' 1O[PAIRR(Q, R)] ''')
+        b = parse(r''' (1O[Q]) TSROL (1O[R]) ''')
+        assert label_trs.normalize(a) == label_trs.normalize(b)
+
+
+def test_TSR_DECOMP_3D():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' 1O[PAIRR(Q1, Q2); R] ''')
+        b = parse(r''' (1O[Q1; FSTR(R)]) TSROL (1O[Q2; SNDR(R)]) ''')
+        assert label_trs.normalize(a) == label_trs.normalize(b)
+
+def test_TSR_DECOMP_3E():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' 1O[Q; PAIRR(R1, R2)] ''')
+        b = parse(r''' (1O[FSTR(Q); R1]) TSROL (1O[SNDR(Q2); R2]) ''')
+        assert label_trs.normalize(a) == label_trs.normalize(b)
+
 def test_TSR_DECOMP_3():
     with wolfram_backend.wolfram_session():
         a = parse(r''' (A TSRK B)[PAIRR(Q, R)] ''')
