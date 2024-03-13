@@ -80,19 +80,20 @@ def test_addL():
         b = AddL(TRSVar("A"), Labelled2(TRSVar("X"), TRSVar("r1"), TRSVar("r2")), TRSVar("B"))
         assert a == b
 
+
+def test_tensorL():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' X1[r2] TSRL X0[r1] ''')
+        b = TensorL(
+            Labelled1(TRSVar("X1"), TRSVar("r2")), 
+            Labelled1(TRSVar('X0'), TRSVar('r1')))
+        assert a == b
+
 def test_ketapplyL():
     with wolfram_backend.wolfram_session():
         a = parse(r''' X[r1; r2] MLTKL K0[r1] ''')
         b = KetApplyL(
             Labelled2(TRSVar("X"), TRSVar("r1"), TRSVar("r2")), 
-            Labelled1(TRSVar('K0'), TRSVar('r1')))
-        assert a == b
-
-def test_kettensorL():
-    with wolfram_backend.wolfram_session():
-        a = parse(r''' K1[r2] TSRKL K0[r1] ''')
-        b = KetTensorL(
-            Labelled1(TRSVar("K1"), TRSVar("r2")), 
             Labelled1(TRSVar('K0'), TRSVar('r1')))
         assert a == b
 
@@ -103,14 +104,6 @@ def test_braapplyL():
         b = BraApplyL(
             Labelled1(TRSVar("B0"), TRSVar("r1")), 
             Labelled2(TRSVar('X'), TRSVar('r1'), TRSVar("r2")))
-        assert a == b
-
-def test_bratensorL():
-    with wolfram_backend.wolfram_session():
-        a = parse(r''' B1[r2] TSRBL B0[r1] ''')
-        b = BraTensorL(
-            Labelled1(TRSVar("B1"), TRSVar("r2")), 
-            Labelled1(TRSVar('B0'), TRSVar('r1')))
         assert a == b
 
 
@@ -128,12 +121,4 @@ def test_opapplyL():
         b = OpApplyL(
             Labelled1(TRSVar("O0"), TRSVar("r1")), 
             Labelled2(TRSVar('O1'), TRSVar('r1'), TRSVar("r2")))
-        assert a == b
-
-def test_optensorL():
-    with wolfram_backend.wolfram_session():
-        a = parse(r''' O1[r2] TSROL O0[r1] ''')
-        b = OpTensorL(
-            Labelled1(TRSVar("O1"), TRSVar("r2")), 
-            Labelled1(TRSVar('O0'), TRSVar('r1')))
         assert a == b

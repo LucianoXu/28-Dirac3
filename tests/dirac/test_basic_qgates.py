@@ -15,7 +15,7 @@ with wolfram_backend.wolfram_session():
         "ketM" : parse(''' "Sqrt[1/2]" SCR (ket0 ADD ("-1" MLTK ket1)) '''),
         "braM" : parse(''' "Sqrt[1/2]" SCR (bra0 ADD ("-1" MLTB bra1)) '''),
 
-        "beta00" : parse(''' "Sqrt[1/2]" SCR ((ket0 TSRK ket0) ADD (ket1 TSRK ket1))'''),
+        "beta00" : parse(''' "Sqrt[1/2]" SCR ((ket0 TSR ket0) ADD (ket1 TSR ket1))'''),
 
         "I2" : parse('''(ket0 OUTER bra0) ADD (ket1 OUTER bra1)'''),
 
@@ -28,15 +28,15 @@ with wolfram_backend.wolfram_session():
 
         "H" : parse(''' "Sqrt[1/2]" SCR ((ket0 OUTER bra0) ADD (ket0 OUTER bra1) ADD (ket1 OUTER bra0) ADD ("-1" SCR (ket1 OUTER bra1)))'''),
 
-        "CX": parse(''' ((ket0 TSRK ket0) OUTER (bra0 TSRB bra0))
-                    ADD ((ket0 TSRK ket1) OUTER (bra0 TSRB bra1)) 
-                    ADD ((ket1 TSRK ket1) OUTER (bra1 TSRB bra0))
-                    ADD ((ket1 TSRK ket0) OUTER (bra1 TSRB bra1))'''),
+        "CX": parse(''' ((ket0 TSR ket0) OUTER (bra0 TSR bra0))
+                    ADD ((ket0 TSR ket1) OUTER (bra0 TSR bra1)) 
+                    ADD ((ket1 TSR ket1) OUTER (bra1 TSR bra0))
+                    ADD ((ket1 TSR ket0) OUTER (bra1 TSR bra1))'''),
 
-        "CZ": parse(''' ((ket0 TSRK ket0) OUTER (bra0 TSRB bra0))
-                    ADD ((ket0 TSRK ket1) OUTER (bra0 TSRB bra1)) 
-                    ADD ((ket1 TSRK ket0) OUTER (bra1 TSRB bra0))
-                    ADD ("-1" SCR ((ket1 TSRK ket1) OUTER (bra1 TSRB bra1)))'''),
+        "CZ": parse(''' ((ket0 TSR ket0) OUTER (bra0 TSR bra0))
+                    ADD ((ket0 TSR ket1) OUTER (bra0 TSR bra1)) 
+                    ADD ((ket1 TSR ket0) OUTER (bra1 TSR bra0))
+                    ADD ("-1" SCR ((ket1 TSR ket1) OUTER (bra1 TSR bra1)))'''),
 
     }).get_idempotent()
 
@@ -74,18 +74,18 @@ def test_Hadamard():
 
 def test_cylinder_ext():
     with wolfram_backend.wolfram_session():
-        a = sub(parse(''' (I2 TSRO X) MLTO (X TSRO I2) '''))
-        b = sub(parse(''' X TSRO X'''))
+        a = sub(parse(''' (I2 TSR X) MLTO (X TSR I2) '''))
+        b = sub(parse(''' X TSR X'''))
         assert trs.normalize(a) == trs.normalize(b)
 
 def test_CX():
     with wolfram_backend.wolfram_session():
         a = sub(parse(''' CX MLTO CX '''))
-        b = sub(parse(''' I2 TSRO I2 '''))
+        b = sub(parse(''' I2 TSR I2 '''))
         assert trs.normalize(a) == trs.normalize(b)
 
         # this term can be a little time consuming
-        a = sub(parse(''' (I2 TSRO H) MLTO CZ MLTO (I2 TSRO H)'''))
+        a = sub(parse(''' (I2 TSR H) MLTO CZ MLTO (I2 TSR H)'''))
         b = sub(parse(''' CX '''))
         assert trs.normalize(a) == trs.normalize(b)
 
@@ -122,7 +122,7 @@ def test_QCQI_Theorem_4_1():
 
 def test_simple_circ():
     with wolfram_backend.wolfram_session():
-        a = parse(''' (A TSRO I2) MLTO CX MLTO (X TSRO I2) MLTO (X TSRO I2) MLTO CX MLTO U ''')
-        b = parse(''' (A TSRO I2) MLTO (I2 TSRO I2) MLTO U ''')
+        a = parse(''' (A TSR I2) MLTO CX MLTO (X TSR I2) MLTO (X TSR I2) MLTO CX MLTO U ''')
+        b = parse(''' (A TSR I2) MLTO (I2 TSR I2) MLTO U ''')
 
         assert trs.normalize(sub(a)) == trs.normalize(sub(b))

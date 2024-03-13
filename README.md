@@ -39,9 +39,9 @@ The keywords are the symbols in captial letters in the following definition. A v
 - base ::= var | '\<WOLFRAM\>' | PAIR(base, base) | FST(base) | SND(base)
 - scal ::= var | "\<WOLFRAM\>" | DELTA(base, base) | scal ADDS scal | scal MLTS scal | CONJS(scal) | dirac DOT dirac
 - dirac ::= var | 0X | ADJ(dirac) | scal SCR dirac | dirac ADD dirac 
-  - | KET(base) | dirac MLTK dirac | dirac TSRK dirac 
-  - | BRA(base) | dirac MLTB dirac | dirac TSRB dirac  
-  - | 1O | dirac OUTER dirac | dirac MLTO dirac | dirac TSRO dirac
+  - | KET(base) | dirac MLTK dirac | dirac TSR dirac 
+  - | BRA(base) | dirac MLTB dirac | dirac TSR dirac  
+  - | 1O | dirac OUTER dirac | dirac MLTO dirac | dirac TSR dirac
 
 
 ## Note
@@ -59,7 +59,7 @@ The keywords are the symbols in captial letters in the following definition. A v
 
 - We already encountered efficiency problems in a simple example:
     ```
-            a = sub(parse(''' (I2 TSRO H) MLTO CZ MLTO (I2 TSRO H)'''))
+            a = sub(parse(''' (I2 TSR H) MLTO CZ MLTO (I2 TSR H)'''))
             b = sub(parse(''' CX '''))
             assert trs.normalize(a) == trs.normalize(b)
     ```

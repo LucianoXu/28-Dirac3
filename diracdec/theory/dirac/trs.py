@@ -434,7 +434,7 @@ def construct_trs(
 
     SCR_DOT_8 = TRSRule(
         "SCR-DOT-8",
-        lhs = parse(r'''(B1 TSRB B2) DOT KET(t)'''),
+        lhs = parse(r'''(B1 TSR B2) DOT KET(t)'''),
         rhs = parse(r'''(B1 DOT KET(FST(t))) MLTS (B2 DOT KET(SND(t)))''')
     )
     rules.append(SCR_DOT_8)
@@ -442,7 +442,7 @@ def construct_trs(
             
     SCR_DOT_9 = TRSRule(
         "SCR-DOT-9",
-        lhs = parse(r'''BRA(s) DOT (K1 TSRK K2)'''),
+        lhs = parse(r'''BRA(s) DOT (K1 TSR K2)'''),
         rhs = parse(r'''(BRA(FST(s)) DOT K1) MLTS (BRA(SND(s)) DOT K2)''')
     )
     rules.append(SCR_DOT_9)
@@ -450,7 +450,7 @@ def construct_trs(
             
     SCR_DOT_10 = TRSRule(
         "SCR-DOT-10",
-        lhs = parse(r'''(B1 TSRB B2) DOT (K1 TSRK K2)'''),
+        lhs = parse(r'''(B1 TSR B2) DOT (K1 TSR K2)'''),
         rhs = parse(r'''(B1 DOT K1) MLTS (B2 DOT K2)'''),
     )
     rules.append(SCR_DOT_10)
@@ -464,15 +464,15 @@ def construct_trs(
 
     SCR_SORT_2 = TRSRule(
         "SCR-SORT-2",
-        lhs = parse(r''' BRA(s) DOT ((O1 TSRO O2) MLTK K0) '''),
-        rhs = parse(r''' ((BRA(FST(s)) MLTB O1) TSRB (BRA(SND(s)) MLTB O2)) DOT K0 ''')
+        lhs = parse(r''' BRA(s) DOT ((O1 TSR O2) MLTK K0) '''),
+        rhs = parse(r''' ((BRA(FST(s)) MLTB O1) TSR (BRA(SND(s)) MLTB O2)) DOT K0 ''')
     )
     rules.append(SCR_SORT_2)
 
     SCR_SORT_3 = TRSRule(
         "SCR-SORT-3",
-        lhs = parse(r''' (B1 TSRB B2) DOT ((O1 TSRO O2) MLTK K0) '''),
-        rhs = parse(r''' ((B1 MLTB O1) TSRB (B2 MLTB O2)) DOT K0''')
+        lhs = parse(r''' (B1 TSR B2) DOT ((O1 TSR O2) MLTK K0) '''),
+        rhs = parse(r''' ((B1 MLTB O1) TSR (B2 MLTB O2)) DOT K0''')
     )
     rules.append(SCR_SORT_3)
 
@@ -532,8 +532,8 @@ def construct_trs(
 
     ADJ_KET_3 = TRSRule(
         "ADJ-KET-3",
-        lhs = parse(r''' ADJ(B1 TSRB B2) '''),
-        rhs = parse(r''' ADJ(B1) TSRK ADJ(B2) ''')
+        lhs = parse(r''' ADJ(B1 TSR B2) '''),
+        rhs = parse(r''' ADJ(B1) TSR ADJ(B2) ''')
     )
     rules.append(ADJ_KET_3)
 
@@ -553,8 +553,8 @@ def construct_trs(
 
     ADJ_BRA_3 = TRSRule(
         "ADJ-BRA-3",
-        lhs = parse(r''' ADJ(K1 TSRK K2) '''),
-        rhs = parse(r''' ADJ(K1) TSRB ADJ(K2) ''')
+        lhs = parse(r''' ADJ(K1 TSR K2) '''),
+        rhs = parse(r''' ADJ(K1) TSR ADJ(K2) ''')
     )
     rules.append(ADJ_BRA_3)
 
@@ -584,8 +584,8 @@ def construct_trs(
 
     ADJ_OPT_4 = TRSRule(
         "ADJ-OPT-4",
-        lhs = parse(r'''ADJ(O1 TSRO O2)'''),
-        rhs = parse(r'''ADJ(O1) TSRO ADJ(O2)''')
+        lhs = parse(r'''ADJ(O1 TSR O2)'''),
+        rhs = parse(r'''ADJ(O1) TSR ADJ(O2)''')
     )
     rules.append(ADJ_OPT_4)
 
@@ -702,6 +702,88 @@ def construct_trs(
     rules.append(ADD_4)
 
 
+
+    TSR_1 = TRSRule(
+        "TSR-1",
+        lhs = parse(r'''0X TSR X0'''),
+        rhs = parse(r'''0X''')
+    )
+    rules.append(TSR_1)
+
+    TSR_2 = TRSRule(
+        "TSR-2",
+        lhs = parse(r'''X0 TSR 0X'''),
+        rhs = parse(r'''0X''')
+    )
+    rules.append(TSR_2)
+
+    TSR_3 = TRSRule(
+        "TSR-3",
+        lhs = parse(r'''KET(s) TSR KET(t)'''),
+        rhs = parse(r'''KET(PAIR(s, t))''')
+    )
+    rules.append(TSR_3)
+
+    TSR_4 = TRSRule(
+        "TSR-4",
+        lhs = parse(r'''BRA(s) TSR BRA(t)'''),
+        rhs = parse(r'''BRA(PAIR(s, t))''')
+    )
+    rules.append(TSR_4)
+
+    TSR_5 = TRSRule(
+        "TSR-5",
+        lhs = parse(r''' 1O TSR 1O '''),
+        rhs = parse(r''' 1O ''')
+    )
+    rules.append(TSR_5)
+
+    TSR_6 = TRSRule(
+        "TSR-6",
+        lhs = parse(r'''(K1 OUTER B1) TSR (K2 OUTER B2)'''),
+        rhs = parse(r'''(K1 TSR K2) OUTER (B1 TSR B2)''')
+    )
+    rules.append(TSR_6)
+
+    TSR_7 = TRSRule(
+        "TSR-7",
+        lhs = parse(r'''(S0 SCR X1) TSR X2'''),
+        rhs = parse(r'''S0 SCR (X1 TSR X2)''')
+    )
+    rules.append(TSR_7)
+
+    TSR_8 = TRSRule(
+        "TSR-8",
+        lhs = parse(r'''X1 TSR (S0 SCR X2)'''),
+        rhs = parse(r'''S0 SCR (X1 TSR X2)''')
+    )
+    rules.append(TSR_8)
+
+    def tsr_9_rewrite(rule, trs, term, side_info):
+        if isinstance(term, Tensor) and isinstance(term.args[0], Add):
+            new_args = tuple(Tensor(arg, term[1]) for arg in term.args[0].args)
+            return Add(*new_args)
+    TSR_9 = TRSRule(
+        "TSR-9",
+        lhs = "(X1 ADD X2) TSR X0",
+        rhs = "(X1 TSR X0) ADD (X2 TSR X0)",
+        rewrite_method=tsr_9_rewrite
+    )
+    rules.append(TSR_9)
+
+    def tsr_10_rewrite(rule, trs, term, side_info):
+        if isinstance(term, Tensor) and isinstance(term.args[1], Add):
+            new_args = tuple(Tensor(term[0], arg) for arg in term.args[1].args)
+            return Add(*new_args)
+    TSR_10 = TRSRule(
+        "TSR-10",
+        lhs = "X0 TSR (X1 ADD X2)",
+        rhs = "(X0 TSR X1) ADD (X0 TSR X2)",
+        rewrite_method=tsr_10_rewrite
+    )
+    rules.append(TSR_10)
+
+
     #######################################
     # Ket
 
@@ -784,83 +866,24 @@ def construct_trs(
 
     KET_MLT_10 = TRSRule(
         "KET-MLT-10",
-        lhs = parse(r'''(O1 TSRO O2) MLTK ((O1p TSRO O2p) MLTK K0)'''),
-        rhs = parse(r'''((O1 MLTO O1p) TSRO (O2 MLTO O2p)) MLTK K0''')
+        lhs = parse(r'''(O1 TSR O2) MLTK ((O1p TSR O2p) MLTK K0)'''),
+        rhs = parse(r'''((O1 MLTO O1p) TSR (O2 MLTO O2p)) MLTK K0''')
     )
     rules.append(KET_MLT_10)
 
     KET_MLT_11 = TRSRule(
         "KET-MLT-11",
-        lhs = parse(r'''(O1 TSRO O2) MLTK KET(t)'''),
-        rhs = parse(r'''(O1 MLTK KET(FST(t))) TSRK (O2 MLTK KET(SND(t)))''')
+        lhs = parse(r'''(O1 TSR O2) MLTK KET(t)'''),
+        rhs = parse(r'''(O1 MLTK KET(FST(t))) TSR (O2 MLTK KET(SND(t)))''')
     )
     rules.append(KET_MLT_11)
 
     KET_MLT_12 = TRSRule(
         "KET-MLT-12",
-        lhs = parse(r'''(O1 TSRO O2) MLTK (K1 TSRK K2)'''),
-        rhs = parse(r'''(O1 MLTK K1) TSRK (O2 MLTK K2)''')
+        lhs = parse(r'''(O1 TSR O2) MLTK (K1 TSR K2)'''),
+        rhs = parse(r'''(O1 MLTK K1) TSR (O2 MLTK K2)''')
     )
     rules.append(KET_MLT_12)
-
-    KET_TSR_1 = TRSRule(
-        "KET-TSR-1",
-        lhs = parse(r'''0X TSRK K0'''),
-        rhs = parse(r'''0X''')
-    )
-    rules.append(KET_TSR_1)
-
-    KET_TSR_2 = TRSRule(
-        "KET-TSR-2",
-        lhs = parse(r'''K0 TSRK 0X'''),
-        rhs = parse(r'''0X''')
-    )
-    rules.append(KET_TSR_2)
-
-    KET_TSR_3 = TRSRule(
-        "KET-TSR-3",
-        lhs = parse(r'''KET(s) TSRK KET(t)'''),
-        rhs = parse(r'''KET(PAIR(s, t))''')
-    )
-    rules.append(KET_TSR_3)
-
-    KET_TSR_4 = TRSRule(
-        "KET-TSR-4",
-        lhs = parse(r'''(S0 SCR K1) TSRK K2'''),
-        rhs = parse(r'''S0 SCR (K1 TSRK K2)''')
-    )
-    rules.append(KET_TSR_4)
-
-    KET_TSR_5 = TRSRule(
-        "KET-TSR-5",
-        lhs = parse(r'''K1 TSRK (S0 SCR K2)'''),
-        rhs = parse(r'''S0 SCR (K1 TSRK K2)''')
-    )
-    rules.append(KET_TSR_5)
-
-    def ket_tsr_6_rewrite(rule, trs, term, side_info):
-        if isinstance(term, KetTensor) and isinstance(term.args[0], Add):
-            new_args = tuple(KetTensor(arg, term[1]) for arg in term.args[0].args)
-            return Add(*new_args)
-    KET_TSR_6 = TRSRule(
-        "KET-TSR-6",
-        lhs = "(K1 ADD K2) TSRK K0",
-        rhs = "(K1 TSRK K0) ADD (K2 TSRK K0)",
-        rewrite_method=ket_tsr_6_rewrite
-    )
-    rules.append(KET_TSR_6)
-
-    def ket_tsr_7_rewrite(rule, trs, term, side_info):
-        if isinstance(term, KetTensor) and isinstance(term.args[1], Add):
-            new_args = tuple(KetTensor(term[0], arg) for arg in term.args[1].args)
-            return Add(*new_args)
-    KET_TSR_7 = TRSRule(
-        "KET-TSR-7",
-        lhs = "K0 TSRK (K1 ADD K2)",
-        rhs = "(K0 TSRK K1) ADD (K0 TSRK K2)",
-        rewrite_method=ket_tsr_7_rewrite
-    )
-    rules.append(KET_TSR_7)
 
 
     ###################################################
@@ -944,85 +967,24 @@ def construct_trs(
 
     BRA_MLT_10 = TRSRule(
         "BRA-MLT-10",
-        lhs = parse(r'''(B0 MLTB (O1 TSRO O2)) MLTB (O1p TSRO O2p)'''),
-        rhs = parse(r'''B0 MLTB ((O1 MLTO O1p) TSRO (O2 MLTO O2p))''')
+        lhs = parse(r'''(B0 MLTB (O1 TSR O2)) MLTB (O1p TSR O2p)'''),
+        rhs = parse(r'''B0 MLTB ((O1 MLTO O1p) TSR (O2 MLTO O2p))''')
     )
     rules.append(BRA_MLT_10)
 
     BRA_MLT_11 = TRSRule(
         "BRA-MLT-11",
-        lhs = parse(r'''BRA(t) MLTB (O1 TSRO O2)'''),
-        rhs = parse(r'''(BRA(FST(t)) MLTB O1) TSRB (BRA(SND(t)) MLTB O2)''')
+        lhs = parse(r'''BRA(t) MLTB (O1 TSR O2)'''),
+        rhs = parse(r'''(BRA(FST(t)) MLTB O1) TSR (BRA(SND(t)) MLTB O2)''')
     )
     rules.append(BRA_MLT_11)
 
     BRA_MLT_12 = TRSRule(
         "BRA-MLT-12",
-        lhs = parse(r'''(B1 TSRB B2) MLTB (O1 TSRO O2)'''),
-        rhs = parse(r'''(B1 MLTB O1) TSRB (B2 MLTB O2)''')
+        lhs = parse(r'''(B1 TSR B2) MLTB (O1 TSR O2)'''),
+        rhs = parse(r'''(B1 MLTB O1) TSR (B2 MLTB O2)''')
     )
     rules.append(BRA_MLT_12)
-
-
-
-    BRA_TSR_1 = TRSRule(
-        "BRA-TSR-1",
-        lhs = parse(r'''0X TSRB B0'''),
-        rhs = parse(r'''0X''')
-    )
-    rules.append(BRA_TSR_1)
-
-    BRA_TSR_2 = TRSRule(
-        "BRA-TSR-2",
-        lhs = parse(r'''B0 TSRB 0X'''),
-        rhs = parse(r'''0X''')
-    )
-    rules.append(BRA_TSR_2)
-
-    BRA_TSR_3 = TRSRule(
-        "BRA-TSR-3",
-        lhs = parse(r'''BRA(s) TSRB BRA(t)'''),
-        rhs = parse(r'''BRA(PAIR(s, t))''')
-    )
-    rules.append(BRA_TSR_3)
-
-    BRA_TSR_4 = TRSRule(
-        "BRA-TSR-4",
-        lhs = parse(r'''(S0 SCR B1) TSRB B2'''),
-        rhs = parse(r'''S0 SCR (B1 TSRB B2)''')
-    )
-    rules.append(BRA_TSR_4)
-
-    BRA_TSR_5 = TRSRule(
-        "BRA-TSR-5",
-        lhs = parse(r'''B1 TSRB (S0 SCR B2)'''),
-        rhs = parse(r'''S0 SCR (B1 TSRB B2)''')
-    )
-    rules.append(BRA_TSR_5)
-
-    def bra_tsr_6_rewrite(rule, trs, term, side_info):
-        if isinstance(term, BraTensor) and isinstance(term.args[0], Add):
-            new_args = tuple(BraTensor(arg, term[1]) for arg in term.args[0].args)
-            return Add(*new_args)
-    BRA_TSR_6 = TRSRule(
-        "BRA-TSR-6",
-        lhs = "(B1 ADD B2) TSRB B0",
-        rhs = "(B1 TSRB B0) ADD (B2 TSRB B0)",
-        rewrite_method=bra_tsr_6_rewrite
-    )
-    rules.append(BRA_TSR_6)
-
-    def bra_tsr_7_rewrite(rule, trs, term, side_info):
-        if isinstance(term, BraTensor) and isinstance(term.args[1], Add):
-            new_args = tuple(BraTensor(term[0], arg) for arg in term.args[1].args)
-            return Add(*new_args)
-    BRA_TSR_7 = TRSRule(
-        "BRA-TSR-7",
-        lhs = "B0 TSRB (B1 ADD B2)",
-        rhs = "(B0 TSRB B1) ADD (B0 TSRB B2)",
-        rewrite_method=bra_tsr_7_rewrite
-    )
-    rules.append(BRA_TSR_7)
 
 
     ###########################################################
@@ -1170,84 +1132,18 @@ def construct_trs(
 
     OPT_MLT_12 = TRSRule(
         "OPT-MLT-12",
-        lhs = parse(r'''(O1 TSRO O2) MLTO (O1p TSRO O2p)'''),
-        rhs = parse(r'''(O1 MLTO O1p) TSRO (O2 MLTO O2p)''')
+        lhs = parse(r'''(O1 TSR O2) MLTO (O1p TSR O2p)'''),
+        rhs = parse(r'''(O1 MLTO O1p) TSR (O2 MLTO O2p)''')
     )
     rules.append(OPT_MLT_12)
 
     OPT_MLT_13 = TRSRule(
         "OPT-MLT-13",
-        lhs = parse(r'''(O1 TSRO O2) MLTO ((O1p TSRO O2p) MLTO O3)'''),
-        rhs = parse(r'''((O1 MLTO O1p) TSRO (O2 MLTO O2p)) MLTO O3''')
+        lhs = parse(r'''(O1 TSR O2) MLTO ((O1p TSR O2p) MLTO O3)'''),
+        rhs = parse(r'''((O1 MLTO O1p) TSR (O2 MLTO O2p)) MLTO O3''')
     )
     rules.append(OPT_MLT_13)
 
-
-    OPT_TSR_1 = TRSRule(
-        "OPT-TSR-1",
-        lhs = parse(r'''0X TSRO O0'''),
-        rhs = parse(r'''0X''')
-    )
-    rules.append(OPT_TSR_1)
-
-    OPT_TSR_2 = TRSRule(
-        "OPT-TSR-2",
-        lhs = parse(r'''O0 TSRO 0X'''),
-        rhs = parse(r'''0X''')
-    )
-    rules.append(OPT_TSR_2)
-
-    OPT_TSR_3 = TRSRule(
-        "OPT-TSR-3",
-        lhs = parse(r''' 1O TSRO 1O '''),
-        rhs = parse(r''' 1O ''')
-    )
-    rules.append(OPT_TSR_3)
-
-    OPT_TSR_4 = TRSRule(
-        "OPT-TSR-4",
-        lhs = parse(r'''(K1 OUTER B1) TSRO (K2 OUTER B2)'''),
-        rhs = parse(r'''(K1 TSRK K2) OUTER (B1 TSRB B2)''')
-    )
-    rules.append(OPT_TSR_4)
-
-    OPT_TSR_5 = TRSRule(
-        "OPT-TSR-5",
-        lhs = parse(r'''(S0 SCR O1) TSRO O2'''),
-        rhs = parse(r'''S0 SCR (O1 TSRO O2)''')
-    )
-    rules.append(OPT_TSR_5)
-
-    OPT_TSR_6 = TRSRule(
-        "OPT-TSR-6",
-        lhs = parse(r'''O1 TSRO (S0 SCR O2)'''),
-        rhs = parse(r'''S0 SCR (O1 TSRO O2)''')
-    )
-    rules.append(OPT_TSR_6)
-
-    def opt_tsr_7_rewrite(rule, trs, term, side_info):
-        if isinstance(term, OpTensor) and isinstance(term.args[0], Add):
-            new_args = tuple(OpTensor(arg, term[1]) for arg in term.args[0].args)
-            return Add(*new_args)
-    OPT_TSR_7 = TRSRule(
-        "OPT-TSR-7",
-        lhs = "(O1 ADD O2) TSRO O0",
-        rhs = "(O1 TSRO O0) ADD (O2 TSRO O0)",
-        rewrite_method=opt_tsr_7_rewrite
-    )
-    rules.append(OPT_TSR_7)
-
-    def opt_tsr_8_rewrite(rule, trs, term, side_info):
-        if isinstance(term, OpTensor) and isinstance(term.args[1], Add):
-            new_args = tuple(OpTensor(term[0], arg) for arg in term.args[1].args)
-            return Add(*new_args)
-    OPT_TSR_8 = TRSRule(
-        "OPT-TSR-8",
-        lhs = "O0 TSRO (O1 ADD O2)",
-        rhs = "(O0 TSRO O1) ADD (O0 TSRO O2)",
-        rewrite_method=opt_tsr_8_rewrite
-    )
-    rules.append(OPT_TSR_8)
 
 
 
@@ -1369,7 +1265,7 @@ let F = signature
   SCR : infix binary ;
   ADD : AC ;
   MLTK : infix binary ;
-  TSRK : infix binary ;
+  TSR : infix binary ;
 
   (* Bra *)
   0X : constant ;
@@ -1378,7 +1274,7 @@ let F = signature
   SCR : infix binary ;
   ADD : AC ;
   MLTB : infix binary ;
-  TSRB : infix binary ;
+  TSR : infix binary ;
 
   (* Operator *)
   0X : constant ;
@@ -1388,7 +1284,7 @@ let F = signature
   SCR : infix binary ;
   ADD : AC ;
   MLTO : infix binary ;
-  TSRO : infix binary ;
+  TSR : infix binary ;
 
 ";
 
@@ -1411,7 +1307,7 @@ let R = TRS F X "
   S(S0) SCR_S K(K0, T1) -> K(S0 SCR K0, T1) ;
   K(K1, T1) ADD_S K(K2, T1) -> K(K1 ADD K2, T1) ;
   O(O0, T1, T2) MLTK_S K(K0, T2) -> K(O0 MLTK K0, T1) ;
-  K(K1, T1) TSRK_S K(K2, T2) -> K(K1 TSRK K2, T1 PROD T2) ;
+  K(K1, T1) TSRK_S K(K2, T2) -> K(K1 TSR K2, T1 PROD T2) ;
 
   (* Bra *)
   0X_S(T1) -> B(0X, T1) ;
@@ -1420,7 +1316,7 @@ let R = TRS F X "
   S(S0) SCR_S B(B0, T1) -> B(S0 SCR B0, T1) ;
   B(B1, T1) ADD_S B(B2, T1) -> B(B1 ADD B2, T1) ;
   B(B0, T1) MLTB_S O(O0, T1, T2) -> B(B0 MLTB O0, T2) ;
-  B(B1, T1) TSRB_S B(B2, T2) -> B(B1 TSRB B2, T1 PROD T2) ;
+  B(B1, T1) TSRB_S B(B2, T2) -> B(B1 TSR B2, T1 PROD T2) ;
 
   (* Operator *)
   0X_S(T1, T2) -> O(0X, T1, T2) ;
@@ -1430,7 +1326,7 @@ let R = TRS F X "
   S(S0) SCR_S O(O0, T1, T2) -> O(S0 SCR O0, T1, T2) ;
   O(O1, T1, T2) ADD_S O(O2, T1, T2) -> O(O1 ADD O2, T1, T2) ;
   O(O1, T1, T2) MLTO_S O(O2, T2, T3) -> O(O1 MLTO O2, T1, T3) ;
-  O(O1, T1, T2) TSRO_S O(O2, T3, T4) -> O(O1 TSRO O2, T1 PROD T3, T2 PROD T4) ;
+  O(O1, T1, T2) TSRO_S O(O2, T3, T4) -> O(O1 TSR O2, T1 PROD T3, T2 PROD T4) ;
 
   (* -------- overload the universal application --------- *)
   S(S1) @ S(S2) -> S(S1 MLTS S2) ;
@@ -1439,12 +1335,12 @@ let R = TRS F X "
 
   S(S0) @ O(O0, T1, T2) -> O(S0 SCR O0, T1, T2) ;
   K(K0, T1) @ S(S0) -> K(S0 SCR K0, T1) ;
-  K(K1, T1) @ K(K2, T2) -> K(K1 TSRK K2, T1 PROD T2) ;
+  K(K1, T1) @ K(K2, T2) -> K(K1 TSR K2, T1 PROD T2) ;
   K(K0, T1) @ B(B0, T2) -> O(K0 OUTER B0, T1, T2) ;
 
   B(B0, T1) @ S(S0) -> B(S0 SCR B0, T1) ;
   B(B0, T1) @ K(K0, T1) -> S(B0 DOT K0) ;
-  B(B1, T1) @ B(B2, T2) -> B(B1 TSRB B2, T1 PROD T2) ;
+  B(B1, T1) @ B(B2, T2) -> B(B1 TSR B2, T1 PROD T2) ;
   B(B0, T1) @ O(O0, T1, T2) -> B(B0 MLTB O0, T2) ;
 
   O(O0, T1, T2) @ S(S0) -> O(S0 SCR O0, T1, T2) ;
@@ -1452,10 +1348,10 @@ let R = TRS F X "
   O(O1, T1, T2) @ O(O2, T2, T3) -> O(O1 MLTO O2, T1, T3) ;
 
   (* -------- overload of otimes and cdot -------- *)
-  K(K1, T1) OTIMES K(K2, T2) -> K(K1 TSRK K2, T1 PROD T2) ;
-  B(B1, T1) OTIMES B(B2, T2) -> B(B1 TSRB B2, T1 PROD T2) ;
+  K(K1, T1) OTIMES K(K2, T2) -> K(K1 TSR K2, T1 PROD T2) ;
+  B(B1, T1) OTIMES B(B2, T2) -> B(B1 TSR B2, T1 PROD T2) ;
   K(K0, T1) OTIMES B(B0, T2) -> O(K0 OUTER B0, T1, T2) ;
-  O(O1, T1, T2) OTIMES O(O2, T3, T4) -> O(O1 TSRO O2, T1 PROD T3, T2 PROD T4) ;
+  O(O1, T1, T2) OTIMES O(O2, T3, T4) -> O(O1 TSR O2, T1 PROD T3, T2 PROD T4) ;
 
   B(B0, T1) CDOT O(O0, T1, T2) -> B(B0 MLTB O0, T2) ;
   O(O0, T1, T2) CDOT K(K0, T2) -> K(O0 MLTK K0, T1) ;

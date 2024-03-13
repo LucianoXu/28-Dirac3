@@ -178,19 +178,19 @@ def test_SCR_DOT_7():
 
 def test_SCR_DOT_8():
     with wolfram_backend.wolfram_session():
-        a = parse(r''' (B1 TSRB B2) DOT KET(t) ''')
+        a = parse(r''' (B1 TSR B2) DOT KET(t) ''')
         b = parse(r''' (B1 DOT KET(FST(t))) MLTS (B2 DOT KET(SND(t))) ''')
         assert trs.normalize(a) == trs.normalize(b)
 
 def test_SCR_DOT_9():
     with wolfram_backend.wolfram_session():
-        a = parse(r''' BRA(s) DOT (K1 TSRK K2) ''')
+        a = parse(r''' BRA(s) DOT (K1 TSR K2) ''')
         b = parse(r''' (BRA(FST(s)) DOT K1) MLTS (BRA(SND(s)) DOT K2) ''')
         assert trs.normalize(a) == trs.normalize(b)
 
 def test_SCR_DOT_10():
     with wolfram_backend.wolfram_session():
-        a = parse(r''' (B1 TSRB B2) DOT (K1 TSRK K2) ''')
+        a = parse(r''' (B1 TSR B2) DOT (K1 TSR K2) ''')
         b = parse(r''' (B1 DOT K1) MLTS (B2 DOT K2) ''')
         assert trs.normalize(a) == trs.normalize(b)
 
@@ -202,14 +202,14 @@ def test_SCR_SORT_1():
 
 def test_SCR_SORT_2():
     with wolfram_backend.wolfram_session():
-        a = parse(r''' BRA(s) DOT ((O1 TSRO O2) MLTK K0) ''')
-        b = parse(r''' ((BRA(FST(s)) MLTB O1) TSRB (BRA(SND(s)) MLTB O2)) DOT K0 ''')
+        a = parse(r''' BRA(s) DOT ((O1 TSR O2) MLTK K0) ''')
+        b = parse(r''' ((BRA(FST(s)) MLTB O1) TSR (BRA(SND(s)) MLTB O2)) DOT K0 ''')
         assert trs.normalize(a) == trs.normalize(b)
 
 def test_SCR_SORT_3():
     with wolfram_backend.wolfram_session():
-        a = parse(r''' (B1 TSRB B2) DOT ((O1 TSRO O2) MLTK K0) ''')
-        b = parse(r''' ((B1 MLTB O1) TSRB (B2 MLTB O2)) DOT K0''')
+        a = parse(r''' (B1 TSR B2) DOT ((O1 TSR O2) MLTK K0) ''')
+        b = parse(r''' ((B1 MLTB O1) TSR (B2 MLTB O2)) DOT K0''')
         assert trs.normalize(a) == trs.normalize(b)
 
 #######################################################
@@ -260,8 +260,8 @@ def test_ADJ_KET_2():
 
 def test_ADJ_KET_3():
     with wolfram_backend.wolfram_session():
-        a = parse(r''' ADJ(B1 TSRB B2) ''')
-        b = parse(r''' ADJ(B1) TSRK ADJ(B2) ''')
+        a = parse(r''' ADJ(B1 TSR B2) ''')
+        b = parse(r''' ADJ(B1) TSR ADJ(B2) ''')
         assert trs.normalize(a) == trs.normalize(b)
 
 def test_ADJ_BRA_1():
@@ -282,8 +282,8 @@ def test_ADJ_BRA_2():
 
 def test_ADJ_BRA_3():
     with wolfram_backend.wolfram_session():
-        a = parse(r''' ADJ(K1 TSRK K2) ''')
-        b = parse(r''' ADJ(K1) TSRB ADJ(K2) ''')
+        a = parse(r''' ADJ(K1 TSR K2) ''')
+        b = parse(r''' ADJ(K1) TSR ADJ(K2) ''')
         assert trs.normalize(a) == trs.normalize(b)
 
 def test_ADJ_OPT_1():
@@ -306,8 +306,8 @@ def test_ADJ_OPT_3():
 
 def test_ADJ_OPT_4():
     with wolfram_backend.wolfram_session():
-        a = parse(r''' ADJ(O1 TSRO O2) ''')
-        b = parse(r''' ADJ(O1) TSRO ADJ(O2) ''')
+        a = parse(r''' ADJ(O1 TSR O2) ''')
+        b = parse(r''' ADJ(O1) TSR ADJ(O2) ''')
         assert trs.normalize(a) == trs.normalize(b)
 
 def test_SCR_1():
@@ -376,6 +376,68 @@ def test_ADD_4():
         b = parse(r''' (S0 MLTS "2") SCR K0 ''')
         assert trs.normalize(a) == trs.normalize(b)
 
+
+def test_TSR_1():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' 0X TSR X ''')
+        b = parse(r''' 0X ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+def test_TSR_2():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' X TSR 0X ''')
+        b = parse(r''' 0X ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+def test_TSR_3():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' KET(s) TSR KET(t) ''')
+        b = parse(r''' KET(PAIR(s, t)) ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+def test_TSR_4():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' BRA(s) TSR BRA(t) ''')
+        b = parse(r''' BRA(PAIR(s, t)) ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+def test_TSR_5():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' 1O TSR 1O ''')
+        b = parse(r''' 1O ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+def test_TSR_6():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' (K1 OUTER B1) TSR (K2 OUTER B2) ''')
+        b = parse(r''' (K1 TSR K2) OUTER (B1 TSR B2)''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+def test_TSR_7():
+    with wolfram_backend.wolfram_session():
+        a = parse(r'''(S0 SCR X1) TSR X2''')
+        b = parse(r'''S0 SCR (X1 TSR X2)''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+def test_TSR_8():
+    with wolfram_backend.wolfram_session():
+        a = parse(r'''X1 TSR (S0 SCR X2)''')
+        b = parse(r'''S0 SCR (X1 TSR X2)''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+def test_TSR_9():
+    with wolfram_backend.wolfram_session():
+        a = parse(r'''(X1 ADD X2 ADD X3) TSR X0''')
+        b = parse(r'''(X1 TSR X0) ADD (X2 TSR X0) ADD (X3 TSR X0)''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+def test_TSR_10():
+    with wolfram_backend.wolfram_session():
+        a = parse(r'''X1 TSR (X2 ADD X3 ADD X4)''')
+        b = parse(r'''(X1 TSR X2) ADD (X1 TSR X3) ADD (X1 TSR X4)''')
+        assert trs.normalize(a) == trs.normalize(b)
+
+
 #######################################################
 # for ket
 
@@ -435,62 +497,20 @@ def test_KET_MLT_9():
 
 def test_KET_MLT_10():
     with wolfram_backend.wolfram_session():
-        a = parse(r'''(O1 TSRO O2) MLTK ((O1p TSRO O2p) MLTK K0)''')
-        b = parse(r'''((O1 MLTO O1p) TSRO (O2 MLTO O2p)) MLTK K0''')
+        a = parse(r'''(O1 TSR O2) MLTK ((O1p TSR O2p) MLTK K0)''')
+        b = parse(r'''((O1 MLTO O1p) TSR (O2 MLTO O2p)) MLTK K0''')
         assert trs.normalize(a) == trs.normalize(b)
 
 def test_KET_MLT_11():
     with wolfram_backend.wolfram_session():
-        a = parse(r'''(O1 TSRO O2) MLTK KET(t)''')
-        b = parse(r'''(O1 MLTK KET(FST(t))) TSRK (O2 MLTK KET(SND(t)))''')
+        a = parse(r'''(O1 TSR O2) MLTK KET(t)''')
+        b = parse(r'''(O1 MLTK KET(FST(t))) TSR (O2 MLTK KET(SND(t)))''')
         assert trs.normalize(a) == trs.normalize(b)
 
 def test_KET_MLT_12():
     with wolfram_backend.wolfram_session():
-        a = parse(r'''(O1 TSRO O2) MLTK (K1 TSRK K2)''')
-        b = parse(r'''(O1 MLTK K1) TSRK (O2 MLTK K2)''')
-        assert trs.normalize(a) == trs.normalize(b)
-
-def test_KET_TSR_1():
-    with wolfram_backend.wolfram_session():
-        a = parse(r''' 0X TSRK K ''')
-        b = parse(r''' 0X ''')
-        assert trs.normalize(a) == trs.normalize(b)
-
-def test_KET_TSR_2():
-    with wolfram_backend.wolfram_session():
-        a = parse(r''' K TSRK 0X ''')
-        b = parse(r''' 0X ''')
-        assert trs.normalize(a) == trs.normalize(b)
-
-def test_KET_TSR_3():
-    with wolfram_backend.wolfram_session():
-        a = parse(r''' KET(s) TSRK KET(t) ''')
-        b = parse(r''' KET(PAIR(s, t)) ''')
-        assert trs.normalize(a) == trs.normalize(b)
-
-def test_KET_TSR_4():
-    with wolfram_backend.wolfram_session():
-        a = parse(r'''(S0 SCR K1) TSRK K2''')
-        b = parse(r'''S0 SCR (K1 TSRK K2)''')
-        assert trs.normalize(a) == trs.normalize(b)
-
-def test_KET_TSR_5():
-    with wolfram_backend.wolfram_session():
-        a = parse(r'''K1 TSRK (S0 SCR K2)''')
-        b = parse(r'''S0 SCR (K1 TSRK K2)''')
-        assert trs.normalize(a) == trs.normalize(b)
-
-def test_KET_TSR_6():
-    with wolfram_backend.wolfram_session():
-        a = parse(r'''(K1 ADD K2 ADD K3) TSRK K0''')
-        b = parse(r'''(K1 TSRK K0) ADD (K2 TSRK K0) ADD (K3 TSRK K0)''')
-        assert trs.normalize(a) == trs.normalize(b)
-
-def test_KET_TSR_7():
-    with wolfram_backend.wolfram_session():
-        a = parse(r'''K1 TSRK (K2 ADD K3 ADD K4)''')
-        b = parse(r'''(K1 TSRK K2) ADD (K1 TSRK K3) ADD (K1 TSRK K4)''')
+        a = parse(r'''(O1 TSR O2) MLTK (K1 TSR K2)''')
+        b = parse(r'''(O1 MLTK K1) TSR (O2 MLTK K2)''')
         assert trs.normalize(a) == trs.normalize(b)
 
 #######################################################
@@ -552,62 +572,20 @@ def test_BRA_MLT_9():
 
 def test_BRA_MLT_10():
     with wolfram_backend.wolfram_session():
-        a = parse(r'''(B0 MLTB (O1 TSRO O2)) MLTB (O1p TSRO O2p)''')
-        b = parse(r'''B0 MLTB ((O1 MLTO O1p) TSRO (O2 MLTO O2p))''')
+        a = parse(r'''(B0 MLTB (O1 TSR O2)) MLTB (O1p TSR O2p)''')
+        b = parse(r'''B0 MLTB ((O1 MLTO O1p) TSR (O2 MLTO O2p))''')
         assert trs.normalize(a) == trs.normalize(b)
 
 def test_BRA_MLT_11():
     with wolfram_backend.wolfram_session():
-        a = parse(r'''BRA(t) MLTB (O1 TSRO O2)''')
-        b = parse(r'''(BRA(FST(t)) MLTB O1) TSRB (BRA(SND(t)) MLTB O2)''')
+        a = parse(r'''BRA(t) MLTB (O1 TSR O2)''')
+        b = parse(r'''(BRA(FST(t)) MLTB O1) TSR (BRA(SND(t)) MLTB O2)''')
         assert trs.normalize(a) == trs.normalize(b)
 
 def test_BRA_MLT_12():
     with wolfram_backend.wolfram_session():
-        a = parse(r'''(B1 TSRB B2) MLTB (O1 TSRO O2)''')
-        b = parse(r'''(B1 MLTB O1) TSRB (B2 MLTB O2)''')
-        assert trs.normalize(a) == trs.normalize(b)
-
-def test_BRA_TSR_1():
-    with wolfram_backend.wolfram_session():
-        a = parse(r''' 0X TSRB B ''')
-        b = parse(r''' 0X ''')
-        assert trs.normalize(a) == trs.normalize(b)
-
-def test_BRA_TSR_2():
-    with wolfram_backend.wolfram_session():
-        a = parse(r''' B TSRB 0X ''')
-        b = parse(r''' 0X ''')
-        assert trs.normalize(a) == trs.normalize(b)
-
-def test_BRA_TSR_3():
-    with wolfram_backend.wolfram_session():
-        a = parse(r''' BRA(s) TSRB BRA(t) ''')
-        b = parse(r''' BRA(PAIR(s, t)) ''')
-        assert trs.normalize(a) == trs.normalize(b)
-
-def test_BRA_TSR_4():
-    with wolfram_backend.wolfram_session():
-        a = parse(r'''(S0 SCR B1) TSRB B2''')
-        b = parse(r'''S0 SCR (B1 TSRB B2)''')
-        assert trs.normalize(a) == trs.normalize(b)
-
-def test_BRA_TSR_5():
-    with wolfram_backend.wolfram_session():
-        a = parse(r'''B1 TSRB (S0 SCR B2)''')
-        b = parse(r'''S0 SCR (B1 TSRB B2)''')
-        assert trs.normalize(a) == trs.normalize(b)
-
-def test_BRA_TSR_6():
-    with wolfram_backend.wolfram_session():
-        a = parse(r'''(B1 ADD B2 ADD B3) TSRB B0''')
-        b = parse(r'''(B1 TSRB B0) ADD (B2 TSRB B0) ADD (B3 TSRB B0)''')
-        assert trs.normalize(a) == trs.normalize(b)
-
-def test_BRA_TSR_7():
-    with wolfram_backend.wolfram_session():
-        a = parse(r'''B1 TSRB (B2 ADD B3 ADD B4)''')
-        b = parse(r'''(B1 TSRB B2) ADD (B1 TSRB B3) ADD (B1 TSRB B4)''')
+        a = parse(r'''(B1 TSR B2) MLTB (O1 TSR O2)''')
+        b = parse(r'''(B1 MLTB O1) TSR (B2 MLTB O2)''')
         assert trs.normalize(a) == trs.normalize(b)
 
 #######################################################
@@ -717,60 +695,12 @@ def test_OPT_MLT_11():
 
 def test_OPT_MLT_12():
     with wolfram_backend.wolfram_session():
-        a = parse(r''' (O1 TSRO O2) MLTO (O1p TSRO O2p) ''')
-        b = parse(r''' (O1 MLTO O1p) TSRO (O2 MLTO O2p) ''')
+        a = parse(r''' (O1 TSR O2) MLTO (O1p TSR O2p) ''')
+        b = parse(r''' (O1 MLTO O1p) TSR (O2 MLTO O2p) ''')
         assert trs.normalize(a) == trs.normalize(b)
 
 def test_OPT_MLT_13():
     with wolfram_backend.wolfram_session():
-        a = parse(r''' (O1 TSRO O2) MLTO ((O1p TSRO O2p) MLTO O0) ''')
-        b = parse(r''' ((O1 MLTO O1p) TSRO (O2 MLTO O2p)) MLTO O0 ''')
-        assert trs.normalize(a) == trs.normalize(b)
-
-def test_OPT_TSR_1():
-    with wolfram_backend.wolfram_session():
-        a = parse(r''' 0X TSRO O ''')
-        b = parse(r''' 0X ''')
-        assert trs.normalize(a) == trs.normalize(b)
-
-def test_OPT_TSR_2():
-    with wolfram_backend.wolfram_session():
-        a = parse(r''' O TSRO 0X ''')
-        b = parse(r''' 0X ''')
-        assert trs.normalize(a) == trs.normalize(b)
-
-def test_OPT_TSR_3():
-    with wolfram_backend.wolfram_session():
-        a = parse(r''' 1O TSRO 1O ''')
-        b = parse(r''' 1O ''')
-        assert trs.normalize(a) == trs.normalize(b)
-
-def test_OPT_TSR_4():
-    with wolfram_backend.wolfram_session():
-        a = parse(r''' (K1 OUTER B1) TSRO (K2 OUTER B2) ''')
-        b = parse(r''' (K1 TSRK K2) OUTER (B1 TSRB B2)''')
-        assert trs.normalize(a) == trs.normalize(b)
-
-def test_OPT_TSR_5():
-    with wolfram_backend.wolfram_session():
-        a = parse(r''' (S0 SCR O1) TSRO O2 ''')
-        b = parse(r''' S0 SCR (O1 TSRO O2) ''')
-        assert trs.normalize(a) == trs.normalize(b)
-
-def test_OPT_TSR_6():
-    with wolfram_backend.wolfram_session():
-        a = parse(r''' O1 TSRO (S0 SCR O2) ''')
-        b = parse(r''' S0 SCR (O1 TSRO O2) ''')
-        assert trs.normalize(a) == trs.normalize(b)
-
-def test_OPT_TSR_7():
-    with wolfram_backend.wolfram_session():
-        a = parse(r''' (O1 ADD O2 ADD O3) TSRO O0 ''')
-        b = parse(r''' (O1 TSRO O0) ADD (O2 TSRO O0) ADD (O3 TSRO O0) ''')
-        assert trs.normalize(a) == trs.normalize(b)
-
-def test_OPT_TSR_8():
-    with wolfram_backend.wolfram_session():
-        a = parse(r''' O1 TSRO (O2 ADD O3 ADD O4) ''')
-        b = parse(r''' (O1 TSRO O2) ADD (O1 TSRO O3) ADD (O1 TSRO O4) ''')
+        a = parse(r''' (O1 TSR O2) MLTO ((O1p TSR O2p) MLTO O0) ''')
+        b = parse(r''' ((O1 MLTO O1p) TSR (O2 MLTO O2p)) MLTO O0 ''')
         assert trs.normalize(a) == trs.normalize(b)

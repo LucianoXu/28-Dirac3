@@ -211,7 +211,7 @@ def construct_trs(
     TSR_DECOMP_1 = TRSRule(
         "TSR-DECOMP-1",
         lhs = parse(''' KET(PAIR(s, t))[PAIRR(Q, R)] '''),
-        rhs = parse(''' KET(s)[Q] TSRKL KET(t)[R] ''')
+        rhs = parse(''' KET(s)[Q] TSRL KET(t)[R] ''')
     )
     rules.append(TSR_DECOMP_1)
 
@@ -219,126 +219,111 @@ def construct_trs(
     TSR_DECOMP_2 = TRSRule(
         "TSR-DECOMP-2",
         lhs = parse(''' BRA(PAIR(s, t))[PAIRR(Q, R)] '''),
-        rhs = parse(''' BRA(s)[Q] TSRBL BRA(t)[R] ''')
+        rhs = parse(''' BRA(s)[Q] TSRL BRA(t)[R] ''')
     )
     rules.append(TSR_DECOMP_2)
+
+    TSR_DECOMP_3X = TRSRule(
+        "TSR-DECOMP-3X",
+        lhs = parse(''' 0X[PAIRR(R1, R2)] '''),
+        rhs = parse(''' (0X[R1]) TSRL (0X[R2]) ''')
+    )
+    rules.append(TSR_DECOMP_3X)
 
     TSR_DECOMP_3A = TRSRule(
         "TSR-DECOMP-3A",
         lhs = parse(''' 0X[PAIRR(Q1, Q2); R] '''),
-        rhs = parse(''' (0X[Q1; FSTR(R)]) TSROL (0X[Q2; SNDR(R)]) ''')
+        rhs = parse(''' (0X[Q1; FSTR(R)]) TSRL (0X[Q2; SNDR(R)]) ''')
     )
     rules.append(TSR_DECOMP_3A)
 
     TSR_DECOMP_3B = TRSRule(
         "TSR-DECOMP-3B",
         lhs = parse(''' 0X[Q; PAIRR(R1, R2)] '''),
-        rhs = parse(''' (0X[FSTR(Q); R1]) TSROL (0X[SNDR(Q2); R2]) ''')
+        rhs = parse(''' (0X[FSTR(Q); R1]) TSRL (0X[SNDR(Q2); R2]) ''')
     )
     rules.append(TSR_DECOMP_3B)
 
     TSR_DECOMP_3C = TRSRule(
         "TSR-DECOMP-3C",
         lhs = parse(''' 1O[PAIRR(Q, R)] '''),
-        rhs = parse(''' (1O[Q]) TSROL (1O[R]) ''')
+        rhs = parse(''' (1O[Q]) TSRL (1O[R]) ''')
     )
     rules.append(TSR_DECOMP_3C)
 
     TSR_DECOMP_3D = TRSRule(
         "TSR-DECOMP-3D",
         lhs = parse(''' 1O[PAIRR(Q1, Q2); R] '''),
-        rhs = parse(''' (1O[Q1; FSTR(R)]) TSROL (1O[Q2; SNDR(R)]) ''')
+        rhs = parse(''' (1O[Q1; FSTR(R)]) TSRL (1O[Q2; SNDR(R)]) ''')
     )
     rules.append(TSR_DECOMP_3D)
 
     TSR_DECOMP_3E = TRSRule(
         "TSR-DECOMP-3E",
         lhs = parse(''' 1O[Q; PAIRR(R1, R2)] '''),
-        rhs = parse(''' (1O[FSTR(Q); R1]) TSROL (1O[SNDR(Q2); R2]) ''')
+        rhs = parse(''' (1O[FSTR(Q); R1]) TSRL (1O[SNDR(Q2); R2]) ''')
     )
     rules.append(TSR_DECOMP_3E)
 
-    def tsr_decomp_3_rewrite(rule, trs, term, side_info):
-        if isinstance(term, Labelled1) and isinstance(term.args[0], (KetTensor, BraTensor, OpTensor)) and isinstance(term.args[1], QRegPair):
-            if isinstance(term.args[0], KetTensor):
-                T = KetTensorL
-            elif isinstance(term.args[0], BraTensor):
-                T = BraTensorL
-            elif isinstance(term.args[0], OpTensor):
-                T = OpTensorL
-            else:
-                raise Exception()
-            
-            return T(
-                Labelled1(term.args[0].args[0], term.args[1].args[0]),
-                Labelled1(term.args[0].args[1], term.args[1].args[1])
-            )
+
     TSR_DECOMP_3 = TRSRule(
         "TSR-DECOMP-3",
-        lhs = " (A {TSRK/TSRB/TSRO} B)[PAIRR(Q, R)] ",
-        rhs = " (A[Q]) {TSRKL/TSRBL/TSROL} (B[R]) ",
-        rewrite_method = tsr_decomp_3_rewrite
+        lhs = parse(''' (A TSR B)[PAIRR(Q, R)] '''),
+        rhs = parse(''' (A[Q]) TSRL (B[R]) ''')
     )
     rules.append(TSR_DECOMP_3)
 
     TSR_DECOMP_4 = TRSRule(
         "TSR-DECOMP-4",
-        lhs = parse(''' (A TSRO B)[PAIRR(Q1, Q2); R] '''),
-        rhs = parse(''' (A[Q1; FSTR(R)]) TSROL (B[Q2; SNDR(R)]) ''')
+        lhs = parse(''' (A TSR B)[PAIRR(Q1, Q2); R] '''),
+        rhs = parse(''' (A[Q1; FSTR(R)]) TSRL (B[Q2; SNDR(R)]) ''')
     )
     rules.append(TSR_DECOMP_4)
 
     TSR_DECOMP_5 = TRSRule(
         "TSR-DECOMP-5",
-        lhs = parse(''' (A TSRO B)[Q; PAIRR(R1, R2)] '''),
-        rhs = parse(''' (A[FSTR(Q); R1]) TSROL (B[SNDR(Q); R2]) ''')
+        lhs = parse(''' (A TSR B)[Q; PAIRR(R1, R2)] '''),
+        rhs = parse(''' (A[FSTR(Q); R1]) TSRL (B[SNDR(Q); R2]) ''')
     )
     rules.append(TSR_DECOMP_5)
 
     def tsr_comp_1_rewrite(rule, trs, term, side_info):
-        if isinstance(term, OpTensorL):
+        if isinstance(term, TensorL):
             for i, oi in enumerate(term.args):
                 if isinstance(oi, Labelled2) and isinstance(oi.args[1], QRegFst) and isinstance(oi.args[2], QRegFst):
                     for j, oj in enumerate(term.args):
                         if isinstance(oj, Labelled2) and isinstance(oj.args[1], QRegSnd) and isinstance(oj.args[2], QRegSnd):
                             if oi.args[1].args[0] == oj.args[1].args[0] and oi.args[2].args[0] == oj.args[2].args[0]:
-                                return OpTensorL(
+                                return TensorL(
                                     Labelled2(
-                                        OpTensor(oi.args[0], oj.args[0]), 
+                                        Tensor(oi.args[0], oj.args[0]), 
                                         oi.args[1].args[0], oi.args[2].args[0]
                                         ),
                                     *term.remained_terms(i, j))
     TSR_COMP_1 = TRSRule(
         "TSR-COMP-1",
-        lhs = " (A[FSTR(Q); FSTR(R)]) TSROL (B[SNDR(Q); SNDR(R)]) ",
-        rhs = " (A TSRO B)[Q; R] ",
+        lhs = " (A[FSTR(Q); FSTR(R)]) TSRL (B[SNDR(Q); SNDR(R)]) ",
+        rhs = " (A TSR B)[Q; R] ",
         rewrite_method = tsr_comp_1_rewrite
     )
     rules.append(TSR_COMP_1)
 
     def tsr_comp_2_rewrite(rule, trs, term, side_info):
-        if isinstance(term, (KetTensorL, BraTensorL, OpTensorL)):
+        if isinstance(term, TensorL):
             for i, oi in enumerate(term.args):
                 if isinstance(oi, Labelled1) and isinstance(oi.args[1], QRegFst):
                     for j, oj in enumerate(term.args):
                         if isinstance(oj, Labelled1) and isinstance(oj.args[1], QRegSnd):
                             if oi.args[1].args[0] == oj.args[1].args[0]:
-                                if isinstance(term, KetTensorL):
-                                    T = KetTensor
-                                elif isinstance(term, BraTensorL):
-                                    T = BraTensor
-                                else:
-                                    T = OpTensor
-
                                 return type(term)(
                                     Labelled1(
-                                        T(oi.args[0], oj.args[0]), 
+                                        Tensor(oi.args[0], oj.args[0]), 
                                         oi.args[1].args[0]),
                                     *term.remained_terms(i, j))
     TSR_COMP_2 = TRSRule(
         "TSR-COMP-2",
-        lhs = " (A[FSTR(Q)]) {TSRKL/TSRBL/TSROL} (B[SNDR(Q)]) ",
-        rhs = " (A {TSRK/TSRB/TSRO} B)[Q] ",
+        lhs = " (A[FSTR(Q)]) TSRL (B[SNDR(Q)]) ",
+        rhs = " (A TSR B)[Q] ",
         rewrite_method = tsr_comp_2_rewrite
     )
     rules.append(TSR_COMP_2)
@@ -346,11 +331,11 @@ def construct_trs(
     def dot_tsr_1_rewrite(rule, trs, term, side_info):
         if isinstance(term, OpApplyL) and isinstance(term.args[0], Labelled2) and isinstance(term.args[1], Labelled2):
             if QReg.is_disj(term.args[0].args[2], term.args[1].args[1]):
-                return OpTensorL(term.args[0], term.args[1])
+                return TensorL(term.args[0], term.args[1])
     DOT_TSR_1 = TRSRule(
         "DOT-TSR-1",
         lhs = " (A[Q;R]) MLTOL (B[S;T]) (R || S) ",
-        rhs = " (A[Q;R]) TSROL (B[S;T]) ",
+        rhs = " (A[Q;R]) TSRL (B[S;T]) ",
         rewrite_method = dot_tsr_1_rewrite
     )
     rules.append(DOT_TSR_1)
@@ -554,9 +539,9 @@ def construct_trs(
                 extA = term.args[0].args[0]
                 while p != "":
                     if p[-1] == "0":
-                        extA = OpTensor(extA, OpOne())
+                        extA = Tensor(extA, OpOne())
                     elif p[-1] == "1":
-                        extA = OpTensor(OpOne(), extA)
+                        extA = Tensor(OpOne(), extA)
                     else:
                         raise Exception()
                     p = p[:-1]
@@ -582,9 +567,9 @@ def construct_trs(
                 extB = term.args[1].args[0]
                 while p != "":
                     if p[-1] == "0":
-                        extB = OpTensor(extB, OpOne())
+                        extB = Tensor(extB, OpOne())
                     elif p[-1] == "1":
-                        extB = OpTensor(OpOne(), extB)
+                        extB = Tensor(OpOne(), extB)
                     else:
                         raise Exception()
                     p = p[:-1]

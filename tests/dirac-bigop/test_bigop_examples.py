@@ -13,7 +13,7 @@ with wolfram_backend.wolfram_session():
         "ketM" : parse(''' "Sqrt[1/2]" SCR (ket0 ADD ("-1" MLTK ket1)) '''),
         "braM" : parse(''' "Sqrt[1/2]" SCR (bra0 ADD ("-1" MLTB bra1)) '''),
 
-        "beta00" : parse(''' "Sqrt[1/2]" SCR ((ket0 TSRK ket0) ADD (ket1 TSRK ket1))'''),
+        "beta00" : parse(''' "Sqrt[1/2]" SCR ((ket0 TSR ket0) ADD (ket1 TSR ket1))'''),
 
         "I2" : parse('''(ket0 OUTER bra0) ADD (ket1 OUTER bra1)'''),
 
@@ -26,15 +26,15 @@ with wolfram_backend.wolfram_session():
 
         "H" : parse(''' "Sqrt[1/2]" SCR ((ket0 OUTER bra0) ADD (ket0 OUTER bra1) ADD (ket1 OUTER bra0) ADD ("-1" SCR (ket1 OUTER bra1)))'''),
 
-        "CX": parse(''' ((ket0 TSRK ket0) OUTER (bra0 TSRB bra0))
-                    ADD ((ket0 TSRK ket1) OUTER (bra0 TSRB bra1)) 
-                    ADD ((ket1 TSRK ket1) OUTER (bra1 TSRB bra0))
-                    ADD ((ket1 TSRK ket0) OUTER (bra1 TSRB bra1))'''),
+        "CX": parse(''' ((ket0 TSR ket0) OUTER (bra0 TSR bra0))
+                    ADD ((ket0 TSR ket1) OUTER (bra0 TSR bra1)) 
+                    ADD ((ket1 TSR ket1) OUTER (bra1 TSR bra0))
+                    ADD ((ket1 TSR ket0) OUTER (bra1 TSR bra1))'''),
 
-        "CZ": parse(''' ((ket0 TSRK ket0) OUTER (bra0 TSRB bra0))
-                    ADD ((ket0 TSRK ket1) OUTER (bra0 TSRB bra1)) 
-                    ADD ((ket1 TSRK ket0) OUTER (bra1 TSRB bra0))
-                    ADD ("-1" SCR ((ket1 TSRK ket1) OUTER (bra1 TSRB bra1)))'''),
+        "CZ": parse(''' ((ket0 TSR ket0) OUTER (bra0 TSR bra0))
+                    ADD ((ket0 TSR ket1) OUTER (bra0 TSR bra1)) 
+                    ADD ((ket1 TSR ket0) OUTER (bra1 TSR bra0))
+                    ADD ("-1" SCR ((ket1 TSR ket1) OUTER (bra1 TSR bra1)))'''),
 
     }).get_idempotent()
 
@@ -90,11 +90,11 @@ def test_ASigma():
 
     `A[T] Sigma[T, S] == A^T[S] Sigma[T, S]`
 
-    Note that the `(I2 TSRO I2)` at the beginning is necessary to decide the space type of A operator.
+    Note that the `(I2 TSR I2)` at the beginning is necessary to decide the space type of A operator.
     '''
     with wolfram_backend.wolfram_session():
-        a = sub(parse(r''' (I2 TSRO I2) MLTK ((A TSRO 1O) MLTK ((ket0 TSRK ket0) ADD (ket1 TSRK ket1)))'''))
-        b = sub(parse(r''' (I2 TSRO I2) MLTK ((1O TSRO TP(A)) MLTK ((ket0 TSRK ket0) ADD (ket1 TSRK ket1))) '''))
+        a = sub(parse(r''' (I2 TSR I2) MLTK ((A TSR 1O) MLTK ((ket0 TSR ket0) ADD (ket1 TSR ket1)))'''))
+        b = sub(parse(r''' (I2 TSR I2) MLTK ((1O TSR TP(A)) MLTK ((ket0 TSR ket0) ADD (ket1 TSR ket1))) '''))
 
         norm_a = trs.normalize(a)
         norm_b = trs.normalize(b)
@@ -113,9 +113,9 @@ def test_ASigma_bigop():
         a = parse(''' 
                         (
                             (
-                                SUM(i, T, KET(i) OUTER BRA(i)) TSRO 1O
+                                SUM(i, T, KET(i) OUTER BRA(i)) TSR 1O
                             ) 
-                            MLTO (A TSRO 1O)
+                            MLTO (A TSR 1O)
                         ) 
                         MLTK 
                         (
@@ -125,7 +125,7 @@ def test_ASigma_bigop():
 
         b = parse(''' 
                         (
-                            (1O TSRO SUM(i, T, KET(i) OUTER BRA(i))) MLTO (1O TSRO TP(A))
+                            (1O TSR SUM(i, T, KET(i) OUTER BRA(i))) MLTO (1O TSR TP(A))
                         ) 
                         MLTK 
                         (

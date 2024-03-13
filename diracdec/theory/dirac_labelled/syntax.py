@@ -295,6 +295,17 @@ class AddL(LDiracNotation, TRS_AC):
     def __init__(self, *tup : TRSTerm):
         TRS_AC.__init__(self, *tup)
 
+class TensorL(LDiracNotation, TRS_AC):
+    fsymbol_print = "⊗"
+    fsymbol = "TSRL"
+
+    def __init__(self, X1: TRSTerm, X2: TRSTerm) :
+        TRS_AC.__init__(self, X1, X2)
+
+    def tex(self) -> str:
+        return r" \left ( " + " \\otimes ".join([s.tex() for s in self.args]) + r" \right )"
+    
+
 class KetApplyL(LDiracNotation, TRSInfixBinary):
     fsymbol_print = "·"
     fsymbol = "MLTKL"
@@ -305,15 +316,6 @@ class KetApplyL(LDiracNotation, TRSInfixBinary):
     def tex(self) -> str:
         return rf" {self.args[0].tex()} \cdot {self.args[1].tex()}"
 
-class KetTensorL(LDiracNotation, TRS_AC):
-    fsymbol_print = "⊗"
-    fsymbol = "TSRKL"
-
-    def __init__(self, K1: TRSTerm, K2: TRSTerm) :
-        TRS_AC.__init__(self, K1, K2)
-
-    def tex(self) -> str:
-        return r" \left ( " + " \\otimes ".join([s.tex() for s in self.args]) + r" \right )"
     
 
 class BraApplyL(LDiracNotation, TRSInfixBinary):
@@ -325,17 +327,6 @@ class BraApplyL(LDiracNotation, TRSInfixBinary):
 
     def tex(self) -> str:
         return rf" {self.args[0].tex()} \cdot {self.args[1].tex()}"
-
-class BraTensorL(LDiracNotation, TRS_AC):
-    fsymbol_print = "⊗"
-    fsymbol = "TSRBL"
-
-    def __init__(self, B1: TRSTerm, B2: TRSTerm) :
-        TRS_AC.__init__(self, B1, B2)
-
-    def tex(self) -> str:
-        return r" \left ( " + " \\otimes ".join([s.tex() for s in self.args]) + r" \right )"
-    
 
 class OpOuterL(LDiracNotation, TRSInfixBinary):
     fsymbol_print = "⊗"
@@ -356,13 +347,3 @@ class OpApplyL(LDiracNotation, TRSInfixBinary):
 
     def tex(self) -> str:
         return rf" {self.args[0].tex()} \cdot {self.args[1].tex()}"
-
-class OpTensorL(LDiracNotation, TRS_AC):
-    fsymbol_print = "⊗"
-    fsymbol = "TSROL"
-
-    def __init__(self, O1: TRSTerm, O2: TRSTerm) :
-        TRS_AC.__init__(self, O1, O2)
-
-    def tex(self) -> str:
-        return r" \left ( " + " \\otimes ".join([s.tex() for s in self.args]) + r" \right )"

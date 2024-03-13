@@ -92,8 +92,8 @@ def construct_trs(
 
     TRANS_KET_3 = TRSRule(
         "TRANS-KET-3",
-        lhs = parse(r'''TP(B1 TSRB B2)'''),
-        rhs = parse(r'''TP(B1) TSRK TP(B2)''')
+        lhs = parse(r'''TP(B1 TSR B2)'''),
+        rhs = parse(r'''TP(B1) TSR TP(B2)''')
     )
     rules.append(TRANS_KET_3)
 
@@ -113,8 +113,8 @@ def construct_trs(
 
     TRANS_BRA_3 = TRSRule(
         "TRANS-BRA-3",
-        lhs = parse(r'''TP(K1 TSRK K2)'''),
-        rhs = parse(r'''TP(K1) TSRB TP(K2)''')
+        lhs = parse(r'''TP(K1 TSR K2)'''),
+        rhs = parse(r'''TP(K1) TSR TP(K2)''')
     )
     rules.append(TRANS_BRA_3)
 
@@ -141,8 +141,8 @@ def construct_trs(
 
     TRANS_OPT_4 = TRSRule(
         "TRANS-OPT-4",
-        lhs = parse(r'''TP(O1 TSRO O2)'''),
-        rhs = parse(r'''TP(O1) TSRO TP(O2)''')
+        lhs = parse(r'''TP(O1 TSR O2)'''),
+        rhs = parse(r'''TP(O1) TSR TP(O2)''')
     )
     rules.append(TRANS_OPT_4)
 
@@ -417,26 +417,26 @@ def construct_trs(
 
 
     def sum_dist_9_rewrite(rule, trs, term, side_info):
-        if isinstance(term, Sum) and isinstance(term.body, (KetTensor, BraTensor, OpOuter, OpTensor)) and \
+        if isinstance(term, Sum) and isinstance(term.body, (Tensor, OpOuter)) and \
             set(v[0].name for v in term.bind_vars) & term.body.args[1].free_variables() == set():
             return type(term.body)(Sum(term.bind_vars, term.body.args[0]), term.body.args[1])     
     SUM_DIST_9 = TRSRule(
         "SUM-DIST-9",
-        lhs = "SUM(x, T, x1 {TSRK/TSRB/OUTER/TSRO} X)",
-        rhs = "SUM(x, T, x1) {TSRK/TSRB/OUTER/TSRO} X",
+        lhs = "SUM(x, T, x1 {TSR/OUTER} X)",
+        rhs = "SUM(x, T, x1) {TSR/OUTER} X",
         rewrite_method = sum_dist_9_rewrite
     )
     rules.append(SUM_DIST_9)
 
 
     def sum_dist_10_rewrite(rule, trs, term, side_info):
-        if isinstance(term, Sum) and isinstance(term.body, (KetTensor, BraTensor, OpOuter, OpTensor)) and \
+        if isinstance(term, Sum) and isinstance(term.body, (Tensor, OpOuter)) and \
             set(v[0].name for v in term.bind_vars) & term.body.args[0].free_variables() == set():
             return type(term.body)(term.body.args[0], Sum(term.bind_vars, term.body.args[1]))
     SUM_DIST_10 = TRSRule(
         "SUM-DIST-10",
-        lhs = "SUM(x, T, X {TSRK/TSRB/OUTER/TSRO} x2)",
-        rhs = "X {TSRK/TSRB/OUTER/TSRO} SUM(x, T, x2)",
+        lhs = "SUM(x, T, X {TSR/OUTER} x2)",
+        rhs = "X {TSR/OUTER} SUM(x, T, x2)",
         rewrite_method = sum_dist_10_rewrite
     )
     rules.append(SUM_DIST_10)
@@ -493,7 +493,7 @@ def construct_trs(
 
 
     def sum_comp_3_rewrite(rule, trs, term, side_info):
-        if isinstance(term, (KetTensor, BraTensor, OpOuter, OpTensor)) and isinstance(term.args[0], Sum):
+        if isinstance(term, (Tensor, OpOuter)) and isinstance(term.args[0], Sum):
 
             # we have to rename if necessary
             if set(v[0].name for v in term.args[0].bind_vars) & term.args[1].free_variables() == set():
@@ -508,14 +508,14 @@ def construct_trs(
                 return Sum(renamed_sum.bind_vars, norm_term)
     SUM_COMP_3 = TRSRule(
         "SUM-COMP-3",
-        lhs = "SUM(i, T, A) {TSRK/TSRB/OUTER/TSRO} X (with side condition)",
-        rhs = "SUM(i, T, A {TSRK/TSRB/OUTER/TSRO} X)",
+        lhs = "SUM(i, T, A) {TSR/OUTER} X (with side condition)",
+        rhs = "SUM(i, T, A {TSR/OUTER} X)",
         rewrite_method = sum_comp_3_rewrite
     )
     rules.append(SUM_COMP_3)
 
     def sum_comp_4_rewrite(rule, trs, term, side_info):
-        if isinstance(term, (KetTensor, BraTensor, OpOuter, OpTensor)) and isinstance(term.args[1], Sum):
+        if isinstance(term, (Tensor, OpOuter)) and isinstance(term.args[1], Sum):
 
             # we have to rename if necessary
             if set(v[0].name for v in term.args[1].bind_vars) & term.args[0].free_variables() == set():
@@ -530,8 +530,8 @@ def construct_trs(
                 return Sum(renamed_sum.bind_vars, norm_term)
     SUM_COMP_4 = TRSRule(
         "SUM-COMP-4",
-        lhs = "X {TSRK/TSRB/OUTER/TSRO} SUM(i, T, A) (with side condition)",
-        rhs = "SUM(i, T, X {TSRK/TSRB/OUTER/TSRO} A)",
+        lhs = "X {TSR/OUTER} SUM(i, T, A) (with side condition)",
+        rhs = "SUM(i, T, X {TSROUTER} A)",
         rewrite_method = sum_comp_4_rewrite
     )
     rules.append(SUM_COMP_4)

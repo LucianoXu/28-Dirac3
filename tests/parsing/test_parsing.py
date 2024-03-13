@@ -64,8 +64,8 @@ def test_basic_K():
         b = KetApply(TRSVar('O'), TRSVar('K'))
         assert a == b
 
-        a = parse(r''' K1 TSRK K2 ''')
-        b = KetTensor(TRSVar('K1'), TRSVar('K2'))
+        a = parse(r''' K1 TSR K2 ''')
+        b = Tensor(TRSVar('K1'), TRSVar('K2'))
         assert a == b
 
 def test_basic_B():
@@ -94,8 +94,8 @@ def test_basic_B():
         b = BraApply(TRSVar('B'), TRSVar('O'))
         assert a == b
 
-        a = parse(r''' B1 TSRB B2 ''')
-        b = BraTensor(TRSVar('B1'), TRSVar('B2'))
+        a = parse(r''' B1 TSR B2 ''')
+        b = Tensor(TRSVar('B1'), TRSVar('B2'))
         assert a == b
 
 def test_basic_O():
@@ -128,8 +128,8 @@ def test_basic_O():
         b = OpApply(TRSVar('O1'), TRSVar('O2'))
         assert a == b
 
-        a = parse(r''' O1 TSRO O2 ''')
-        b = OpTensor(TRSVar('O1'), TRSVar('O2'))
+        a = parse(r''' O1 TSR O2 ''')
+        b = Tensor(TRSVar('O1'), TRSVar('O2'))
         assert a == b
 
 def test_subst():

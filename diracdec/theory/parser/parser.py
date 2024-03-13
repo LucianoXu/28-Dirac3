@@ -140,6 +140,11 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
         '''
         p[0] = Add(p[1], p[3])
 
+    def p_dirac_tsr(p):
+        '''
+        diracnotation    : trs-term TSR trs-term
+        '''
+        p[0] = Tensor(p[1], p[3])
 
     # ket
     def p_diracket1(p):
@@ -155,11 +160,6 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
         '''
         p[0] = KetApply(p[1], p[3])
 
-    def p_diracket3(p):
-        '''
-        diracnotation    : trs-term TSRK trs-term
-        '''
-        p[0] = KetTensor(p[1], p[3])
 
     # bra
 
@@ -174,12 +174,6 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
         diracnotation    : trs-term MLTB trs-term
         '''
         p[0] = BraApply(p[1], p[3])
-
-    def p_diracbra3(p):
-        '''
-        diracnotation    : trs-term TSRB trs-term
-        '''
-        p[0] = BraTensor(p[1], p[3])
 
 
     # operator
@@ -201,13 +195,6 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
         diracnotation     : trs-term MLTO trs-term
         '''
         p[0] = OpApply(p[1], p[3])
-
-    def p_diracop4(p):
-        '''
-        diracnotation     : trs-term TSRO trs-term
-        '''
-        p[0] = OpTensor(p[1], p[3])
-
 
 
 
@@ -389,6 +376,12 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
         '''
         p[0] = AddL(p[1], p[3])
 
+    def p_diracnotationL6(p):
+        '''
+        diracnotationL  : trs-term TSRL trs-term
+        '''
+        p[0] = TensorL(p[1], p[3])
+
 
     def p_dirac_ketL1(p):
         '''
@@ -396,23 +389,12 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
         '''
         p[0] = KetApplyL(p[1], p[3])
 
-    def p_dirac_ketL2(p):
-        '''
-        diracnotationL : trs-term TSRKL trs-term
-        '''
-        p[0] = KetTensorL(p[1], p[3])
 
     def p_dirac_braL1(p):
         '''
         diracnotationL : trs-term MLTBL trs-term
         '''
         p[0] = BraApplyL(p[1], p[3])
-
-    def p_dirac_braL2(p):
-        '''
-        diracnotationL : trs-term TSRBL trs-term
-        '''
-        p[0] = BraTensorL(p[1], p[3])
 
     def p_dirac_opL1(p):
         '''
@@ -426,11 +408,6 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
         '''
         p[0] = OpApplyL(p[1], p[3])
 
-    def p_dirac_opL3(p):
-        '''
-        diracnotationL : trs-term TSROL trs-term
-        '''
-        p[0] = OpTensorL(p[1], p[3])
 
 
     def p_error(p):
