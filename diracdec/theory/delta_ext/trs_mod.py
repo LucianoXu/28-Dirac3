@@ -62,6 +62,6 @@ def modify_trs(
 
 
     # construct the trs
-    return TRS(rules, trs.side_info_procs)
+    return TRS(rules)
 
 

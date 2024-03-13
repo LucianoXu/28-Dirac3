@@ -296,3 +296,16 @@ def test_OPT_EXT_3():
         a = parse(r''' (B[PAIRR(R, Q)]) MLTOL (A[SNDR(R)])''')
         b = parse(r''' (B MLTO ((1O TSRO A) TSRO 1O))[PAIRR(R, Q)] ''')
         assert label_trs.normalize(a) == label_trs.normalize(b)
+
+def test_LABEL_SUM_1():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' SUM(x, T, A[R]) ''')
+        b = parse(r''' SUM(x, T, A)[R] ''')
+        assert label_trs.normalize(a) == label_trs.normalize(b)
+
+
+def test_LABEL_SUM_2():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' SUM(x, T, A[Q; R]) ''')
+        b = parse(r''' SUM(x, T, A)[Q; R] ''')
+        assert label_trs.normalize(a) == label_trs.normalize(b)

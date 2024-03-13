@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Optional
 
 from ..dirac.syntax import *
+from ..dirac_bigop.syntax import *
 
 from ..trs import BindVarTerm, MultiBindTerm, var_rename, var_rename_ls, seq_content_eq
 

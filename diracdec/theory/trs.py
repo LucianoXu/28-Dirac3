@@ -753,13 +753,14 @@ class TRS:
 
     def __init__(self, 
                  rules: List[TRSRule], 
-                 side_info_procs: Tuple[Callable[[Dict[str, Any]], Dict[str, Any]],...] = (),
                  ):
         '''
         side_info_procs provides methods to preprocess side informations (executed in sequence)
         '''
         self.rules : List[TRSRule] = rules
-        self.side_info_procs = side_info_procs
+
+    def __add__(self, other: TRS) -> TRS:
+        return TRS(self.rules + other.rules)
 
     def variables(self) -> set[str]:
         '''
@@ -820,8 +821,6 @@ class TRS:
 
         # execute the preprocess of side information
         final_side_info = side_info.copy()
-        for proc in self.side_info_procs:
-            final_side_info = proc(final_side_info)
 
         final_side_info['trs-args'] = {
             'side_info': side_info, 

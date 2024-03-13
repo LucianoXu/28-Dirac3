@@ -543,6 +543,29 @@ def construct_trs(
     )
     rules.append(OPT_EXT_3)
 
+    def label_sum_1_rewrite(rule, trs, term, side_info):
+        if isinstance(term, Sum) and isinstance(term.body, Labelled1):
+            return Labelled1(Sum(term.bind_vars, term.body.args[0]), term.body.args[1])
+    LABEL_SUM_1 = TRSRule(
+        "LABEL-SUM-1",
+        lhs = " SUM(x, T, A[R]) ",
+        rhs = " SUM(x, T, A)[R] ",
+        rewrite_method = label_sum_1_rewrite
+    )
+    rules.append(LABEL_SUM_1)
+
+
+    def label_sum_2_rewrite(rule, trs, term, side_info):
+        if isinstance(term, Sum) and isinstance(term.body, Labelled2):
+            return Labelled2(Sum(term.bind_vars, term.body.args[0]), term.body.args[1], term.body.args[2])
+    LABEL_SUM_2 = TRSRule(
+        "LABEL-SUM-2",
+        lhs = " SUM(x, T, A[Q; R]) ",
+        rhs = " SUM(x, T, A)[Q; R] ",
+        rewrite_method = label_sum_2_rewrite
+    )
+    rules.append(LABEL_SUM_2)
+
 
     # build the trs
     return TRS(rules)
