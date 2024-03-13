@@ -223,19 +223,42 @@ def construct_trs(
     )
     rules.append(TSR_DECOMP_2)
 
+    def tsr_decomp_3_rewrite(rule, trs, term, side_info):
+        if isinstance(term, Labelled1) and isinstance(term.args[0], (KetTensor, BraTensor, OpTensor)) and isinstance(term.args[1], QRegPair):
+            if isinstance(term.args[0], KetTensor):
+                T = KetTensorL
+            elif isinstance(term.args[0], BraTensor):
+                T = BraTensorL
+            elif isinstance(term.args[0], OpTensor):
+                T = OpTensorL
+            else:
+                raise Exception()
+            
+            return T(
+                Labelled1(term.args[0].args[0], term.args[1].args[0]),
+                Labelled1(term.args[0].args[1], term.args[1].args[1])
+            )
     TSR_DECOMP_3 = TRSRule(
         "TSR-DECOMP-3",
-        lhs = parse(''' (A TSRO B)[PAIRR(Q1, Q2); R] '''),
-        rhs = parse(''' (A[Q1; FSTR(R)]) TSROL (B[Q2; SNDR(R)]) ''')
+        lhs = " (A {TSRK/TSRB/TSRO} B)[PAIRR(Q, R)] ",
+        rhs = " (A[Q]) {TSRKL/TSRBL/TSROL} (B[R]) ",
+        rewrite_method = tsr_decomp_3_rewrite
     )
     rules.append(TSR_DECOMP_3)
 
     TSR_DECOMP_4 = TRSRule(
         "TSR-DECOMP-4",
+        lhs = parse(''' (A TSRO B)[PAIRR(Q1, Q2); R] '''),
+        rhs = parse(''' (A[Q1; FSTR(R)]) TSROL (B[Q2; SNDR(R)]) ''')
+    )
+    rules.append(TSR_DECOMP_4)
+
+    TSR_DECOMP_5 = TRSRule(
+        "TSR-DECOMP-5",
         lhs = parse(''' (A TSRO B)[Q; PAIRR(R1, R2)] '''),
         rhs = parse(''' (A[FSTR(Q); R1]) TSROL (B[SNDR(Q); R2]) ''')
     )
-    rules.append(TSR_DECOMP_4)
+    rules.append(TSR_DECOMP_5)
 
     def tsr_comp_1_rewrite(rule, trs, term, side_info):
         if isinstance(term, OpTensorL):
