@@ -1199,48 +1199,55 @@ def construct_trs(
 
     OPT_TSR_3 = TRSRule(
         "OPT-TSR-3",
-        lhs = parse(r'''(K1 OUTER B1) TSRO (K2 OUTER B2)'''),
-        rhs = parse(r'''(K1 TSRK K2) OUTER (B1 TSRB B2)''')
+        lhs = parse(r''' 1O TSRO 1O '''),
+        rhs = parse(r''' 1O ''')
     )
     rules.append(OPT_TSR_3)
 
     OPT_TSR_4 = TRSRule(
         "OPT-TSR-4",
-        lhs = parse(r'''(S0 SCR O1) TSRO O2'''),
-        rhs = parse(r'''S0 SCR (O1 TSRO O2)''')
+        lhs = parse(r'''(K1 OUTER B1) TSRO (K2 OUTER B2)'''),
+        rhs = parse(r'''(K1 TSRK K2) OUTER (B1 TSRB B2)''')
     )
     rules.append(OPT_TSR_4)
 
     OPT_TSR_5 = TRSRule(
         "OPT-TSR-5",
-        lhs = parse(r'''O1 TSRO (S0 SCR O2)'''),
+        lhs = parse(r'''(S0 SCR O1) TSRO O2'''),
         rhs = parse(r'''S0 SCR (O1 TSRO O2)''')
     )
     rules.append(OPT_TSR_5)
 
-    def opt_tsr_6_rewrite(rule, trs, term, side_info):
-        if isinstance(term, OpTensor) and isinstance(term.args[0], Add):
-            new_args = tuple(OpTensor(arg, term[1]) for arg in term.args[0].args)
-            return Add(*new_args)
     OPT_TSR_6 = TRSRule(
         "OPT-TSR-6",
-        lhs = "(O1 ADD O2) TSRO O0",
-        rhs = "(O1 TSRO O0) ADD (O2 TSRO O0)",
-        rewrite_method=opt_tsr_6_rewrite
+        lhs = parse(r'''O1 TSRO (S0 SCR O2)'''),
+        rhs = parse(r'''S0 SCR (O1 TSRO O2)''')
     )
     rules.append(OPT_TSR_6)
 
     def opt_tsr_7_rewrite(rule, trs, term, side_info):
-        if isinstance(term, OpTensor) and isinstance(term.args[1], Add):
-            new_args = tuple(OpTensor(term[0], arg) for arg in term.args[1].args)
+        if isinstance(term, OpTensor) and isinstance(term.args[0], Add):
+            new_args = tuple(OpTensor(arg, term[1]) for arg in term.args[0].args)
             return Add(*new_args)
     OPT_TSR_7 = TRSRule(
         "OPT-TSR-7",
-        lhs = "O0 TSRO (O1 ADD O2)",
-        rhs = "(O0 TSRO O1) ADD (O0 TSRO O2)",
+        lhs = "(O1 ADD O2) TSRO O0",
+        rhs = "(O1 TSRO O0) ADD (O2 TSRO O0)",
         rewrite_method=opt_tsr_7_rewrite
     )
     rules.append(OPT_TSR_7)
+
+    def opt_tsr_8_rewrite(rule, trs, term, side_info):
+        if isinstance(term, OpTensor) and isinstance(term.args[1], Add):
+            new_args = tuple(OpTensor(term[0], arg) for arg in term.args[1].args)
+            return Add(*new_args)
+    OPT_TSR_8 = TRSRule(
+        "OPT-TSR-8",
+        lhs = "O0 TSRO (O1 ADD O2)",
+        rhs = "(O0 TSRO O1) ADD (O0 TSRO O2)",
+        rewrite_method=opt_tsr_8_rewrite
+    )
+    rules.append(OPT_TSR_8)
 
 
 
