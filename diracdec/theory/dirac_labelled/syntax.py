@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Optional
+
 from ..dirac.syntax import *
 
 from ..trs import BindVarTerm, MultiBindTerm, var_rename, var_rename_ls, seq_content_eq
@@ -80,7 +82,54 @@ class QReg(TRSTerm):
             return QReg.is_disj(A, B.args[0]) and QReg.is_disj(A, B.args[1])
     
         return not QReg.is_in(A, B) and not QReg.is_in(B, A)
+    
 
+    @staticmethod
+    def subreg_pos(A: TRSTerm, B: TRSTerm) -> Optional[str]:
+        '''
+        Check whether the qreg A is a sub-reg of B.
+        If A is a sub-reg of B, then return the sub-reg position.
+        '''
+
+        A = QReg.normalize(A)
+        B = QReg.normalize(B)
+        
+        if isinstance(A, QRegFst):
+            if A.args[0] == B:
+                return "0"
+            else:
+                p = QReg.subreg_pos(A.args[0], B)
+                if p is not None:
+                    return "0" + p
+            
+        if isinstance(A, QRegSnd) and A.args[0] == B:
+            if A.args[0] == B:
+                return "1"
+            else:
+                p = QReg.subreg_pos(A.args[0], B)
+                if p is not None:
+                    return "1" + p
+
+        if isinstance(B, QRegPair):
+            if A == B.args[0]:
+                return "0"
+            else:
+                p = QReg.subreg_pos(A, B.args[0])
+                if p is not None:
+                    return "0" + p
+        
+        if isinstance(B, QRegPair):
+            if A == B.args[1]:
+                return "1"
+            else:
+                p = QReg.subreg_pos(A, B.args[1])
+                if p is not None:
+                    return "1" + p
+                
+        return None
+        
+        
+        
 
 
 class QRegPair(QReg, StdTerm):

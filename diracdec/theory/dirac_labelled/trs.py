@@ -481,6 +481,68 @@ def construct_trs(
     )
     rules.append(LABEL_LIFT_16)
 
+    OPT_EXT_1 = TRSRule(
+        "OPT-EXT-1",
+        lhs = parse(''' A[R; R] '''),
+        rhs = parse(''' A[R] ''')
+    )
+    rules.append(OPT_EXT_1)
+
+    def opt_ext_2_rewrite(rule, trs, term, side_info):
+        if isinstance(term, OpApplyL) and isinstance(term.args[0], Labelled1) and isinstance(term.args[1], Labelled1):
+
+            p = QReg.subreg_pos(term.args[0].args[1], term.args[1].args[1])
+            if p is not None:
+                extA = term.args[0].args[0]
+                while p != "":
+                    if p[-1] == "0":
+                        extA = OpTensor(extA, OpOne())
+                    elif p[-1] == "1":
+                        extA = OpTensor(OpOne(), extA)
+                    else:
+                        raise Exception()
+                    p = p[:-1]
+
+                return Labelled1(
+                    OpApply(extA, term.args[1].args[0]),
+                    term.args[1].args[1]
+                )
+    OPT_EXT_2 = TRSRule(
+        "OPT-EXT-2",
+        lhs = "(A[Q]) MLTOL (B[R]) (Q is a subterm of R at p)",
+        rhs = "(ext(A, p) MLTO B)[R]",
+        rewrite_method = opt_ext_2_rewrite
+    )
+    rules.append(OPT_EXT_2)
+
+
+    def opt_ext_3_rewrite(rule, trs, term, side_info):
+        if isinstance(term, OpApplyL) and isinstance(term.args[0], Labelled1) and isinstance(term.args[1], Labelled1):
+
+            p = QReg.subreg_pos(term.args[1].args[1], term.args[0].args[1])
+            if p is not None:
+                extB = term.args[1].args[0]
+                while p != "":
+                    if p[-1] == "0":
+                        extB = OpTensor(extB, OpOne())
+                    elif p[-1] == "1":
+                        extB = OpTensor(OpOne(), extB)
+                    else:
+                        raise Exception()
+                    p = p[:-1]
+
+                return Labelled1(
+                    OpApply(term.args[0].args[0], extB),
+                    term.args[0].args[1]
+                )
+    OPT_EXT_3 = TRSRule(
+        "OPT-EXT-3",
+        lhs = "(A[Q]) MLTOL (B[R]) (R is a subterm of Q at p)",
+        rhs = "(A MLTO ext(B, p))[Q]",
+        rewrite_method = opt_ext_3_rewrite
+    )
+    rules.append(OPT_EXT_3)
+
 
     # build the trs
     return TRS(rules)

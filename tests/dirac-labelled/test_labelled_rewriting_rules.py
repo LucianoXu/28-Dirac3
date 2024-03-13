@@ -270,3 +270,29 @@ def test_LABEL_LIFT_16():
         a = parse(r''' (A[R]) DOTL (B[R]) ''')
         b = parse(r''' A DOT B ''')
         assert label_trs.normalize(a) == label_trs.normalize(b)
+
+def test_OPT_EXT_1():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' A[R; R] ''')
+        b = parse(r''' A[R] ''')
+        assert label_trs.normalize(a) == label_trs.normalize(b)
+
+def test_OPT_EXT_2():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' (A[R]) MLTOL (B[PAIRR(R, Q)]) ''')
+        b = parse(r''' ((A TSRO 1O) MLTO B)[PAIRR(R, Q)] ''')
+        assert label_trs.normalize(a) == label_trs.normalize(b)
+
+        a = parse(r''' (A[SNDR(R)]) MLTOL (B[PAIRR(R, Q)]) ''')
+        b = parse(r''' (((1O TSRO A) TSRO 1O) MLTO B)[PAIRR(R, Q)] ''')
+        assert label_trs.normalize(a) == label_trs.normalize(b)
+
+def test_OPT_EXT_3():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' (B[PAIRR(R, Q)]) MLTOL (A[R]) ''')
+        b = parse(r''' (B MLTO (A TSRO 1O))[PAIRR(R, Q)] ''')
+        assert label_trs.normalize(a) == label_trs.normalize(b)
+
+        a = parse(r''' (B[PAIRR(R, Q)]) MLTOL (A[SNDR(R)])''')
+        b = parse(r''' (B MLTO ((1O TSRO A) TSRO 1O))[PAIRR(R, Q)] ''')
+        assert label_trs.normalize(a) == label_trs.normalize(b)
