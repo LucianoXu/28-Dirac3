@@ -474,6 +474,14 @@ def construct_trs(
     )
     rules.append(LABEL_LIFT_16)
 
+    LABEL_LIFT_17 = TRSRule(
+        "LABEL-LIFT-17",
+        lhs = parse(''' (K0[Q]) OUTER (B0[R]) '''),
+        rhs = parse(''' (K0 OUTER B0)[Q; R] ''')
+    )
+    rules.append(LABEL_LIFT_17)
+
+
     OPT_EXT_1 = TRSRule(
         "OPT-EXT-1",
         lhs = parse(''' A[R; R] '''),

@@ -320,6 +320,13 @@ def test_LABEL_LIFT_16():
         b = parse(r''' A DOT B ''')
         assert label_trs.normalize(a) == label_trs.normalize(b)
 
+def test_LABEL_LIFT_17():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' (K0[Q]) OUTER (B0[R]) ''')
+        b = parse(r''' (K0 OUTER B0)[Q; R] ''')
+        assert label_trs.normalize(a) == label_trs.normalize(b)
+
+
 def test_OPT_EXT_1():
     with wolfram_backend.wolfram_session():
         a = parse(r''' A[R; R] ''')
