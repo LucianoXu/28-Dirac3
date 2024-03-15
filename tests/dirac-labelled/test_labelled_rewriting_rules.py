@@ -309,6 +309,14 @@ def test_LABEL_LIFT_14():
 
 def test_LABEL_LIFT_15():
     with wolfram_backend.wolfram_session():
+        a = parse(r''' (A[R]) MLTK (B[R]) ''')
+        b = parse(r''' (A MLTK B)[R] ''')
+        assert label_trs.normalize(a) == label_trs.normalize(b)
+
+        a = parse(r''' (A[R]) MLTB (B[R]) ''')
+        b = parse(r''' (A MLTB B)[R] ''')
+        assert label_trs.normalize(a) == label_trs.normalize(b)
+
         a = parse(r''' (A[R]) MLTO (B[R]) ''')
         b = parse(r''' (A MLTO B)[R] ''')
         assert label_trs.normalize(a) == label_trs.normalize(b)
@@ -369,4 +377,28 @@ def test_LABEL_SUM_2():
     with wolfram_backend.wolfram_session():
         a = parse(r''' SUM(x, T, A)[Q; R] ''')
         b = parse(r''' SUM(x, T, A[Q; R]) ''')
+        assert label_trs.normalize(a) == label_trs.normalize(b)
+
+def test_LABEL_TEMP_1():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' A[R] MLTO (B[PAIRR(R, Q)] TSRL X) ''')
+        b = parse(r''' (A[R] MLTO B[PAIRR(R, Q)]) TSRL X ''')
+        assert label_trs.normalize(a) == label_trs.normalize(b)
+
+def test_LABEL_TEMP_2():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' (B[PAIRR(R, Q)] TSRL X) MLTO A[R] ''')
+        b = parse(r''' (B[PAIRR(R, Q)] MLTO A[R]) TSRL X ''')
+        assert label_trs.normalize(a) == label_trs.normalize(b)
+
+def test_LABEL_TEMP_3():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' A[R] DOT (B[R] TSRL X) ''')
+        b = parse(r''' (A[R] DOT B[R]) SCR X ''')
+        assert label_trs.normalize(a) == label_trs.normalize(b)
+
+def test_LABEL_TEMP_4():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' (A[R] TSRL X) DOT B[R] ''')
+        b = parse(r''' (A[R] DOT B[R]) SCR X ''')
         assert label_trs.normalize(a) == label_trs.normalize(b)
