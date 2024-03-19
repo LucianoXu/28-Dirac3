@@ -15,6 +15,7 @@ from ..backends import render_tex, render_tex_to_svg
 
 
 import itertools
+from itertools import combinations
 
 def new_var(vars: Container[str|Var], prefix: str = "x") -> Var:
     '''
@@ -612,7 +613,9 @@ class Matching:
     A matching problem in the TRS system.
     (No type check.)
 
-    Based on [Term Rewriting and All That] Sec.4.7
+    Based on [Term Rewriting and All That] Sec.4.7, and some enhancement about AC
+
+    [find a substitution sigma that sigma(lhs) = rhs]
     '''
     def __init__(self, ineqs : List[Tuple[Term, Term]]):
         self.ineqs = ineqs
@@ -629,13 +632,15 @@ class Matching:
         return res        
     
 
-    def solve(self) -> Subst | None:
-        return self.solve_matching(self.ineqs)
+    def solve(self) -> list[Subst]:
+        subst_res = []
+        self.solve_matching(tuple(self.ineqs), {}, subst_res)
+        return subst_res
 
     @staticmethod
-    def solve_matching(ineqs: List[Tuple[Term, Term]]) -> Subst | None:
+    def solve_matching(ineqs: Tuple[Tuple[Term, Term], ...], pre_subst: dict[Var, Term], subst_res: list[Subst]) -> None:
 
-        subst : dict[Var, Term] = {}
+        subst = pre_subst.copy()
 
         while len(ineqs) > 0:
             lhs, rhs = ineqs[0]
@@ -646,7 +651,7 @@ class Matching:
                         ineqs = ineqs[1:]
                         continue
                     else:
-                        return None
+                        return
                 else:
                     subst[lhs] = rhs
                     ineqs = ineqs[1:]
@@ -655,20 +660,53 @@ class Matching:
             # being function constructions
             elif isinstance(lhs, StdTerm):
                 if isinstance(rhs, Var):
-                    return None
+                    return
             
                 elif isinstance(rhs, StdTerm):
                     if lhs.fsymbol == rhs.fsymbol:
                         ineqs = ineqs[1:]
-                        for i in range(len(lhs.args)):
-                            ineqs.append((lhs.args[i], rhs.args[i]))
-                        continue
+                        # check different situations, possibly branch into different cases
+                        if isinstance(lhs, CommBinary):
+                            Matching.solve_matching(ineqs + ((lhs[0], rhs[0]), (lhs[1], rhs[1])), subst, subst_res)
+                            Matching.solve_matching(ineqs + ((lhs[0], rhs[1]), (lhs[1], rhs[0])), subst, subst_res)
+                            return
+
+                        if isinstance(rhs, AC):
+                            assert isinstance(lhs, AC)
+                            
+                            # get all possible bipartition of rhs.args
+                            bipartitions = []
+                            for i in range(1, len(rhs.args)):
+                                for comb in combinations(range(len(rhs.args)), i):
+                                    bipartitions.append(
+                                        (
+                                            type(rhs)(rhs.remained_terms(*comb)), 
+                                            type(rhs)(rhs.remained_terms(*tuple(i for i in range(len(rhs.args)) if i not in comb)))
+                                        )
+                                    )
+                            
+                            for bipartite in bipartitions:
+                                Matching.solve_matching(
+                                    ineqs + 
+                                    (
+                                        (lhs.args[0], type(rhs)(*bipartite[0])), 
+                                        (type(lhs)(*lhs.remained_terms(0)), type(rhs)(*bipartite[1]))
+                                    ), 
+                                    subst, subst_res
+                                )
+
+                            return
+
+                        else:
+                            for i in range(len(lhs.args)):
+                                ineqs = ineqs + ((lhs.args[i], rhs.args[i]),)
+                            continue
 
                     else:
-                        return None
+                        return
                     
                 else:
-                    return None
+                    return
                     
             # if there are terms outside the term rewriting system
             else:
@@ -676,14 +714,16 @@ class Matching:
                     ineqs = ineqs[1:]
                     continue
                 else:
-                    return None
+                    return
                     
-        return Subst(subst)
+        subst_res.append(Subst(subst))
 
 
     @staticmethod
-    def single_match(lhs : Term, rhs : Term) -> Subst | None:
-        return Matching.solve_matching([(lhs, rhs)])
+    def single_match(lhs : Term, rhs : Term) -> list[Subst]:
+        subst_res = []
+        Matching.solve_matching(((lhs, rhs),), {}, subst_res)
+        return subst_res
     
 ############################################################################
 # term rewriting rules
@@ -735,10 +775,10 @@ def canonical_rewrite(rule: CanonicalRule, trs : TRS, term : Term) -> Term | Non
         (The parameter [trs] is necessary to be consistent with customized rewriting methods.)
         '''
         subst = Matching.single_match(rule.lhs, term)
-        if subst is None:
+        if len(subst) == 0:
             return None
         else:
-            return subst(rule.rhs)
+            return subst[0](rule.rhs)
         
 class CanonicalRule(TRSRule):
     def __init__(self, 

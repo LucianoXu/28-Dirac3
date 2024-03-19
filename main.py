@@ -49,17 +49,9 @@ if __name__ == "__main__":
                     ADD ("-1" SCR ((ket1 TSRK ket1) OUTER (bra1 TSRB bra1)));
         }''')
 
-    sub = Subst({
-        Var("a") : Var("z"),
-    })
-    a = BindVarTerm(Var("a"), Var("a"))
-    assert sub(a) == a
+        a = parse(r''' DELTA(FST(u), FST(v)) MLTS DELTA(SND(u), SND(v)) MLTS "2" ''')
+        b = parse(r''' DELTA(u, v) MLTS "2" ''')
 
-    a = BindVarTerm(Var("b"), Var("a"))
-    b = BindVarTerm(Var("c"), Var("z"))
-    assert sub(a) == b
-
-
-    a = BindVarTerm(Var("z"), Var("a"))
-    b = BindVarTerm(Var("y"), Var("z"))
-    assert sub(a) == b
+        print(trs.normalize(a))
+        print(trs.normalize(b))
+        assert trs.normalize(a) == trs.normalize(b)

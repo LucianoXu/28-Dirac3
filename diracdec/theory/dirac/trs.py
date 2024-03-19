@@ -86,52 +86,28 @@ def construct_trs(
 
     #################################################
     # Delta
-    def delta_1_rewrite(rule, trs, term):
-        if isinstance(term, ScalarDelta):
-            if isinstance(term.args[0], BasePair):
-                return ScalarMlt(
-                    ScalarDelta(term.args[0].args[0], BaseFst(term.args[1])),
-                    ScalarDelta(term.args[0].args[1], BaseSnd(term.args[1]))
-                    )
-            if isinstance(term.args[1], BasePair):
-                return ScalarMlt(
-                    ScalarDelta(BaseFst(term.args[0]), term.args[1].args[0]),
-                    ScalarDelta(BaseSnd(term.args[0]), term.args[1].args[1])
-                    )
-    DELTA_1 = TRSRule(
+
+    DELTA_1 = CanonicalRule(
         "DELTA-1",
-        lhs = "DELTA(s, PAIR(t1, t2))",
-        rhs = "DELTA(FST(s), t1) MLTS DELTA(SND(s), t2)",
-        rewrite_method=delta_1_rewrite
+        lhs = parse("DELTA(s, PAIR(t1, t2))"),
+        rhs = parse("DELTA(FST(s), t1) MLTS DELTA(SND(s), t2)")
     )
     rules.append(DELTA_1)
 
 
-    def delta_2_rewrite(rule, trs, term):
-        if isinstance(term, ScalarMlt):
-            for i in range(len(term.args)):
-                if isinstance(term.args[i], ScalarDelta) \
-                    and isinstance(term.args[i].args[0], BaseFst) \
-                    and isinstance(term.args[i].args[1], BaseFst):
-                    for j in range(len(term.args)):
-                        if i == j:
-                            continue
-                        if isinstance(term.args[j], ScalarDelta) \
-                            and isinstance(term.args[j].args[0], BaseSnd) \
-                            and isinstance(term.args[j].args[1], BaseSnd) \
-                            and term.args[i].args[0].args[0] == term.args[j].args[0].args[0] \
-                            and term.args[i].args[1].args[0] == term.args[j].args[1].args[0]:
-
-                            deltauv = ScalarDelta(term.args[i].args[0].args[0], term.args[i].args[1].args[0])
-
-                            return ScalarMlt(deltauv, *term.remained_terms(i, j))
-    DELTA_2 = TRSRule(
+    DELTA_2 = CanonicalRule(
         "DELTA-2",
-        lhs = "DELTA(FST(s), FST(t)) MLTS DELTA(SND(s), SND(t))",
-        rhs = "DELTA(s, t)",
-        rewrite_method=delta_2_rewrite
+        lhs = parse("DELTA(FST(s), FST(t)) MLTS DELTA(SND(s), SND(t))"),
+        rhs = parse("DELTA(s, t)")
     )
     rules.append(DELTA_2)
+
+    DELTA_2_ext = CanonicalRule(
+        "DELTA-2-ext",
+        lhs = parse("DELTA(FST(s), FST(t)) MLTS DELTA(SND(s), SND(t)) MLTS X"),
+        rhs = parse("DELTA(s, t) MLTS X")
+    )
+    rules.append(DELTA_2_ext)
 
 
     #################################################

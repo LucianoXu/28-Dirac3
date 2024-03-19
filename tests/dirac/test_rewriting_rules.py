@@ -52,6 +52,10 @@ def test_DELTA_1():
         b = parse(r''' DELTA(FST(u), s) MLTS DELTA(SND(u), t) ''')
         assert trs.normalize(a) == trs.normalize(b)
 
+        a = parse(r''' DELTA(PAIR(s, t), u) ''')
+        b = parse(r''' DELTA(FST(u), s) MLTS DELTA(SND(u), t) ''')
+        assert trs.normalize(a) == trs.normalize(b)
+
 def test_DELTA_2():
     with wolfram_backend.wolfram_session():
         a = parse(r''' DELTA(FST(u), FST(v)) MLTS DELTA(SND(u), SND(v)) ''')
