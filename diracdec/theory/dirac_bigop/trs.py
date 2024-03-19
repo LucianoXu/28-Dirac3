@@ -442,7 +442,7 @@ def construct_trs(
     rules.append(SUM_DIST_10)
 
     def sum_comp_1_rewrite(rule, trs, term, side_info):
-        if isinstance(term, ScalarDot) and isinstance(term.args[0], SumS) or isinstance(term, (KetApply, BraApply, OpApply)) and isinstance(term.args[0], Sum):
+        if isinstance(term, (ScalarDot, KetApply, BraApply, OpApply)) and isinstance(term.args[0], Sum):
 
             # we have to rename if necessary
             if set(v[0].name for v in term.args[0].bind_vars) & term.args[1].free_variables() == set():
@@ -467,7 +467,7 @@ def construct_trs(
     rules.append(SUM_COMP_1)
 
     def sum_comp_2_rewrite(rule, trs, term, side_info):
-        if isinstance(term, ScalarDot) and isinstance(term.args[1], SumS) or isinstance(term, (KetApply, BraApply, OpApply)) and isinstance(term.args[1], Sum):
+        if isinstance(term, (ScalarDot, KetApply, BraApply, OpApply)) and isinstance(term.args[1], Sum):
 
             # we have to rename if necessary
             if set(v[0].name for v in term.args[1].bind_vars) & term.args[0].free_variables() == set():
