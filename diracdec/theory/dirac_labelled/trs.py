@@ -20,7 +20,7 @@ def construct_trs(
     This trs only deals with label related rewritings.
     '''
     
-    def parse(s: str) -> TRSTerm:
+    def parse(s: str) -> Term:
         return parser.parse(s)
 
 
@@ -644,7 +644,7 @@ def construct_trs(
         if isinstance(term, ScalarDotL) and isinstance(term.args[0], SumS) or isinstance(term, (KetApplyL, BraApplyL, OpApplyL)) and isinstance(term.args[0], Sum):
 
             # we have to rename if necessary
-            if set(v[0].name for v in term.args[0].bind_vars) & term.args[1].free_variables() == set():
+            if set(v[0].name for v in term.args[0].bind_vars) & term.args[1].variables() == set():
                 new_var = new_var_ls(term.args[0].variables() | term.args[1].variables(), len(term.args[0].bind_vars))
                 renamed_sum = term.args[0].rename_bind(tuple(v for v in new_var))
             else:
@@ -669,7 +669,7 @@ def construct_trs(
         if isinstance(term, ScalarDotL) and isinstance(term.args[1], SumS) or isinstance(term, (KetApplyL, BraApplyL, OpApplyL)) and isinstance(term.args[1], Sum):
 
             # we have to rename if necessary
-            if set(v[0].name for v in term.args[1].bind_vars) & term.args[0].free_variables() == set():
+            if set(v[0].name for v in term.args[1].bind_vars) & term.args[0].variables() == set():
                 new_var = new_var_ls(term.args[1].variables() | term.args[0].variables(), len(term.args[1].bind_vars))
                 renamed_sum = term.args[1].rename_bind(tuple(v for v in new_var))
             else:
@@ -695,7 +695,7 @@ def construct_trs(
     #     if isinstance(term, (KetTensorL, BraTensorL, OpOuterL, OpTensorL)) and isinstance(term.args[0], Sum):
 
     #         # we have to rename if necessary
-    #         if set(v[0].name for v in term.args[0].bind_vars) & term.args[1].free_variables() == set():
+    #         if set(v[0].name for v in term.args[0].bind_vars) & term.args[1].variables() == set():
     #             new_var = new_var_ls(term.args[0].variables() | term.args[1].variables(), len(term.args[0].bind_vars))
     #             renamed_sum = term.args[0].rename_bind(tuple(Var(v) for v in new_var))
     #         else:
@@ -717,7 +717,7 @@ def construct_trs(
     #     if isinstance(term, (KetTensorL, BraTensorL, OpOuterL, OpTensorL)) and isinstance(term.args[1], Sum):
 
     #         # we have to rename if necessary
-    #         if set(v[0].name for v in term.args[1].bind_vars) & term.args[0].free_variables() == set():
+    #         if set(v[0].name for v in term.args[1].bind_vars) & term.args[0].variables() == set():
     #             new_var = new_var_ls(term.args[1].variables() | term.args[0].variables(), len(term.args[1].bind_vars))
     #             renamed_sum = term.args[1].rename_bind(tuple(Var(v) for v in new_var))
     #         else:

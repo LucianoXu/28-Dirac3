@@ -14,7 +14,7 @@ def test_bind_alpha_conv():
 
 def test_bind_substitute():
     sub = Subst({
-        "a" : Var("z"),
+        Var("a") : Var("z"),
     })
     a = BindVarTerm(Var("a"), Var("a"))
     assert sub(a) == a

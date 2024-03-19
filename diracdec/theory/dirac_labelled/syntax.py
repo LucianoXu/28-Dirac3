@@ -9,9 +9,9 @@ from ..trs import BindVarTerm, MultiBindTerm, new_var, new_var_ls, seq_content_e
 
 import itertools
 
-class QReg(TRSTerm):
+class QReg(Term):
     @staticmethod
-    def normalize(A: TRSTerm) -> TRSTerm:
+    def normalize(A: Term) -> Term:
         '''
         Get the REG-normal form.
         '''
@@ -35,7 +35,7 @@ class QReg(TRSTerm):
 
 
     @staticmethod
-    def is_in(A: TRSTerm, B: TRSTerm) -> bool:
+    def is_in(A: Term, B: Term) -> bool:
         '''
         Check whether the qreg A is in the qreg B.
         For example, `FSTR(R)` is in `R`, and `SND(FST(R))` is in `FST(R)`.
@@ -66,7 +66,7 @@ class QReg(TRSTerm):
         return False
     
     @staticmethod
-    def is_disj(A: TRSTerm, B: TRSTerm) -> bool:
+    def is_disj(A: Term, B: Term) -> bool:
         '''
         Check whether the qreg A and B are disjoint
         '''
@@ -86,7 +86,7 @@ class QReg(TRSTerm):
     
 
     @staticmethod
-    def subreg_pos(A: TRSTerm, B: TRSTerm) -> Optional[str]:
+    def subreg_pos(A: Term, B: Term) -> Optional[str]:
         '''
         Check whether the qreg A is a sub-reg of B.
         If A is a sub-reg of B, then return the sub-reg position.
@@ -137,7 +137,7 @@ class QRegPair(QReg, StdTerm):
     fsymbol_print = "PAIRR"
     fsymbol = "PAIRR"
 
-    def __init__(self, left: TRSTerm, right: TRSTerm):
+    def __init__(self, left: Term, right: Term):
         super().__init__(left, right)
 
     def __str__(self) -> str:
@@ -153,7 +153,7 @@ class QRegFst(DiracBase, StdTerm):
     fsymbol_print = "fstR"
     fsymbol = "FSTR"
 
-    def __init__(self, p: TRSTerm):
+    def __init__(self, p: Term):
         super().__init__(p)
 
     def tex(self) -> str:
@@ -163,7 +163,7 @@ class QRegSnd(DiracBase, StdTerm):
     fsymbol_print = "sndR"
     fsymbol = "SNDR"
 
-    def __init__(self, p: TRSTerm):
+    def __init__(self, p: Term):
         super().__init__(p)
 
     def tex(self) -> str:
@@ -173,7 +173,7 @@ class QRegSnd(DiracBase, StdTerm):
 #######################################################
 # QRegSet: this part will not go into parsing
 
-class QRegSet(TRSTerm):
+class QRegSet(Term):
     ...
 
 
@@ -194,7 +194,7 @@ class RegRSet(QRegSet, StdTerm):
     fsymbol_print = "SETR"
     fsymbol = "SETR"
 
-    def __init__(self, qreg : TRSTerm):
+    def __init__(self, qreg : Term):
         super().__init__(qreg)
 
     def __str__(self) -> str:
@@ -203,18 +203,18 @@ class RegRSet(QRegSet, StdTerm):
     def tex(self) -> str:
         return r" \{ " + self.args[0].tex() + r" \}"
 
-class UnionRSet(QRegSet, TRS_AC):
+class UnionRSet(QRegSet, AC):
     fsymbol_print = "∪"
     fsymbol = "UNIONR"
 
-    def __init__(self, *tup : TRSTerm):
-        TRS_AC.__init__(self, *tup)
+    def __init__(self, *tup : Term):
+        AC.__init__(self, *tup)
 
 
     def tex(self) -> str:
         return "( " + " \\cup ".join([s.tex() for s in self.args]) + " )"
     
-class SubRSet(QRegSet, TRSInfixBinary):
+class SubRSet(QRegSet, InfixBinary):
     fsymbol_print = "\\"
     fsymbol = "SUBR"
 
@@ -229,21 +229,21 @@ class ScalarDotL(DiracScalar, StdTerm):
     fsymbol_print = "·"
     fsymbol = "DOTL"
 
-    def __init__(self, B: TRSTerm, K: TRSTerm):
+    def __init__(self, B: Term, K: Term):
         super().__init__(B, K)
 
     def tex(self) -> str:
         
         return rf" ({self.args[0].tex()} \cdot {self.args[1].tex()})"
 
-class LDiracNotation(TRSTerm):
+class LDiracNotation(Term):
     ...
 
 class Labelled1(LDiracNotation, StdTerm):
     fsymbol_print = "LABELLED1"
     fsymbol = "LABELLED1"
 
-    def __init__(self, dirac: TRSTerm, label: TRSTerm):
+    def __init__(self, dirac: Term, label: Term):
         super().__init__(dirac, label)
 
     def __str__(self) -> str:
@@ -256,7 +256,7 @@ class Labelled2(LDiracNotation, StdTerm):
     fsymbol_print = "LABELLED2"
     fsymbol = "LABELLED2"
 
-    def __init__(self, dirac: TRSTerm, labelL: TRSTerm, labelR: TRSTerm):
+    def __init__(self, dirac: Term, labelL: Term, labelR: Term):
         super().__init__(dirac, labelL, labelR)
 
     def __str__(self) -> str:
@@ -269,7 +269,7 @@ class AdjL(LDiracNotation, StdTerm):
     fsymbol_print = "ADJL"
     fsymbol = "ADJL"
 
-    def __init__(self, X: TRSTerm):
+    def __init__(self, X: Term):
         super().__init__(X)
 
     def __str__(self) -> str:
@@ -278,91 +278,91 @@ class AdjL(LDiracNotation, StdTerm):
     def tex(self) -> str:
         return rf" {self.args[0].tex()}^\dagger"
 
-class ScalL(LDiracNotation, TRSInfixBinary):
+class ScalL(LDiracNotation, InfixBinary):
     fsymbol_print = "."
     fsymbol = "SCRL"
 
-    def __init__(self, S: TRSTerm, X: TRSTerm):
-        TRSInfixBinary.__init__(self, S, X)
+    def __init__(self, S: Term, X: Term):
+        InfixBinary.__init__(self, S, X)
 
     def tex(self) -> str:
         return rf" {self.args[0].tex()} {self.args[1].tex()}"
     
-class AddL(LDiracNotation, TRS_AC):
+class AddL(LDiracNotation, AC):
     fsymbol_print = '+'
     fsymbol = 'ADDL'
 
-    def __init__(self, *tup : TRSTerm):
-        TRS_AC.__init__(self, *tup)
+    def __init__(self, *tup : Term):
+        AC.__init__(self, *tup)
 
-class KetApplyL(LDiracNotation, TRSInfixBinary):
+class KetApplyL(LDiracNotation, InfixBinary):
     fsymbol_print = "·"
     fsymbol = "MLTKL"
 
-    def __init__(self, O: TRSTerm, K: TRSTerm) :
-        TRSInfixBinary.__init__(self, O, K)
+    def __init__(self, O: Term, K: Term) :
+        InfixBinary.__init__(self, O, K)
 
     def tex(self) -> str:
         return rf" {self.args[0].tex()} \cdot {self.args[1].tex()}"
 
-class KetTensorL(LDiracNotation, TRS_AC):
+class KetTensorL(LDiracNotation, AC):
     fsymbol_print = "⊗"
     fsymbol = "TSRKL"
 
-    def __init__(self, K1: TRSTerm, K2: TRSTerm) :
-        TRS_AC.__init__(self, K1, K2)
+    def __init__(self, K1: Term, K2: Term) :
+        AC.__init__(self, K1, K2)
 
     def tex(self) -> str:
         return r" \left ( " + " \\otimes ".join([s.tex() for s in self.args]) + r" \right )"
     
 
-class BraApplyL(LDiracNotation, TRSInfixBinary):
+class BraApplyL(LDiracNotation, InfixBinary):
     fsymbol_print = "·"
     fsymbol = "MLTBL"
 
-    def __init__(self, B: TRSTerm, O: TRSTerm) :
-        TRSInfixBinary.__init__(self, B, O)
+    def __init__(self, B: Term, O: Term) :
+        InfixBinary.__init__(self, B, O)
 
     def tex(self) -> str:
         return rf" {self.args[0].tex()} \cdot {self.args[1].tex()}"
 
-class BraTensorL(LDiracNotation, TRS_AC):
+class BraTensorL(LDiracNotation, AC):
     fsymbol_print = "⊗"
     fsymbol = "TSRBL"
 
-    def __init__(self, B1: TRSTerm, B2: TRSTerm) :
-        TRS_AC.__init__(self, B1, B2)
+    def __init__(self, B1: Term, B2: Term) :
+        AC.__init__(self, B1, B2)
 
     def tex(self) -> str:
         return r" \left ( " + " \\otimes ".join([s.tex() for s in self.args]) + r" \right )"
     
 
-class OpOuterL(LDiracNotation, TRSInfixBinary):
+class OpOuterL(LDiracNotation, InfixBinary):
     fsymbol_print = "⊗"
     fsymbol = "OUTERL"
 
-    def __init__(self, K: TRSTerm, B: TRSTerm) :
-        TRSInfixBinary.__init__(self, K, B)
+    def __init__(self, K: Term, B: Term) :
+        InfixBinary.__init__(self, K, B)
 
     def tex(self) -> str:
         return rf" {self.args[0].tex()} \otimes {self.args[1].tex()}"
 
-class OpApplyL(LDiracNotation, TRSInfixBinary):
+class OpApplyL(LDiracNotation, InfixBinary):
     fsymbol_print = "·"
     fsymbol = "MLTOL"
 
-    def __init__(self, O1: TRSTerm, O2: TRSTerm) :
-        TRSInfixBinary.__init__(self, O1, O2)
+    def __init__(self, O1: Term, O2: Term) :
+        InfixBinary.__init__(self, O1, O2)
 
     def tex(self) -> str:
         return rf" {self.args[0].tex()} \cdot {self.args[1].tex()}"
 
-class OpTensorL(LDiracNotation, TRS_AC):
+class OpTensorL(LDiracNotation, AC):
     fsymbol_print = "⊗"
     fsymbol = "TSROL"
 
-    def __init__(self, O1: TRSTerm, O2: TRSTerm) :
-        TRS_AC.__init__(self, O1, O2)
+    def __init__(self, O1: Term, O2: Term) :
+        AC.__init__(self, O1, O2)
 
     def tex(self) -> str:
         return r" \left ( " + " \\otimes ".join([s.tex() for s in self.args]) + r" \right )"

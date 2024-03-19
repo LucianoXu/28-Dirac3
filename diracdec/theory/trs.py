@@ -4,7 +4,7 @@ The architecture of the term rewriting system
 
 from __future__ import annotations
 import sys
-from typing import Callable, TextIO, Tuple, Any, Dict, List, Sequence, Container
+from typing import Callable, Set, TextIO, Tuple, Any, Dict, List, Sequence, Container
 
 from abc import ABC, abstractmethod
 
@@ -52,7 +52,7 @@ def seq_content_eq(ls1: Sequence, ls2: Sequence) -> bool:
                 return False
         return True
 
-class TRSTerm(ABC):
+class Term(ABC):
     '''
     The abstract class for all terms in the term rewriting system.
     '''
@@ -78,7 +78,7 @@ class TRSTerm(ABC):
         pass
 
     @abstractmethod
-    def __eq__(self, __value: TRSTerm) -> bool:
+    def __eq__(self, __value: Term) -> bool:
         '''
         This method calculates the equivalence in pure syntactic level.
         '''
@@ -88,20 +88,16 @@ class TRSTerm(ABC):
     def size(self) -> int:
         pass
 
-    # TODO merge into one?
     @abstractmethod
     def variables(self) -> set[Var]:
         pass
-
-    def free_variables(self) -> set[Var]:
-        return self.variables()
 
     @property
     def is_ground(self) -> bool:
         return len(self.variables()) == 0
 
     @abstractmethod
-    def substitute(self, sigma : Subst) -> TRSTerm:
+    def subst(self, sigma : Subst | dict[Var, Term]) -> Term:
         pass
 
 
@@ -120,7 +116,7 @@ class TRSTerm(ABC):
         return render_tex_to_svg(self.tex(), filename)
         
 
-class Var(TRSTerm):
+class Var(Term):
     fsymbol_print = "var"
     fsymbol = "VAR"
 
@@ -156,14 +152,16 @@ class Var(TRSTerm):
     def variables(self) -> set[Var]:
         return {self}
     
-    def substitute(self, sigma: Subst) -> TRSTerm:
+    def subst(self, sigma: Subst | dict[Var, Term]) -> Term:
+        if isinstance(sigma, Subst):
+            sigma = sigma.data
         return self if self.name not in sigma else sigma[self.name]
 
-class StdTerm(TRSTerm):
+class StdTerm(Term):
     fsymbol_print = 'std'
     fsymbol = 'STD'
 
-    def __init__(self, *args: TRSTerm):
+    def __init__(self, *args: Term):
         self.args = args
 
     def __str__(self) -> str:
@@ -183,13 +181,13 @@ class StdTerm(TRSTerm):
     def __repr__(self) -> str:
         return f'{self.fsymbol}({", ".join(map(repr, self.args))})'
 
-    def __eq__(self, other: TRSTerm) -> bool:
+    def __eq__(self, other: Term) -> bool:
         if self is other:
             return True
         
         return isinstance(other, type(self)) and self.args == other.args
     
-    def __getitem__(self, index) -> TRSTerm:
+    def __getitem__(self, index) -> Term:
         return self.args[index]
     
     def size(self) -> int:
@@ -207,21 +205,21 @@ class StdTerm(TRSTerm):
             res |= arg.variables()
         return res
     
-    def substitute(self, sigma : Subst) -> TRSTerm:
+    def subst(self, sigma : Subst | dict[Var, Term]) -> Term:
         
         new_args = tuple(
-            arg.substitute(sigma) for arg in self.args
+            arg.subst(sigma) for arg in self.args
         )
         return type(self)(*new_args)
 
-class BindVarTerm(TRSTerm):
+class BindVarTerm(Term):
     fsymbol_print = 'bind'
     fsymbol = 'BIND'
 
     '''
-    The TRSTerm with a bind variable
+    The Term with a bind variable
     '''
-    def __init__(self, bind_var: Var, body: TRSTerm):
+    def __init__(self, bind_var: Var, body: Term):
         self.bind_var = bind_var
         self.body = body
 
@@ -242,7 +240,7 @@ class BindVarTerm(TRSTerm):
     def tex(self) -> str:
         return rf" \left ({self.fsymbol_print}\ {self.bind_var.tex()}.{self.body.tex()} \right )"
     
-    def __eq__(self, __value: TRSTerm) -> bool:
+    def __eq__(self, __value: Term) -> bool:
         '''
         alpha-conversion is considered in the syntactical equivalence of bind variable expressions
         '''
@@ -253,7 +251,7 @@ class BindVarTerm(TRSTerm):
             if self.bind_var == __value.bind_var:
                 return self.body == __value.body
             else:
-                new_v = new_var(self.variables() | __value.variables())
+                new_v = new_var(self.variables() | __value.variables() | {self.bind_var, __value.bind_var})
                 return self.rename_bind(new_v) == __value.rename_bind(new_v)
         
         else:
@@ -262,48 +260,53 @@ class BindVarTerm(TRSTerm):
     def size(self) -> int:
         return self.body.size() + 2
     
-    def variables(self) -> set[Var]:
-        return self.body.variables() | {self.bind_var}
     
-    def free_variables(self) -> set[Var]:
+    def variables(self) -> set[Var]:
         res = self.body.variables()
         res.discard(self.bind_var)
         return res
-    
-    @property
-    def is_ground(self) -> bool:
-        return len(self.free_variables()) == 0
 
 
     def rename_bind(self, new_v: Var) -> BindVarTerm:
         '''
         rename the bind variable to a new one.
         '''
-        return type(self)(new_v, self.body.substitute(Subst({self.bind_var: new_v})))
+        assert new_v != self.bind_var
+        return type(self)(new_v, self.body.subst({self.bind_var: new_v}))
     
-    def substitute(self, sigma: Subst) -> BindVarTerm:
+    def avoid_vars(self, var_set: set[Var]) -> BindVarTerm:
+        '''
+        return the bind variable term which avoids bind variables in var_set
+        '''
+        if self.bind_var in var_set:
+            new_bind_var = new_var(var_set | self.variables())
+            return self.rename_bind(new_bind_var)
+        
+        else:
+            return self
+    
+    def subst(self, sigma: Subst | dict[Var, Term]) -> BindVarTerm:
         '''
         check whether the bind variable appears in sigma.
         change the bind variable if so.
         '''
+        if isinstance(sigma, dict):
+            sigma = Subst(sigma)
+
         vset = sigma.domain | sigma.vrange
-        if self.bind_var not in vset:
-            return type(self)(self.bind_var, self.body.substitute(sigma))
-        else:
-            new_v = new_var(vset)
-            new_sigma = sigma.composite(Subst({self.bind_var : new_v}))
-            return type(self)(new_v, self.body.substitute(new_sigma))
+        avoided_term = self.avoid_vars(vset)
+        return type(avoided_term)(avoided_term.bind_var, avoided_term.body.subst(sigma))
         
 
-class MultiBindTerm(TRSTerm):
+class MultiBindTerm(Term):
     fsymbol_print = 'multi-bind'
     fsymbol = 'MULBIND'
 
     '''
-    The TRSTerm with multiple bind variable 
+    The Term with multiple bind variable 
     (different bind variable order are equivalent)
     '''
-    def __new__(cls, bind_vars: Tuple[Var, ...], body: TRSTerm):
+    def __new__(cls, bind_vars: Tuple[Var, ...], body: Term):
         if len(bind_vars) == 0:
             return body
         else:
@@ -311,7 +314,7 @@ class MultiBindTerm(TRSTerm):
             MultiBindTerm.__init__(obj, bind_vars, body)
             return obj
 
-    def __init__(self, bind_vars: Tuple[Var, ...], body: TRSTerm):
+    def __init__(self, bind_vars: Tuple[Var, ...], body: Term):
         # try to flatten
         if isinstance(body, type(self)):
             bind_vars = bind_vars + body.bind_vars
@@ -331,7 +334,7 @@ class MultiBindTerm(TRSTerm):
         var_tex = '\\ '.join(map(lambda x: x.tex(), self.bind_vars))
         return rf" \left ({self.fsymbol_print}\ {var_tex}.{self.body.tex()} \right )"
     
-    def __eq__(self, __value: TRSTerm) -> bool:
+    def __eq__(self, __value: Term) -> bool:
         '''
         alpha-conversion is considered in the syntactical equivalence of bind variable expressions
         '''
@@ -343,13 +346,13 @@ class MultiBindTerm(TRSTerm):
                 return False
             
             # first find common bind variable renaming list
-            new_vars = new_var_ls(self.variables() | __value.variables(), len(self.bind_vars))
+            new_vars = new_var_ls(self.variables() | __value.variables() | set(self.bind_vars) | set(__value.bind_vars), len(self.bind_vars))
 
             self_renamed = self.rename_bind(tuple(v for v in new_vars))
 
             # try different bind variable sequences
             for perm in itertools.permutations(new_vars):
-                other_renamed = __value.rename_bind(tuple(v for v in perm))
+                other_renamed = __value.rename_bind(tuple(perm))
                 if self_renamed.body == other_renamed.body:
                     return True
                 
@@ -362,56 +365,50 @@ class MultiBindTerm(TRSTerm):
     def size(self) -> int:
         return self.body.size() + len(self.bind_vars) + 1
     
-    def variables(self) -> set[Var]:
-        return self.body.variables() | set(self.bind_vars)
     
-    def free_variables(self) -> set[Var]:
+    def variables(self) -> set[Var]:
         res = self.body.variables()
         return res - set(self.bind_vars)
-    
-    @property
-    def is_ground(self) -> bool:
-        return len(self.free_variables()) == 0
 
 
     def rename_bind(self, new_vars: Tuple[Var, ...]) -> MultiBindTerm:
         '''
         rename the bind variables in order
         '''
+        assert set(self.bind_vars) & set(new_vars) == set()
+
         sub_dist = {}
         for i, new_v in enumerate(new_vars):
             sub_dist[self.bind_vars[i].name] = new_v
 
-        return type(self)(new_vars, self.body.substitute(Subst(sub_dist)))
+        return type(self)(new_vars, self.body.subst(Subst(sub_dist)))
     
-    def substitute(self, sigma: Subst) -> MultiBindTerm:
+    def avoid_vars(self, var_set: set[Var]) -> MultiBindTerm:
+        '''
+        return the bind variable term which avoids bind variables in var_set
+        '''
+        if set(self.bind_vars) in var_set:
+            new_bind_var_ls = new_var_ls(var_set | self.variables(), len(self.bind_vars))
+            return self.rename_bind(new_bind_var_ls)
+        
+        else:
+            return self
+
+    def subst(self, sigma: Subst) -> MultiBindTerm:
         '''
         check whether the bind variable appears in sigma.
         change the bind variable if so.
         '''
         vset = sigma.domain | sigma.vrange
-        bind_vars_set = set(self.bind_vars)
-        if len(bind_vars_set & vset) == 0:
-            return type(self)(self.bind_vars, self.body.substitute(sigma))
-        else:
-            new_vars = new_var_ls(vset, len(self.bind_vars))
+        avoided_term = self.avoid_vars(vset)
+        return type(self)(avoided_term.bind_vars, avoided_term.body.subst(sigma))
 
-            new_vars = tuple(v for v in new_vars)
-
-            sub_dist = {}
-            for i, new_v in enumerate(new_vars):
-                sub_dist[self.bind_vars[i]] = new_v
-
-            new_sigma = sigma.composite(Subst(sub_dist))
-            return type(self)(new_vars, self.body.substitute(new_sigma))
-            
-            
 
 ##################################################################
 # other specified terms (Commutative, AC, infix binary, ...)
     
-class TRSInfixBinary(StdTerm):
-    def __init__(self, L : TRSTerm, R : TRSTerm):
+class InfixBinary(StdTerm):
+    def __init__(self, L : Term, R : Term):
         super().__init__(L, R)
 
     def __str__(self) -> str:
@@ -422,10 +419,10 @@ class TRSInfixBinary(StdTerm):
     def __repr__(self) -> str:
         return f'({repr(self.args[0])} {self.fsymbol} {repr(self.args[1])})'
     
-    def substitute(self, sigma: Subst) -> TRSTerm:
-        return super().substitute(sigma)
+    def subst(self, sigma: Subst) -> Term:
+        return super().subst(sigma)
     
-class TRSCommBinary(StdTerm):
+class CommBinary(StdTerm):
     '''
     (not infix)
     '''
@@ -444,10 +441,10 @@ class TRSCommBinary(StdTerm):
     def __repr__(self) -> str:
         return f'{self.fsymbol}({repr(self.args[0])}, {repr(self.args[1])})'
     
-    def substitute(self, sigma: Subst) -> TRSTerm:
-        return super().substitute(sigma)
+    def subst(self, sigma: Subst) -> Term:
+        return super().subst(sigma)
 
-class TRS_AC(StdTerm):
+class AC(StdTerm):
 
     def __new__(cls, *tup: Any):
         '''
@@ -459,7 +456,7 @@ class TRS_AC(StdTerm):
             return tup[0]
         else:
             obj = object.__new__(cls)
-            TRS_AC.__init__(obj, *tup)
+            AC.__init__(obj, *tup)
             return obj
         
     def __init__(self, *tup: Any):
@@ -503,8 +500,8 @@ class TRS_AC(StdTerm):
     def tex(self) -> str:
         return rf' \left ({f" {self.fsymbol_print} ".join(map(lambda x: x.tex(), self.args))} \right )'
     
-    def substitute(self, sigma: Subst) -> TRSTerm:
-        return type(self)(*tuple(arg.substitute(sigma) for arg in self.args))
+    def subst(self, sigma: Subst) -> Term:
+        return type(self)(*tuple(arg.subst(sigma) for arg in self.args))
     
     def remained_terms(self, *idx: int):
         '''
@@ -516,20 +513,20 @@ class TRS_AC(StdTerm):
 # universal algebra methods
 
 class Subst:
-    def __init__(self, data : Dict[Var, TRSTerm]):
+    def __init__(self, data : dict[Var, Term]):
         self.data = data.copy()
 
 
-    def __call__(self, term : TRSTerm) -> TRSTerm:
+    def __call__(self, term : Term) -> Term:
         '''
         Apply the substitution on a term. Return the result.
         '''
-        return term.substitute(self)
+        return term.subst(self)
     
     def __contains__(self, idx) -> bool:
         return idx in self.data
 
-    def __getitem__(self, idx) -> TRSTerm:
+    def __getitem__(self, idx) -> Term:
         return self.data[idx]
     
     def __str__(self):
@@ -539,12 +536,15 @@ class Subst:
             blocks.append(' ')
         return str(FrameBlock(VSeqBlock(*blocks, h_align='l')))
     
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Subst | dict[Var, Term]) -> bool:
         if self is other:
             return True
         
         if isinstance(other, Subst):
             return self.data == other.data
+        
+        elif isinstance(other, dict):
+            return self.data == other
         
         else:
             return False
@@ -556,10 +556,6 @@ class Subst:
     @property
     def domain(self) -> set[Var]:
         return set(self.data.keys())
-
-    @property
-    def range(self) -> set[TRSTerm]:
-        return set(self.data.values())
     
     @property
     def vrange(self) -> set[Var]:
@@ -571,15 +567,18 @@ class Subst:
             res |= rhs.variables()
         return res
     
-    def composite(self, other : Subst) -> Subst:
+    def composite(self, other : Subst | dict[Var, Term]) -> Subst:
         '''
         return the composition `self(other)`.
         The `other` substitution is applied first.
         '''
+        if not isinstance(other, Subst):
+            other = Subst(other)
+
         new_data = {}
 
         for var in other.domain:
-            new_data[var] = other[var].substitute(self)
+            new_data[var] = other[var].subst(self)
 
         for var in self.domain - other.domain:
             new_data[var] = self[var]
@@ -615,7 +614,7 @@ class Matching:
 
     Based on [Term Rewriting and All That] Sec.4.7
     '''
-    def __init__(self, ineqs : List[Tuple[TRSTerm, TRSTerm]]):
+    def __init__(self, ineqs : List[Tuple[Term, Term]]):
         self.ineqs = ineqs
 
     def __str__(self) -> str:
@@ -634,9 +633,9 @@ class Matching:
         return self.solve_matching(self.ineqs)
 
     @staticmethod
-    def solve_matching(ineqs: List[Tuple[TRSTerm, TRSTerm]]) -> Subst | None:
+    def solve_matching(ineqs: List[Tuple[Term, Term]]) -> Subst | None:
 
-        subst : Dict[Var, TRSTerm] = {}
+        subst : dict[Var, Term] = {}
 
         while len(ineqs) > 0:
             lhs, rhs = ineqs[0]
@@ -683,7 +682,7 @@ class Matching:
 
 
     @staticmethod
-    def single_match(lhs : TRSTerm, rhs : TRSTerm) -> Subst | None:
+    def single_match(lhs : Term, rhs : Term) -> Subst | None:
         return Matching.solve_matching([(lhs, rhs)])
     
 ############################################################################
@@ -692,12 +691,12 @@ class Matching:
 # for common rules we use normal matching, and for rules with equational theories, we write specified matching algorithms.
 # this is a good balance of generality and efficiency.
     
-def check_special_symbol(term : TRSTerm) -> bool:
+def check_special_symbol(term : Term) -> bool:
     '''
-    iteratively check whether there are subterms of TRS_AC or TRS_CommBinary.
+    iteratively check whether there are subterms of AC or TRS_CommBinary.
     return True if there are.
     '''
-    if isinstance(term, TRS_AC) or isinstance(term, TRSCommBinary):
+    if isinstance(term, AC) or isinstance(term, CommBinary):
         return True
     else:
         if isinstance(term, Var):
@@ -711,7 +710,7 @@ def check_special_symbol(term : TRSTerm) -> bool:
             return False
 
 
-def normal_rewrite(self, trs: TRS, term : TRSTerm, side_info : dict[str, Any]) -> TRSTerm | None:
+def normal_rewrite(self, trs: TRS, term : Term, side_info : dict[str, Any]) -> Term | None:
         '''
         The rewrite method for normal rules.
 
@@ -726,9 +725,9 @@ def normal_rewrite(self, trs: TRS, term : TRSTerm, side_info : dict[str, Any]) -
 class TRSRule:
     def __init__(self, 
                  rule_name:str,
-                 lhs: TRSTerm|str, 
-                 rhs: TRSTerm|str,
-                 rewrite_method : Callable[[TRSRule, TRS, TRSTerm, Dict[str, Any]], TRSTerm|None] = normal_rewrite,
+                 lhs: Term|str, 
+                 rhs: Term|str,
+                 rewrite_method : Callable[[TRSRule, TRS, Term, dict[str, Any]], Term|None] = normal_rewrite,
                  rule_repr: str|None = None):
         '''
         note: the rewrite_method checks whether the current rule can rewrite the given term (not including subterms)
@@ -783,7 +782,7 @@ class TRS:
         '''
         res = set()
         for rule in self.rules:
-            if isinstance(rule.lhs, TRSTerm) and isinstance(rule.rhs, TRSTerm):
+            if isinstance(rule.lhs, Term) and isinstance(rule.rhs, Term):
                 res |= rule.lhs.variables() | rule.rhs.variables()
         return res
     
@@ -798,25 +797,25 @@ class TRS:
             res += repr(rule) + "\n"
         return res
     
-    def substitute(self, sigma : Subst) -> TRS:
+    def subst(self, sigma : Subst) -> TRS:
         '''
         Apply the substitution on the TRS. Return the result.
         '''
         new_rules = []
         for rule in self.rules:
-            new_lhs = rule.lhs.substitute(sigma) if isinstance(rule.lhs, TRSTerm) else rule.lhs
-            new_rhs = rule.rhs.substitute(sigma) if isinstance(rule.rhs, TRSTerm) else rule.rhs
+            new_lhs = rule.lhs.subst(sigma) if isinstance(rule.lhs, Term) else rule.lhs
+            new_rhs = rule.rhs.subst(sigma) if isinstance(rule.rhs, Term) else rule.rhs
             new_rules.append(TRSRule(rule.rule_name, new_lhs, new_rhs, rule.rewrite_method, rule.rule_repr))
 
         return TRS(new_rules)
 
     def normalize(self, 
-            term : TRSTerm, 
+            term : Term, 
             side_info : dict[str, Any] = {},
             verbose: bool = False, 
             stream: TextIO = sys.stdout,
             step_limit : int | None = None,
-            alg: str = "inner_most") -> TRSTerm:
+            alg: str = "inner_most") -> Term:
 
         # check the variable conincidence
         overlap = term.variables() & self.variables()
@@ -828,7 +827,7 @@ class TRS:
             for var in overlap:
                 subst[var] = new_var(overlap|set(subst.keys()), var.name)
             
-            renamed_trs = self.substitute(Subst(subst))
+            renamed_trs = self.subst(Subst(subst))
 
         else:
             renamed_trs = self
@@ -877,7 +876,7 @@ class TRS:
             
     
 
-    def rewrite_outer_most(self, term : TRSTerm, side_info: dict[str, Any], verbose:bool = False, stream: TextIO = sys.stdout) -> TRSTerm | None:
+    def rewrite_outer_most(self, term : Term, side_info: dict[str, Any], verbose:bool = False, stream: TextIO = sys.stdout) -> Term | None:
         '''
         rewrite the term using the rules. Return the result.
         return None when no rewriting is applicable
@@ -922,7 +921,7 @@ class TRS:
         return None
     
 
-    def rewrite_inner_most(self, term : TRSTerm, side_info: dict[str, Any], verbose:bool = False, stream:TextIO = sys.stdout) -> TRSTerm | None:
+    def rewrite_inner_most(self, term : Term, side_info: dict[str, Any], verbose:bool = False, stream:TextIO = sys.stdout) -> Term | None:
         '''
         rewrite the term using the rules. Return the result.
         return None when no rewriting is applicable

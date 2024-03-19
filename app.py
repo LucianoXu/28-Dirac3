@@ -94,7 +94,7 @@ def calculate():
 
     termA = None
     try:
-        termA = parse(termA_code).substitute(sub_idempotent)
+        termA = parse(termA_code).subst(sub_idempotent)
         norm_termA = wolU(trs.normalize(juxt(trs.normalize(termA, verbose=True, stream=proofA_stream))))
         norm_termA_text = str(norm_termA)
 
@@ -108,7 +108,7 @@ def calculate():
 
     termB = None
     try:
-        termB = parse(termB_code).substitute(sub_idempotent)
+        termB = parse(termB_code).subst(sub_idempotent)
         norm_termB = wolU(trs.normalize(juxt(trs.normalize(termB, verbose=True, stream=proofB_stream))))
         norm_termB_text = str(norm_termB)
     

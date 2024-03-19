@@ -6,11 +6,11 @@ from __future__ import annotations
 
 from typing import Any
 
-from .trs import TRSTerm
+from .trs import Term
 
 from abc import abstractmethod
 
-class AtomicBase(TRSTerm):
+class AtomicBase(Term):
     '''
     The interface for an implementation of the atomic base
     '''

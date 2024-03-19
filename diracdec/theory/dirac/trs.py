@@ -20,7 +20,7 @@ def construct_trs(
         ABase: Type[AtomicBase], 
         parser: yacc.LRParser) -> TRS:
     
-    def parse(s: str) -> TRSTerm:
+    def parse(s: str) -> Term:
         return parser.parse(s)
 
 

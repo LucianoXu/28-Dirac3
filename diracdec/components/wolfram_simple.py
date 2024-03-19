@@ -5,12 +5,12 @@ The implementation for complex scalar system by wolfram expressions
 from __future__ import annotations
 from typing import Any
 
-from diracdec.theory.trs import Subst, TRSTerm
+from diracdec.theory.trs import Subst, Term
 
 from ..theory.atomic_base import AtomicBase
 from ..theory.complex_scalar import ComplexScalar
 
-from ..theory import TRSTerm, Var, Subst
+from ..theory import Term, Var, Subst
 
 from ..backends.wolfram_backend import *
 
@@ -81,7 +81,10 @@ class WolframABase(AtomicBase):
             res = session.evaluate(wl.FindInstance(wl.Equal(self.simp_expr, other.simp_expr), vars))
             return res != ()
         
-    def substitute(self, sigma: Subst) -> TRSTerm:
+    def subst(self, sigma: Subst | dict[Var, Term]) -> Term:
+
+        if not isinstance(sigma, Subst):
+            sigma = Subst(sigma)
 
         # create the substitution in Wolfram Language
         wolfram_sub = []
@@ -160,7 +163,11 @@ class WolframCScalar(ComplexScalar):
                    if isinstance(v, WLSymbol)
                    )
 
-    def substitute(self, sigma: Subst) -> TRSTerm:
+    def subst(self, sigma: Subst | dict[Var, Term]) -> Term:
+
+        if not isinstance(sigma, Subst):
+            sigma = Subst(sigma)
+
         # create the substitution in Wolfram Language
         wolfram_sub = []
         for k, v in sigma.data.items():

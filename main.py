@@ -8,6 +8,8 @@
 from diracdec import *
 from diracdec import parse as parse, dirac_bigop_delta_trs as trs, label_trs
 
+from diracdec.theory.trs import BindVarTerm
+
 trs = trs + label_trs
 
 
@@ -46,21 +48,18 @@ if __name__ == "__main__":
                     ADD ((ket1 TSRK ket0) OUTER (bra1 TSRB bra0))
                     ADD ("-1" SCR ((ket1 TSRK ket1) OUTER (bra1 TSRB bra1)));
         }''')
-        a = parse(''' 
-(KET(a) OUTER BRA(b)) MLTO (KET(c) OUTER BRA(d))            ''')
-        b = parse(''' 
-                (
-                    (SUM(i, KET(i) OUTER BRA(i))[T]) MLTOL (TP(A)[T])
-                ) 
-                MLTKL 
-                (
-                    SUM(i, KET(PAIR(i, i))[PAIRR(S, T)])
-                ) 
-            ''')
-        
 
-        print(trs.normalize(a, verbose=True))
-        print(trs.normalize(b))
-        print(repr(trs.normalize(a)))
-        # print(trs.normalize(b))
+    sub = Subst({
+        Var("a") : Var("z"),
+    })
+    a = BindVarTerm(Var("a"), Var("a"))
+    assert sub(a) == a
 
+    a = BindVarTerm(Var("b"), Var("a"))
+    b = BindVarTerm(Var("c"), Var("z"))
+    assert sub(a) == b
+
+
+    a = BindVarTerm(Var("z"), Var("a"))
+    b = BindVarTerm(Var("y"), Var("z"))
+    assert sub(a) == b

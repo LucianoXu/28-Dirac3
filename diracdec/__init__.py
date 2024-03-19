@@ -10,7 +10,7 @@ try:
     from . import backends, components, theory
 
     
-    from .theory import TRSTerm, Var, Subst
+    from .theory import Term, Var, Subst
 
     from .factory import parse
 

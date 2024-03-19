@@ -1,7 +1,7 @@
 
 from __future__ import annotations
 
-from ..trs import TRSTerm, Var, StdTerm, TRS_AC, TRSCommBinary, TRSInfixBinary, Subst
+from ..trs import Term, Var, StdTerm, AC, CommBinary, InfixBinary, Subst
 
 from ...backends.formprint import *
 
@@ -19,7 +19,7 @@ class BasePair(DiracBase, StdTerm):
     fsymbol_print = "pair"
     fsymbol = "PAIR"
     
-    def __init__(self, left: TRSTerm, right: TRSTerm):
+    def __init__(self, left: Term, right: Term):
         super().__init__(left, right)
     
     def __str__(self) -> str:
@@ -36,7 +36,7 @@ class BaseFst(DiracBase, StdTerm):
     fsymbol_print = "fst"
     fsymbol = "FST"
 
-    def __init__(self, p: TRSTerm):
+    def __init__(self, p: Term):
         super().__init__(p)
 
     def tex(self) -> str:
@@ -46,7 +46,7 @@ class BaseSnd(DiracBase, StdTerm):
     fsymbol_print = "snd"
     fsymbol = "SND"
 
-    def __init__(self, p: TRSTerm):
+    def __init__(self, p: Term):
         super().__init__(p)
 
     def tex(self) -> str:
@@ -60,31 +60,31 @@ class DiracScalar(DiracSyntax):
     ...
 
 
-class ScalarDelta(DiracScalar, TRSCommBinary):
+class ScalarDelta(DiracScalar, CommBinary):
     fsymbol_print = "δ"
     fsymbol = "DELTA"
 
-    def __init__(self, b1 : TRSTerm, b2 : TRSTerm):
-        TRSCommBinary.__init__(self, b1, b2)
+    def __init__(self, b1 : Term, b2 : Term):
+        CommBinary.__init__(self, b1, b2)
 
     def tex(self) -> str:
         return rf" \delta_{{{self.args[0].tex()}, {self.args[1].tex()}}}"
 
 
-class ScalarAdd(DiracScalar, TRS_AC):
+class ScalarAdd(DiracScalar, AC):
     fsymbol_print = '+'
     fsymbol = 'ADDS'
 
-    def __init__(self, *tup : TRSTerm):
-        TRS_AC.__init__(self, *tup)
+    def __init__(self, *tup : Term):
+        AC.__init__(self, *tup)
 
     
-class ScalarMlt(DiracScalar, TRS_AC):
+class ScalarMlt(DiracScalar, AC):
     fsymbol_print = '×'
     fsymbol = 'MLTS'
 
-    def __init__(self, *tup : TRSTerm):
-        TRS_AC.__init__(self, *tup)
+    def __init__(self, *tup : Term):
+        AC.__init__(self, *tup)
 
     def tex(self) -> str:
         return "( " + " \\times ".join([s.tex() for s in self.args]) + " )"
@@ -93,7 +93,7 @@ class ScalarConj(DiracScalar, StdTerm):
     fsymbol_print = "CONJS"
     fsymbol = "CONJS"
 
-    def __init__(self, s: TRSTerm):
+    def __init__(self, s: Term):
         super().__init__(s)
 
     def __str__(self) -> str:
@@ -103,11 +103,11 @@ class ScalarConj(DiracScalar, StdTerm):
         return f" {self.args[0].tex()}^*"
     
     
-class ScalarDot(DiracScalar, TRSInfixBinary):
+class ScalarDot(DiracScalar, InfixBinary):
     fsymbol_print = "·"
     fsymbol = "DOT"
 
-    def __init__(self, B: TRSTerm, K: TRSTerm):
+    def __init__(self, B: Term, K: Term):
         super().__init__(B, K)
 
     def tex(self) -> str:
@@ -142,7 +142,7 @@ class Adj(DiracNotation, StdTerm):
     fsymbol_print = "ADJ"
     fsymbol = "ADJ"
 
-    def __init__(self, X: TRSTerm):
+    def __init__(self, X: Term):
         super().__init__(X)
 
     def __str__(self) -> str:
@@ -152,23 +152,23 @@ class Adj(DiracNotation, StdTerm):
         return rf" {self.args[0].tex()}^\dagger"
     
 
-class Scal(DiracNotation, TRSInfixBinary):
+class Scal(DiracNotation, InfixBinary):
     fsymbol_print = "."
     fsymbol = "SCR"
 
-    def __init__(self, S: TRSTerm, X: TRSTerm):
-        TRSInfixBinary.__init__(self, S, X)
+    def __init__(self, S: Term, X: Term):
+        InfixBinary.__init__(self, S, X)
 
     def tex(self) -> str:
         return rf" {self.args[0].tex()} {self.args[1].tex()}"
 
     
-class Add(DiracNotation, TRS_AC):
+class Add(DiracNotation, AC):
     fsymbol_print = '+'
     fsymbol = 'ADD'
 
-    def __init__(self, *tup : TRSTerm):
-        TRS_AC.__init__(self, *tup)
+    def __init__(self, *tup : Term):
+        AC.__init__(self, *tup)
     
         
 ############################################
@@ -178,7 +178,7 @@ class KetBase(DiracNotation, StdTerm):
     fsymbol_print = "ket"
     fsymbol = "KET"
 
-    def __init__(self, b : TRSTerm):
+    def __init__(self, b : Term):
         super().__init__(b)
     
     def __str__(self) -> str:
@@ -188,12 +188,12 @@ class KetBase(DiracNotation, StdTerm):
         return rf" |{self.args[0].tex()} \rangle"
     
     
-class KetApply(DiracNotation, TRSInfixBinary):
+class KetApply(DiracNotation, InfixBinary):
     fsymbol_print = "·"
     fsymbol = "MLTK"
 
-    def __init__(self, O: TRSTerm, K: TRSTerm) :
-        TRSInfixBinary.__init__(self, O, K)
+    def __init__(self, O: Term, K: Term) :
+        InfixBinary.__init__(self, O, K)
 
     def tex(self) -> str:
         if isinstance(self.args[1], KetBase):
@@ -202,12 +202,12 @@ class KetApply(DiracNotation, TRSInfixBinary):
             return rf" {self.args[0].tex()} \cdot {self.args[1].tex()}"
 
 
-class KetTensor(DiracNotation, TRSInfixBinary):
+class KetTensor(DiracNotation, InfixBinary):
     fsymbol_print = "⊗"
     fsymbol = "TSRK"
 
-    def __init__(self, K1: TRSTerm, K2: TRSTerm) :
-        TRSInfixBinary.__init__(self, K1, K2)
+    def __init__(self, K1: Term, K2: Term) :
+        InfixBinary.__init__(self, K1, K2)
 
     def tex(self) -> str:
         return rf" \left ({self.args[0].tex()} \otimes {self.args[1].tex()} \right)"
@@ -220,7 +220,7 @@ class BraBase(DiracNotation, StdTerm):
     fsymbol_print = "bra"
     fsymbol = "BRA"
 
-    def __init__(self, b : TRSTerm):
+    def __init__(self, b : Term):
         super().__init__(b)
     
     def __str__(self) -> str:
@@ -230,12 +230,12 @@ class BraBase(DiracNotation, StdTerm):
         return rf" \langle {self.args[0].tex()} |"
     
 
-class BraApply(DiracNotation, TRSInfixBinary):
+class BraApply(DiracNotation, InfixBinary):
     fsymbol_print = "·"
     fsymbol = "MLTB"
 
-    def __init__(self, B: TRSTerm, O: TRSTerm) :
-        TRSInfixBinary.__init__(self, B, O)
+    def __init__(self, B: Term, O: Term) :
+        InfixBinary.__init__(self, B, O)
 
     def tex(self) -> str:
         if isinstance(self.args[0], BraBase):
@@ -244,12 +244,12 @@ class BraApply(DiracNotation, TRSInfixBinary):
             return rf" {self.args[0].tex()} \cdot {self.args[1].tex()}"
 
     
-class BraTensor(DiracNotation, TRSInfixBinary):
+class BraTensor(DiracNotation, InfixBinary):
     fsymbol_print = "⊗"
     fsymbol = "TSRB"
 
-    def __init__(self, B1: TRSTerm, B2: TRSTerm) :
-        TRSInfixBinary.__init__(self, B1, B2)
+    def __init__(self, B1: Term, B2: Term) :
+        InfixBinary.__init__(self, B1, B2)
 
     def tex(self) -> str:
         return rf" \left ( {self.args[0].tex()} \otimes {self.args[1].tex()} \right )"
@@ -275,12 +275,12 @@ class OpOne(DiracNotation, StdTerm):
         return r" \mathbf{1}"
     
     
-class OpOuter(DiracNotation, TRSInfixBinary):
+class OpOuter(DiracNotation, InfixBinary):
     fsymbol_print = "⊗"
     fsymbol = "OUTER"
 
-    def __init__(self, K: TRSTerm, B: TRSTerm):
-        TRSInfixBinary.__init__(self, K, B)
+    def __init__(self, K: Term, B: Term):
+        InfixBinary.__init__(self, K, B)
 
     def tex(self) -> str:
         if isinstance(self.args[0], KetBase) and isinstance(self.args[1], BraBase):
@@ -289,23 +289,23 @@ class OpOuter(DiracNotation, TRSInfixBinary):
         return rf" {self.args[0].tex()} \otimes {self.args[1].tex()}"
 
     
-class OpApply(DiracNotation, TRSInfixBinary):
+class OpApply(DiracNotation, InfixBinary):
     fsymbol_print = "·"
     fsymbol = "MLTO"
 
-    def __init__(self, O1: TRSTerm, O2: TRSTerm) :
-        TRSInfixBinary.__init__(self, O1, O2)
+    def __init__(self, O1: Term, O2: Term) :
+        InfixBinary.__init__(self, O1, O2)
 
     def tex(self) -> str:
         return rf" {self.args[0].tex()} \cdot {self.args[1].tex()}"
 
 
-class OpTensor(DiracNotation, TRSInfixBinary):
+class OpTensor(DiracNotation, InfixBinary):
     fsymbol_print = "⊗"
     fsymbol = "TSRO"
 
-    def __init__(self, O1: TRSTerm, O2: TRSTerm) :
-        TRSInfixBinary.__init__(self, O1, O2)
+    def __init__(self, O1: Term, O2: Term) :
+        InfixBinary.__init__(self, O1, O2)
 
     def tex(self) -> str:
         return rf" \left ( {self.args[0].tex()} \otimes {self.args[1].tex()} \right ) "

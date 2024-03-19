@@ -6,11 +6,11 @@ Defining the interfaces of a complex scalar system.
 from __future__ import annotations
 
 
-from .trs import TRSTerm
+from .trs import Term
 
 from abc import abstractmethod
 
-class ComplexScalar(TRSTerm):
+class ComplexScalar(Term):
     @staticmethod
     @abstractmethod
     def zero() -> ComplexScalar:
@@ -23,17 +23,17 @@ class ComplexScalar(TRSTerm):
 
     @staticmethod
     @abstractmethod
-    def conj(c : TRSTerm) -> ComplexScalar:
+    def conj(c : Term) -> ComplexScalar:
         pass
 
     @staticmethod
     @abstractmethod
-    def add(c1 : TRSTerm, c2 : TRSTerm) -> ComplexScalar:
+    def add(c1 : Term, c2 : Term) -> ComplexScalar:
         pass
 
     @staticmethod
     @abstractmethod
-    def mlt(c1 : TRSTerm, c2 : TRSTerm) -> ComplexScalar:
+    def mlt(c1 : Term, c2 : Term) -> ComplexScalar:
         pass
 
 

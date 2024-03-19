@@ -13,7 +13,7 @@ class Transpose(DiracNotation, StdTerm):
     fsymbol_print = "TP"
     fsymbol = "TP"
 
-    def __init__(self, X : TRSTerm):
+    def __init__(self, X : Term):
         super().__init__(X)
 
     def __str__(self) -> str:
@@ -37,7 +37,7 @@ class Apply(StdTerm):
     fsymbol_print = "apply"
     fsymbol = "APPLY"
 
-    def __init__(self, f: TRSTerm, x: TRSTerm):
+    def __init__(self, f: Term, x: Term):
         super().__init__(f, x)
 
     def __str__(self) -> str:
@@ -51,7 +51,7 @@ class Apply(StdTerm):
 ###################################################################
 # syntax for set
 
-class SetTerm(TRSTerm):
+class SetTerm(Term):
     ...
 
 class EmptySet(SetTerm, StdTerm):
@@ -80,12 +80,12 @@ class UniversalSet(SetTerm, StdTerm):
     def tex(self) -> str:
         return r" \mathbf{U}"
 
-class UnionSet(SetTerm, TRS_AC):
+class UnionSet(SetTerm, AC):
     fsymbol_print = "∪"
     fsymbol = "UNION"
 
-    def __init__(self, *tup : TRSTerm):
-        TRS_AC.__init__(self, *tup)
+    def __init__(self, *tup : Term):
+        AC.__init__(self, *tup)
 
 
     def tex(self) -> str:
@@ -96,7 +96,7 @@ class SumTemplate(MultiBindTerm):
     fsymbol_print = 'SumTemplate'
     fsymbol = 'SumTemplate'
 
-    def __new__(cls, bind_vars: Tuple[Tuple[Var, TRSTerm], ...], body: TRSTerm):
+    def __new__(cls, bind_vars: Tuple[Tuple[Var, Term], ...], body: Term):
         if len(bind_vars) == 0:
             return body
         else:
@@ -104,7 +104,7 @@ class SumTemplate(MultiBindTerm):
             SumTemplate.__init__(obj, bind_vars, body)
             return obj
 
-    def __init__(self, bind_vars: Tuple[Tuple[Var, TRSTerm], ...], body: TRSTerm):
+    def __init__(self, bind_vars: Tuple[Tuple[Var, Term], ...], body: Term):
         # try to flatten
         if isinstance(body, type(self)):
             bind_vars = bind_vars + body.bind_vars
@@ -122,7 +122,7 @@ class SumTemplate(MultiBindTerm):
     def tex(self) -> str:
         raise NotImplementedError()
     
-    def __eq__(self, __value: TRSTerm) -> bool:
+    def __eq__(self, __value: Term) -> bool:
         '''
         alpha-conversion is considered in the syntactical equivalence of bind variable expressions
         '''
@@ -159,13 +159,6 @@ class SumTemplate(MultiBindTerm):
         bind_vars = set()
         for v, t in self.bind_vars:
             bind_vars.add(v.name)
-            bind_vars |= t.variables()
-        return self.body.variables() | bind_vars
-    
-    def free_variables(self) -> set[Var]:
-        bind_vars = set()
-        for v, t in self.bind_vars:
-            bind_vars.add(v.name)
 
         set_vars = set()
         for v, t in self.bind_vars:
@@ -175,7 +168,7 @@ class SumTemplate(MultiBindTerm):
     
     @property
     def is_ground(self) -> bool:
-        return len(self.free_variables()) == 0
+        return len(self.variables()) == 0
 
 
     def rename_bind(self, new_vars: Tuple[Var, ...]) -> SumTemplate:
@@ -186,21 +179,26 @@ class SumTemplate(MultiBindTerm):
         for i, new_v in enumerate(new_vars):
             sub_dist[self.bind_vars[i][0]] = new_v
 
-        new_vars_with_set = tuple(zip(new_vars, [t.substitute(Subst(sub_dist)) for v, t in self.bind_vars]))
+        new_vars_with_set = tuple(zip(new_vars, [t.subst(Subst(sub_dist)) for v, t in self.bind_vars]))
 
-        return type(self)(new_vars_with_set, self.body.substitute(Subst(sub_dist)))
+        return type(self)(new_vars_with_set, self.body.subst(Subst(sub_dist)))
     
-    def substitute(self, sigma: Subst) -> SumTemplate:
+    def subst(self, sigma: Subst | dict[Var, Term]) -> SumTemplate:
         '''
         check whether the bind variable appears in sigma.
         change the bind variable if so.
         '''
+
+        if not isinstance(sigma, Subst):
+            sigma = Subst(sigma)
+
+
         vset = sigma.domain | sigma.vrange
         bind_vars_set = set(map(lambda x:x[0], self.bind_vars))
         
         if len(bind_vars_set & vset) == 0:
-            new_vars_with_set = tuple([(v, t.substitute(sigma)) for v, t in self.bind_vars])
-            return type(self)(new_vars_with_set, self.body.substitute(sigma))
+            new_vars_with_set = tuple([(v, t.subst(sigma)) for v, t in self.bind_vars])
+            return type(self)(new_vars_with_set, self.body.subst(sigma))
         else:
             new_vars = new_var_ls(vset, len(self.bind_vars))
 
@@ -208,10 +206,10 @@ class SumTemplate(MultiBindTerm):
             for i, new_v in enumerate(new_vars):
                 sub_dist[self.bind_vars[i][0]] = new_v
 
-            new_vars_with_set = tuple([(new_vars[i], self.bind_vars[i][1].substitute(sigma)) for i in range(len(new_vars))])
+            new_vars_with_set = tuple([(new_vars[i], self.bind_vars[i][1].subst(sigma)) for i in range(len(new_vars))])
 
             new_sigma = sigma.composite(Subst(sub_dist))
-            return type(self)(new_vars_with_set, self.body.substitute(new_sigma))
+            return type(self)(new_vars_with_set, self.body.subst(new_sigma))
             
 
 class SumS(DiracNotation, SumTemplate):
@@ -251,14 +249,14 @@ class Sum(DiracNotation, SumTemplate):
 #####################################
 # section-2 syntax
     
-class Juxtapose(DiracScalar, TRSCommBinary):
+class Juxtapose(DiracScalar, CommBinary):
     '''
     Note: this rule is only for internal representation, and should not be used in the user interface or parsing
     '''
     fsymbol_print = "JUXT"
     fsymbol = "JUXT"
 
-    def __init__(self, A: TRSTerm, B: TRSTerm):
+    def __init__(self, A: Term, B: Term):
         super().__init__(A, B)
 
     def __str__(self) -> str:
