@@ -36,7 +36,7 @@ def construct_trs(
     #################################################
     # reducing basis and complex scalars
 
-    def atomic_base_rewrite(rule, trs, term, side_info):
+    def atomic_base_rewrite(rule, trs, term):
         if isinstance(term, ABase):
             return term.reduce()
     ATOMIC_BASE = TRSRule(
@@ -48,7 +48,7 @@ def construct_trs(
     )
     rules.append(ATOMIC_BASE)
 
-    def complex_scalar_rewrite(rule, trs, term, side_info):
+    def complex_scalar_rewrite(rule, trs, term):
         if isinstance(term, CScalar):
             return term.reduce()
     COMPLEX_SCALAR = TRSRule(
@@ -63,21 +63,21 @@ def construct_trs(
 
     #################################################
     # Base
-    BASIS_1 = TRSRule(
+    BASIS_1 = CanonicalRule(
         "BASIS-1",
         lhs = parse("FST(PAIR(s, t))"),
         rhs = parse("s")
     )
     rules.append(BASIS_1)
 
-    BASIS_2 = TRSRule(
+    BASIS_2 = CanonicalRule(
         "BASIS-2",
         lhs = parse("SND(PAIR(s, t))"),
         rhs = parse("t")
     )
     rules.append(BASIS_2)
 
-    BASIS_3 = TRSRule(
+    BASIS_3 = CanonicalRule(
         "BASIS-3",
         lhs = parse("PAIR(FST(s), SND(s))"),
         rhs = parse("s")
@@ -86,7 +86,7 @@ def construct_trs(
 
     #################################################
     # Delta
-    def delta_1_rewrite(rule, trs, term, side_info):
+    def delta_1_rewrite(rule, trs, term):
         if isinstance(term, ScalarDelta):
             if isinstance(term.args[0], BasePair):
                 return ScalarMlt(
@@ -107,7 +107,7 @@ def construct_trs(
     rules.append(DELTA_1)
 
 
-    def delta_2_rewrite(rule, trs, term, side_info):
+    def delta_2_rewrite(rule, trs, term):
         if isinstance(term, ScalarMlt):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], ScalarDelta) \
@@ -137,7 +137,7 @@ def construct_trs(
     #################################################
     # Scalar
 
-    def scr_cop_1_rewrite(rule, trs, term, side_info):
+    def scr_cop_1_rewrite(rule, trs, term):
         if isinstance(term, ScalarAdd):
             for i in range(len(term.args)):
                 if term.args[i] == C0:
@@ -152,7 +152,7 @@ def construct_trs(
     rules.append(SCR_COP_1)
 
 
-    def scr_cop_2_rewrite(rule, trs, term, side_info):
+    def scr_cop_2_rewrite(rule, trs, term):
         if isinstance(term, ScalarAdd):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], ComplexScalar):
@@ -171,7 +171,7 @@ def construct_trs(
     )
     rules.append(SCR_COP_2)
 
-    def scr_cop_3_rewrite(rule, trs, term, side_info):
+    def scr_cop_3_rewrite(rule, trs, term):
         if isinstance(term, ScalarAdd):
             for i in range(len(term.args)):
                 for j in range(i+1, len(term.args)):
@@ -187,7 +187,7 @@ def construct_trs(
     )
     rules.append(SCR_COP_3)
 
-    def scr_cop_4_rewrite(rule, trs, term, side_info):
+    def scr_cop_4_rewrite(rule, trs, term):
         if isinstance(term, ScalarAdd):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], ScalarMlt):
@@ -208,7 +208,7 @@ def construct_trs(
     )
     rules.append(SCR_COP_4)
 
-    def scr_cop_5_rewrite(rule, trs, term, side_info):
+    def scr_cop_5_rewrite(rule, trs, term):
         if isinstance(term, ScalarAdd):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], ScalarMlt):
@@ -233,7 +233,7 @@ def construct_trs(
     )
     rules.append(SCR_COP_5)
 
-    def scr_cop_6_rewrite(rule, trs, term, side_info):
+    def scr_cop_6_rewrite(rule, trs, term):
         if isinstance(term, ScalarMlt):
             for i in range(len(term.args)):
                 if term.args[i] == C0:
@@ -247,7 +247,7 @@ def construct_trs(
     )
     rules.append(SCR_COP_6)
 
-    def scr_cop_7_rewrite(rule, trs, term, side_info):
+    def scr_cop_7_rewrite(rule, trs, term):
         if isinstance(term, ScalarMlt):
             for i in range(len(term.args)):
                 if term.args[i] == C1:
@@ -261,7 +261,7 @@ def construct_trs(
     rules.append(SCR_COP_7)
 
 
-    def scr_cop_8_rewrite(rule, trs, term, side_info):
+    def scr_cop_8_rewrite(rule, trs, term):
         if isinstance(term, ScalarMlt):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], ComplexScalar):
@@ -280,7 +280,7 @@ def construct_trs(
     )
     rules.append(SCR_COP_8)
 
-    def scr_cop_9_rewrite(rule, trs, term, side_info):
+    def scr_cop_9_rewrite(rule, trs, term):
         if isinstance(term, ScalarMlt):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], ScalarAdd):
@@ -296,7 +296,7 @@ def construct_trs(
     rules.append(SCR_COP_9)
 
 
-    def scr_cop_10_rewrite(rule, trs, term, side_info):
+    def scr_cop_10_rewrite(rule, trs, term):
         if isinstance(term, ScalarConj):
             if isinstance(term.args[0], ComplexScalar):
                 return CScalar.conj(term.args[0])
@@ -309,7 +309,7 @@ def construct_trs(
     rules.append(SCR_COP_10)
         
 
-    def scr_cop_11_rewrite(rule, trs, term, side_info):
+    def scr_cop_11_rewrite(rule, trs, term):
         if isinstance(term, ScalarConj):
             if isinstance(term.args[0], ScalarDelta):
                 return term.args[0]
@@ -323,7 +323,7 @@ def construct_trs(
     rules.append(SCR_COP_11)
 
 
-    def scr_cop_12_rewrite(rule, trs, term, side_info):
+    def scr_cop_12_rewrite(rule, trs, term):
         if isinstance(term, ScalarConj):
             if isinstance(term.args[0], ScalarAdd):
                 new_args = tuple(ScalarConj(arg) for arg in term.args[0].args)
@@ -337,7 +337,7 @@ def construct_trs(
     rules.append(SCR_COP_12)
 
 
-    def scr_cop_13_rewrite(rule, trs, term, side_info):
+    def scr_cop_13_rewrite(rule, trs, term):
         if isinstance(term, ScalarConj):
             if isinstance(term.args[0], ScalarMlt):
                 new_args = tuple(ScalarConj(arg) for arg in term.args[0].args)
@@ -351,14 +351,14 @@ def construct_trs(
     rules.append(SCR_COP_13)
 
 
-    SCR_COP_14 = TRSRule(
+    SCR_COP_14 = CanonicalRule(
         "SCR-COP-14",
         lhs=parse(r''' CONJS(CONJS(a)) '''), 
         rhs=parse(r''' a ''')
     )
     rules.append(SCR_COP_14)
 
-    SCR_COP_15 = TRSRule(
+    SCR_COP_15 = CanonicalRule(
         "SCR-COP-15",
         lhs = parse(r''' CONJS(B0 DOT K0) '''),
         rhs = parse(r''' ADJ(K0) DOT ADJ(B0) ''')
@@ -366,7 +366,7 @@ def construct_trs(
     rules.append(SCR_COP_15)
 
 
-    SCR_DOT_1 = TRSRule(
+    SCR_DOT_1 = CanonicalRule(
         "SCR-DOT-1",
         lhs = parse(r''' 0X DOT K0 '''),
         rhs = parse(r''' "0" '''),
@@ -374,7 +374,7 @@ def construct_trs(
     )
     rules.append(SCR_DOT_1)
 
-    SCR_DOT_2 = TRSRule(
+    SCR_DOT_2 = CanonicalRule(
         "SCR-DOT-2",
         lhs = parse(r''' B0 DOT 0X '''),
         rhs = parse(r''' "0" '''),
@@ -382,7 +382,7 @@ def construct_trs(
     )
     rules.append(SCR_DOT_2)
 
-    SCR_DOT_3 = TRSRule(
+    SCR_DOT_3 = CanonicalRule(
         "SCR-DOT-3",
         lhs = parse(r'''(S0 SCR B0) DOT K0'''),
         rhs = parse(r'''S0 MLTS (B0 DOT K0)''')
@@ -390,14 +390,14 @@ def construct_trs(
     rules.append(SCR_DOT_3)
 
 
-    SCR_DOT_4 = TRSRule(
+    SCR_DOT_4 = CanonicalRule(
         "SCR-DOT-4",
         lhs = parse(r'''B0 DOT (S0 SCR K0)'''),
         rhs = parse(r'''S0 MLTS (B0 DOT K0)''')
     )
     rules.append(SCR_DOT_4)
 
-    def scr_dot_5_rewrite(rule, trs, term, side_info):
+    def scr_dot_5_rewrite(rule, trs, term):
         if isinstance(term, ScalarDot):
             if isinstance(term.args[0], Add):
                 new_args = tuple(ScalarDot(arg, term.args[1]) for arg in term.args[0].args)
@@ -410,7 +410,7 @@ def construct_trs(
     )
     rules.append(SCR_DOT_5)
 
-    def scr_dot_6_rewrite(rule, trs, term, side_info):
+    def scr_dot_6_rewrite(rule, trs, term):
         if isinstance(term, ScalarDot):
             if isinstance(term.args[1], Add):
                 new_args = tuple(ScalarDot(term.args[0], arg) for arg in term.args[1].args)
@@ -424,7 +424,7 @@ def construct_trs(
     rules.append(SCR_DOT_6)
 
 
-    SCR_DOT_7 = TRSRule(
+    SCR_DOT_7 = CanonicalRule(
         "SCR-DOT-7",
         lhs = parse(r''' BRA(s) DOT KET(t) '''),
         rhs = parse(r''' DELTA(s, t) ''')
@@ -432,7 +432,7 @@ def construct_trs(
     rules.append(SCR_DOT_7)
 
 
-    SCR_DOT_8 = TRSRule(
+    SCR_DOT_8 = CanonicalRule(
         "SCR-DOT-8",
         lhs = parse(r'''(B1 TSRB B2) DOT KET(t)'''),
         rhs = parse(r'''(B1 DOT KET(FST(t))) MLTS (B2 DOT KET(SND(t)))''')
@@ -440,7 +440,7 @@ def construct_trs(
     rules.append(SCR_DOT_8)
 
             
-    SCR_DOT_9 = TRSRule(
+    SCR_DOT_9 = CanonicalRule(
         "SCR-DOT-9",
         lhs = parse(r'''BRA(s) DOT (K1 TSRK K2)'''),
         rhs = parse(r'''(BRA(FST(s)) DOT K1) MLTS (BRA(SND(s)) DOT K2)''')
@@ -448,28 +448,28 @@ def construct_trs(
     rules.append(SCR_DOT_9)
 
             
-    SCR_DOT_10 = TRSRule(
+    SCR_DOT_10 = CanonicalRule(
         "SCR-DOT-10",
         lhs = parse(r'''(B1 TSRB B2) DOT (K1 TSRK K2)'''),
         rhs = parse(r'''(B1 DOT K1) MLTS (B2 DOT K2)'''),
     )
     rules.append(SCR_DOT_10)
 
-    SCR_SORT_1 = TRSRule(
+    SCR_SORT_1 = CanonicalRule(
         "SCR-SORT-1",
         lhs = parse(r''' (B0 MLTB O0) DOT K0 '''),
         rhs = parse(r''' B0 DOT (O0 MLTK K0) ''')
     )
     rules.append(SCR_SORT_1)
 
-    SCR_SORT_2 = TRSRule(
+    SCR_SORT_2 = CanonicalRule(
         "SCR-SORT-2",
         lhs = parse(r''' BRA(s) DOT ((O1 TSRO O2) MLTK K0) '''),
         rhs = parse(r''' ((BRA(FST(s)) MLTB O1) TSRB (BRA(SND(s)) MLTB O2)) DOT K0 ''')
     )
     rules.append(SCR_SORT_2)
 
-    SCR_SORT_3 = TRSRule(
+    SCR_SORT_3 = CanonicalRule(
         "SCR-SORT-3",
         lhs = parse(r''' (B1 TSRB B2) DOT ((O1 TSRO O2) MLTK K0) '''),
         rhs = parse(r''' ((B1 MLTB O1) TSRB (B2 MLTB O2)) DOT K0''')
@@ -480,21 +480,21 @@ def construct_trs(
     #######################################
     # unified symbols
 
-    ADJ_UNI_1 = TRSRule(
+    ADJ_UNI_1 = CanonicalRule(
         "ADJ-UNI-1",
         lhs = parse(r'''ADJ(0X)'''),
         rhs = parse(r'''0X''')
     )
     rules.append(ADJ_UNI_1)
 
-    ADJ_UNI_2 = TRSRule(
+    ADJ_UNI_2 = CanonicalRule(
         "ADJ-UNI-2",
         lhs = parse(r'''ADJ(ADJ(X0))'''),
         rhs = parse(r'''X0''')
     )
     rules.append(ADJ_UNI_2)
 
-    ADJ_UNI_3 = TRSRule(
+    ADJ_UNI_3 = CanonicalRule(
         "ADJ-UNI-3",
         lhs = parse(r'''ADJ(S0 SCR X0)'''),
         rhs = parse(r'''CONJS(S0) SCR ADJ(X0)'''),
@@ -502,7 +502,7 @@ def construct_trs(
     rules.append(ADJ_UNI_3)
 
     
-    def adj_uni_4_rewrite(rule, trs, term, side_info):
+    def adj_uni_4_rewrite(rule, trs, term):
         if isinstance(term, Adj):
             if isinstance(term.args[0], Add):
                 new_args = tuple(Adj(arg) for arg in term.args[0].args)
@@ -516,42 +516,42 @@ def construct_trs(
     rules.append(ADJ_UNI_4)
 
 
-    ADJ_KET_1 = TRSRule(
+    ADJ_KET_1 = CanonicalRule(
         "ADJ-KET-1",
         lhs = parse(r'''ADJ(BRA(s))'''),
         rhs = parse(r'''KET(s)''')
     )
     rules.append(ADJ_KET_1)
 
-    ADJ_KET_2 = TRSRule(
+    ADJ_KET_2 = CanonicalRule(
         "ADJ-KET-2",
         lhs = parse(r'''ADJ(B0 MLTB O0)'''),
         rhs = parse(r'''ADJ(O0) MLTK ADJ(B0)''')
     )
     rules.append(ADJ_KET_2)
 
-    ADJ_KET_3 = TRSRule(
+    ADJ_KET_3 = CanonicalRule(
         "ADJ-KET-3",
         lhs = parse(r''' ADJ(B1 TSRB B2) '''),
         rhs = parse(r''' ADJ(B1) TSRK ADJ(B2) ''')
     )
     rules.append(ADJ_KET_3)
 
-    ADJ_BRA_1 = TRSRule(
+    ADJ_BRA_1 = CanonicalRule(
         "ADJ-BRA-1",
         lhs = parse(r'''ADJ(KET(s))'''),
         rhs = parse(r'''BRA(s)''')
     )
     rules.append(ADJ_BRA_1)
 
-    ADJ_BRA_2 = TRSRule(
+    ADJ_BRA_2 = CanonicalRule(
         "ADJ-BRA-2",
         lhs = parse(r'''ADJ(O0 MLTK K0)'''),
         rhs = parse(r'''ADJ(K0) MLTB ADJ(O0)''')
     )
     rules.append(ADJ_BRA_2)
 
-    ADJ_BRA_3 = TRSRule(
+    ADJ_BRA_3 = CanonicalRule(
         "ADJ-BRA-3",
         lhs = parse(r''' ADJ(K1 TSRK K2) '''),
         rhs = parse(r''' ADJ(K1) TSRB ADJ(K2) ''')
@@ -559,14 +559,14 @@ def construct_trs(
     rules.append(ADJ_BRA_3)
 
 
-    ADJ_OPT_1 = TRSRule(
+    ADJ_OPT_1 = CanonicalRule(
         "ADJ-OPT-1",
         lhs = parse(r'''ADJ(1O)'''),
         rhs = parse(r'''1O''')
     )
     rules.append(ADJ_OPT_1)
 
-    ADJ_OPT_2 = TRSRule(
+    ADJ_OPT_2 = CanonicalRule(
         "ADJ-OPT-2",
         lhs = parse(r'''ADJ(K0 OUTER B0)'''),
         rhs = parse(r'''ADJ(B0) OUTER ADJ(K0)''')
@@ -574,7 +574,7 @@ def construct_trs(
     rules.append(ADJ_OPT_2)
 
 
-    ADJ_OPT_3 = TRSRule(
+    ADJ_OPT_3 = CanonicalRule(
         "ADJ-OPT-3",
         lhs = parse(r'''ADJ(O1 MLTO O2)'''),
         rhs = parse(r'''ADJ(O2) MLTO ADJ(O1)''')
@@ -582,7 +582,7 @@ def construct_trs(
     rules.append(ADJ_OPT_3)
 
 
-    ADJ_OPT_4 = TRSRule(
+    ADJ_OPT_4 = CanonicalRule(
         "ADJ-OPT-4",
         lhs = parse(r'''ADJ(O1 TSRO O2)'''),
         rhs = parse(r'''ADJ(O1) TSRO ADJ(O2)''')
@@ -590,7 +590,7 @@ def construct_trs(
     rules.append(ADJ_OPT_4)
 
 
-    SCR_1 = TRSRule(
+    SCR_1 = CanonicalRule(
         "SCR-1",
         lhs = parse(r''' "0" SCR X0 '''),
         rhs = parse(r''' 0X '''),
@@ -599,7 +599,7 @@ def construct_trs(
     rules.append(SCR_1)
 
 
-    SCR_2 = TRSRule(
+    SCR_2 = CanonicalRule(
         "SCR-2",
         lhs = parse(r''' "1" SCR X0 '''),
         rhs = parse(r''' X0 '''),
@@ -607,7 +607,7 @@ def construct_trs(
     )
     rules.append(SCR_2)
 
-    SCR_3 = TRSRule(
+    SCR_3 = CanonicalRule(
         "SCR-3",
         lhs = parse(r'''S0 SCR 0X'''),
         rhs = parse(r''' 0X ''')
@@ -615,7 +615,7 @@ def construct_trs(
     rules.append(SCR_3)
 
         
-    SCR_4 = TRSRule(
+    SCR_4 = CanonicalRule(
         "SCR-4",
         lhs = parse(r'''S1 SCR (S2 SCR X0)'''),
         rhs = parse(r'''(S1 MLTS S2) SCR X0'''),
@@ -623,7 +623,7 @@ def construct_trs(
     rules.append(SCR_4)
 
 
-    def scr_5_rewrite(rule, trs, term, side_info):
+    def scr_5_rewrite(rule, trs, term):
         if isinstance(term, Scal):
             if isinstance(term.args[1], Add):
                 new_args = tuple(Scal(term.args[0], arg) for arg in term.args[1].args)
@@ -639,7 +639,7 @@ def construct_trs(
 
 
 
-    def add_1_rewrite(rule, trs, term, side_info):
+    def add_1_rewrite(rule, trs, term):
         if isinstance(term, Add):
             for i in range(len(term.args)):
                 if term.args[i] == Zero():
@@ -652,7 +652,7 @@ def construct_trs(
     )
     rules.append(ADD_1)
 
-    def add_2_rewrite(rule, trs, term, side_info):
+    def add_2_rewrite(rule, trs, term):
         if isinstance(term, Add):
             for i in range(len(term.args)):
                 for j in range(i+1, len(term.args)):
@@ -667,7 +667,7 @@ def construct_trs(
     )
     rules.append(ADD_2)
 
-    def add_3_rewrite(rule, trs, term, side_info):
+    def add_3_rewrite(rule, trs, term):
         if isinstance(term, Add):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], Scal):
@@ -684,7 +684,7 @@ def construct_trs(
     )
     rules.append(ADD_3)
 
-    def add_4_rewrite(rule, trs, term, side_info):
+    def add_4_rewrite(rule, trs, term):
         if isinstance(term, Add):
             for i in range(len(term.args)):
                 if isinstance(term.args[i], Scal):
@@ -706,35 +706,35 @@ def construct_trs(
     # Ket
 
 
-    KET_MLT_1 = TRSRule(
+    KET_MLT_1 = CanonicalRule(
         "KET-MLT-1",
         lhs = parse(r'''0X MLTK K0'''),
         rhs = parse(r'''0X''')
     )
     rules.append(KET_MLT_1)
 
-    KET_MLT_2 = TRSRule(
+    KET_MLT_2 = CanonicalRule(
         "KET-MLT-2",
         lhs = parse(r'''O0 MLTK 0X'''),
         rhs = parse(r'''0X''')
     )
     rules.append(KET_MLT_2)
 
-    KET_MLT_3 = TRSRule(
+    KET_MLT_3 = CanonicalRule(
         "KET-MLT-3",
         lhs = parse(r'''1O MLTK K0'''),
         rhs = parse(r'''K0''')
     )
     rules.append(KET_MLT_3)
 
-    KET_MLT_4 = TRSRule(
+    KET_MLT_4 = CanonicalRule(
         "KET-MLT-4",
         lhs = parse(r'''(S0 SCR O0) MLTK K0'''),
         rhs = parse(r'''S0 SCR (O0 MLTK K0)''')
     )
     rules.append(KET_MLT_4)
 
-    KET_MLT_5 = TRSRule(
+    KET_MLT_5 = CanonicalRule(
         "KET-MLT-5",
         lhs = parse(r'''O0 MLTK (S0 SCR K0)'''),
         rhs = parse(r'''S0 SCR (O0 MLTK K0)''')
@@ -742,7 +742,7 @@ def construct_trs(
     rules.append(KET_MLT_5)
 
 
-    def ket_mlt_6_rewrite(rule, trs, term, side_info):
+    def ket_mlt_6_rewrite(rule, trs, term):
         if isinstance(term, KetApply) and isinstance(term.args[0], Add):
             new_args = tuple(KetApply(arg, term[1]) for arg in term.args[0].args)
             return Add(*new_args)
@@ -755,7 +755,7 @@ def construct_trs(
     rules.append(KET_MLT_6)
 
 
-    def ket_mlt_7_rewrite(rule, trs, term, side_info):
+    def ket_mlt_7_rewrite(rule, trs, term):
         if isinstance(term, KetApply) and isinstance(term.args[1], Add):
             new_args = tuple(KetApply(term[0], arg) for arg in term.args[1].args)
             return Add(*new_args)
@@ -767,14 +767,14 @@ def construct_trs(
     )
     rules.append(KET_MLT_7)
 
-    KET_MLT_8 = TRSRule(
+    KET_MLT_8 = CanonicalRule(
         "KET-MLT-8",
         lhs = parse(r'''(K1 OUTER B0) MLTK K2'''),
         rhs = parse(r'''(B0 DOT K2) SCR K1''')
     )
     rules.append(KET_MLT_8)
 
-    KET_MLT_9 = TRSRule(
+    KET_MLT_9 = CanonicalRule(
         "KET-MLT-9",
         lhs = parse(r'''(O1 MLTO O2) MLTK K0'''),
         rhs = parse(r'''O1 MLTK (O2 MLTK K0)''')
@@ -782,63 +782,63 @@ def construct_trs(
     rules.append(KET_MLT_9)
 
 
-    KET_MLT_10 = TRSRule(
+    KET_MLT_10 = CanonicalRule(
         "KET-MLT-10",
         lhs = parse(r'''(O1 TSRO O2) MLTK ((O1p TSRO O2p) MLTK K0)'''),
         rhs = parse(r'''((O1 MLTO O1p) TSRO (O2 MLTO O2p)) MLTK K0''')
     )
     rules.append(KET_MLT_10)
 
-    KET_MLT_11 = TRSRule(
+    KET_MLT_11 = CanonicalRule(
         "KET-MLT-11",
         lhs = parse(r'''(O1 TSRO O2) MLTK KET(t)'''),
         rhs = parse(r'''(O1 MLTK KET(FST(t))) TSRK (O2 MLTK KET(SND(t)))''')
     )
     rules.append(KET_MLT_11)
 
-    KET_MLT_12 = TRSRule(
+    KET_MLT_12 = CanonicalRule(
         "KET-MLT-12",
         lhs = parse(r'''(O1 TSRO O2) MLTK (K1 TSRK K2)'''),
         rhs = parse(r'''(O1 MLTK K1) TSRK (O2 MLTK K2)''')
     )
     rules.append(KET_MLT_12)
 
-    KET_TSR_1 = TRSRule(
+    KET_TSR_1 = CanonicalRule(
         "KET-TSR-1",
         lhs = parse(r'''0X TSRK K0'''),
         rhs = parse(r'''0X''')
     )
     rules.append(KET_TSR_1)
 
-    KET_TSR_2 = TRSRule(
+    KET_TSR_2 = CanonicalRule(
         "KET-TSR-2",
         lhs = parse(r'''K0 TSRK 0X'''),
         rhs = parse(r'''0X''')
     )
     rules.append(KET_TSR_2)
 
-    KET_TSR_3 = TRSRule(
+    KET_TSR_3 = CanonicalRule(
         "KET-TSR-3",
         lhs = parse(r'''KET(s) TSRK KET(t)'''),
         rhs = parse(r'''KET(PAIR(s, t))''')
     )
     rules.append(KET_TSR_3)
 
-    KET_TSR_4 = TRSRule(
+    KET_TSR_4 = CanonicalRule(
         "KET-TSR-4",
         lhs = parse(r'''(S0 SCR K1) TSRK K2'''),
         rhs = parse(r'''S0 SCR (K1 TSRK K2)''')
     )
     rules.append(KET_TSR_4)
 
-    KET_TSR_5 = TRSRule(
+    KET_TSR_5 = CanonicalRule(
         "KET-TSR-5",
         lhs = parse(r'''K1 TSRK (S0 SCR K2)'''),
         rhs = parse(r'''S0 SCR (K1 TSRK K2)''')
     )
     rules.append(KET_TSR_5)
 
-    def ket_tsr_6_rewrite(rule, trs, term, side_info):
+    def ket_tsr_6_rewrite(rule, trs, term):
         if isinstance(term, KetTensor) and isinstance(term.args[0], Add):
             new_args = tuple(KetTensor(arg, term[1]) for arg in term.args[0].args)
             return Add(*new_args)
@@ -850,7 +850,7 @@ def construct_trs(
     )
     rules.append(KET_TSR_6)
 
-    def ket_tsr_7_rewrite(rule, trs, term, side_info):
+    def ket_tsr_7_rewrite(rule, trs, term):
         if isinstance(term, KetTensor) and isinstance(term.args[1], Add):
             new_args = tuple(KetTensor(term[0], arg) for arg in term.args[1].args)
             return Add(*new_args)
@@ -866,35 +866,35 @@ def construct_trs(
     ###################################################
     # Bra
 
-    BRA_MLT_1 = TRSRule(
+    BRA_MLT_1 = CanonicalRule(
         "BRA-MLT-1",
         lhs = parse(r'''B0 MLTB 0X'''),
         rhs = parse(r'''0X''')
     )
     rules.append(BRA_MLT_1)
 
-    BRA_MLT_2 = TRSRule(
+    BRA_MLT_2 = CanonicalRule(
         "BRA-MLT-2",
         lhs = parse(r'''0X MLTB O0'''),
         rhs = parse(r'''0X''')
     )
     rules.append(BRA_MLT_2)
 
-    BRA_MLT_3 = TRSRule(
+    BRA_MLT_3 = CanonicalRule(
         "BRA-MLT-3",
         lhs = parse(r'''B0 MLTB 1O'''),
         rhs = parse(r'''B0''')
     )
     rules.append(BRA_MLT_3)
 
-    BRA_MLT_4 = TRSRule(
+    BRA_MLT_4 = CanonicalRule(
         "BRA-MLT-4",
         lhs = parse(r'''B0 MLTB (S0 SCR O0)'''),
         rhs = parse(r'''S0 SCR (B0 MLTB O0)''')
     )
     rules.append(BRA_MLT_4)
 
-    BRA_MLT_5 = TRSRule(
+    BRA_MLT_5 = CanonicalRule(
         "BRA-MLT-5",
         lhs = parse(r'''(S0 SCR B0) MLTB O0'''),
         rhs = parse(r'''S0 SCR (B0 MLTB O0)''')
@@ -902,7 +902,7 @@ def construct_trs(
     rules.append(BRA_MLT_5)
 
 
-    def bra_mlt_6_rewrite(rule, trs, term, side_info):
+    def bra_mlt_6_rewrite(rule, trs, term):
         if isinstance(term, BraApply) and isinstance(term.args[1], Add):
             new_args = tuple(BraApply(term[0], arg) for arg in term.args[1].args)
             return Add(*new_args)
@@ -915,7 +915,7 @@ def construct_trs(
     rules.append(BRA_MLT_6)
 
 
-    def bra_mlt_7_rewrite(rule, trs, term, side_info):
+    def bra_mlt_7_rewrite(rule, trs, term):
         if isinstance(term, BraApply) and isinstance(term.args[0], Add):
             new_args = tuple(BraApply(arg, term[1]) for arg in term.args[0].args)
             return Add(*new_args)
@@ -927,14 +927,14 @@ def construct_trs(
     )
     rules.append(BRA_MLT_7)
 
-    BRA_MLT_8 = TRSRule(
+    BRA_MLT_8 = CanonicalRule(
         "BRA-MLT-8",
         lhs = parse(r'''B1 MLTB (K1 OUTER B2)'''),
         rhs = parse(r'''(B1 DOT K1) SCR B2''')
     )
     rules.append(BRA_MLT_8)
 
-    BRA_MLT_9 = TRSRule(
+    BRA_MLT_9 = CanonicalRule(
         "BRA-MLT-9",
         lhs = parse(r'''B0 MLTB (O1 MLTO O2)'''),
         rhs = parse(r'''(B0 MLTB O1) MLTB O2''')
@@ -942,21 +942,21 @@ def construct_trs(
     rules.append(BRA_MLT_9)
 
 
-    BRA_MLT_10 = TRSRule(
+    BRA_MLT_10 = CanonicalRule(
         "BRA-MLT-10",
         lhs = parse(r'''(B0 MLTB (O1 TSRO O2)) MLTB (O1p TSRO O2p)'''),
         rhs = parse(r'''B0 MLTB ((O1 MLTO O1p) TSRO (O2 MLTO O2p))''')
     )
     rules.append(BRA_MLT_10)
 
-    BRA_MLT_11 = TRSRule(
+    BRA_MLT_11 = CanonicalRule(
         "BRA-MLT-11",
         lhs = parse(r'''BRA(t) MLTB (O1 TSRO O2)'''),
         rhs = parse(r'''(BRA(FST(t)) MLTB O1) TSRB (BRA(SND(t)) MLTB O2)''')
     )
     rules.append(BRA_MLT_11)
 
-    BRA_MLT_12 = TRSRule(
+    BRA_MLT_12 = CanonicalRule(
         "BRA-MLT-12",
         lhs = parse(r'''(B1 TSRB B2) MLTB (O1 TSRO O2)'''),
         rhs = parse(r'''(B1 MLTB O1) TSRB (B2 MLTB O2)''')
@@ -965,42 +965,42 @@ def construct_trs(
 
 
 
-    BRA_TSR_1 = TRSRule(
+    BRA_TSR_1 = CanonicalRule(
         "BRA-TSR-1",
         lhs = parse(r'''0X TSRB B0'''),
         rhs = parse(r'''0X''')
     )
     rules.append(BRA_TSR_1)
 
-    BRA_TSR_2 = TRSRule(
+    BRA_TSR_2 = CanonicalRule(
         "BRA-TSR-2",
         lhs = parse(r'''B0 TSRB 0X'''),
         rhs = parse(r'''0X''')
     )
     rules.append(BRA_TSR_2)
 
-    BRA_TSR_3 = TRSRule(
+    BRA_TSR_3 = CanonicalRule(
         "BRA-TSR-3",
         lhs = parse(r'''BRA(s) TSRB BRA(t)'''),
         rhs = parse(r'''BRA(PAIR(s, t))''')
     )
     rules.append(BRA_TSR_3)
 
-    BRA_TSR_4 = TRSRule(
+    BRA_TSR_4 = CanonicalRule(
         "BRA-TSR-4",
         lhs = parse(r'''(S0 SCR B1) TSRB B2'''),
         rhs = parse(r'''S0 SCR (B1 TSRB B2)''')
     )
     rules.append(BRA_TSR_4)
 
-    BRA_TSR_5 = TRSRule(
+    BRA_TSR_5 = CanonicalRule(
         "BRA-TSR-5",
         lhs = parse(r'''B1 TSRB (S0 SCR B2)'''),
         rhs = parse(r'''S0 SCR (B1 TSRB B2)''')
     )
     rules.append(BRA_TSR_5)
 
-    def bra_tsr_6_rewrite(rule, trs, term, side_info):
+    def bra_tsr_6_rewrite(rule, trs, term):
         if isinstance(term, BraTensor) and isinstance(term.args[0], Add):
             new_args = tuple(BraTensor(arg, term[1]) for arg in term.args[0].args)
             return Add(*new_args)
@@ -1012,7 +1012,7 @@ def construct_trs(
     )
     rules.append(BRA_TSR_6)
 
-    def bra_tsr_7_rewrite(rule, trs, term, side_info):
+    def bra_tsr_7_rewrite(rule, trs, term):
         if isinstance(term, BraTensor) and isinstance(term.args[1], Add):
             new_args = tuple(BraTensor(term[0], arg) for arg in term.args[1].args)
             return Add(*new_args)
@@ -1028,35 +1028,35 @@ def construct_trs(
     ###########################################################
     # Operators
 
-    OPT_OUTER_1 = TRSRule(
+    OPT_OUTER_1 = CanonicalRule(
         "OPT-OUTER-1",
         lhs = parse(r'''0X OUTER B0 '''),
         rhs = parse(r'''0X''')
     )
     rules.append(OPT_OUTER_1)
 
-    OPT_OUTER_2 = TRSRule(
+    OPT_OUTER_2 = CanonicalRule(
         "OPT-OUTER-2",
         lhs = parse(r'''K0 OUTER 0X'''),
         rhs = parse(r'''0X''')
     )
     rules.append(OPT_OUTER_2)
 
-    OPT_OUTER_3 = TRSRule(
+    OPT_OUTER_3 = CanonicalRule(
         "OPT-OUTER-3",
         lhs = parse(r'''(S0 SCR K0) OUTER B0'''),
         rhs = parse(r'''S0 SCR (K0 OUTER B0)''')
     )
     rules.append(OPT_OUTER_3)
 
-    OPT_OUTER_4 = TRSRule(
+    OPT_OUTER_4 = CanonicalRule(
         "OPT-OUTER-4",
         lhs = parse(r'''K0 OUTER (S0 SCR B0)'''),
         rhs = parse(r'''S0 SCR (K0 OUTER B0)''')
     )
     rules.append(OPT_OUTER_4)
 
-    def opt_outer_5_rewrite(rule, trs, term, side_info):
+    def opt_outer_5_rewrite(rule, trs, term):
         if isinstance(term, OpOuter) and isinstance(term.args[0], Add):
             new_args = tuple(OpOuter(arg, term[1]) for arg in term.args[0].args)
             return Add(*new_args)
@@ -1068,7 +1068,7 @@ def construct_trs(
     )
     rules.append(OPT_OUTER_5)
 
-    def opt_outer_6_rewrite(rule, trs, term, side_info):
+    def opt_outer_6_rewrite(rule, trs, term):
         if isinstance(term, OpOuter) and isinstance(term.args[1], Add):
             new_args = tuple(OpOuter(term[0], arg) for arg in term.args[1].args)
             return Add(*new_args)
@@ -1081,63 +1081,63 @@ def construct_trs(
     rules.append(OPT_OUTER_6)
 
 
-    OPT_MLT_1 = TRSRule(
+    OPT_MLT_1 = CanonicalRule(
         "OPT-MLT-1",
         lhs = parse(r'''0X MLTO O0'''),
         rhs = parse(r'''0X''')
     )
     rules.append(OPT_MLT_1)
 
-    OPT_MLT_2 = TRSRule(
+    OPT_MLT_2 = CanonicalRule(
         "OPT-MLT-2",
         lhs = parse(r'''O0 MLTO 0X'''),
         rhs = parse(r'''0X''')
     )
     rules.append(OPT_MLT_2)
 
-    OPT_MLT_3 = TRSRule(
+    OPT_MLT_3 = CanonicalRule(
         "OPT-MLT-3",
         lhs = parse(r'''1O MLTO O0'''),
         rhs = parse(r'''O0''')
     )
     rules.append(OPT_MLT_3)
 
-    OPT_MLT_4 = TRSRule(
+    OPT_MLT_4 = CanonicalRule(
         "OPT-MLT-4",
         lhs = parse(r'''O0 MLTO 1O'''),
         rhs = parse(r'''O0''')
     )
     rules.append(OPT_MLT_4)
 
-    OPT_MLT_5 = TRSRule(
+    OPT_MLT_5 = CanonicalRule(
         "OPT-MLT-5",
         lhs = parse(r'''(K0 OUTER B0) MLTO O0'''),
         rhs = parse(r'''K0 OUTER (B0 MLTB O0)''')
     )
     rules.append(OPT_MLT_5)
 
-    OPT_MLT_6 = TRSRule(
+    OPT_MLT_6 = CanonicalRule(
         "OPT-MLT-6",
         lhs = parse(r'''O0 MLTO (K0 OUTER B0)'''),
         rhs = parse(r'''(O0 MLTK K0) OUTER B0''')
     )
     rules.append(OPT_MLT_6)
 
-    OPT_MLT_7 = TRSRule(
+    OPT_MLT_7 = CanonicalRule(
         "OPT-MLT-7",
         lhs = parse(r'''(S0 SCR O1) MLTO O2'''),
         rhs = parse(r'''S0 SCR (O1 MLTO O2)''')
     )
     rules.append(OPT_MLT_7)
 
-    OPT_MLT_8 = TRSRule(
+    OPT_MLT_8 = CanonicalRule(
         "OPT-MLT-8",
         lhs = parse(r'''O1 MLTO (S0 SCR O2)'''),
         rhs = parse(r'''S0 SCR (O1 MLTO O2)''')
     )
     rules.append(OPT_MLT_8)
 
-    def opt_mlt_9_rewrite(rule, trs, term, side_info):
+    def opt_mlt_9_rewrite(rule, trs, term):
         if isinstance(term, OpApply) and isinstance(term.args[0], Add):
             new_args = tuple(OpApply(arg, term[1]) for arg in term.args[0].args)
             return Add(*new_args)
@@ -1149,7 +1149,7 @@ def construct_trs(
     )
     rules.append(OPT_MLT_9)
 
-    def opt_mlt_10_rewrite(rule, trs, term, side_info):
+    def opt_mlt_10_rewrite(rule, trs, term):
         if isinstance(term, OpApply) and isinstance(term.args[1], Add):
             new_args = tuple(OpApply(term[0], arg) for arg in term.args[1].args)
             return Add(*new_args)
@@ -1161,21 +1161,21 @@ def construct_trs(
     )
     rules.append(OPT_MLT_10)
 
-    OPT_MLT_11 = TRSRule(
+    OPT_MLT_11 = CanonicalRule(
         "OPT-MLT-11",
         lhs = parse(r'''(O1 MLTO O2) MLTO O3'''),
         rhs = parse(r'''O1 MLTO (O2 MLTO O3)''')
     )
     rules.append(OPT_MLT_11)
 
-    OPT_MLT_12 = TRSRule(
+    OPT_MLT_12 = CanonicalRule(
         "OPT-MLT-12",
         lhs = parse(r'''(O1 TSRO O2) MLTO (O1p TSRO O2p)'''),
         rhs = parse(r'''(O1 MLTO O1p) TSRO (O2 MLTO O2p)''')
     )
     rules.append(OPT_MLT_12)
 
-    OPT_MLT_13 = TRSRule(
+    OPT_MLT_13 = CanonicalRule(
         "OPT-MLT-13",
         lhs = parse(r'''(O1 TSRO O2) MLTO ((O1p TSRO O2p) MLTO O3)'''),
         rhs = parse(r'''((O1 MLTO O1p) TSRO (O2 MLTO O2p)) MLTO O3''')
@@ -1183,49 +1183,49 @@ def construct_trs(
     rules.append(OPT_MLT_13)
 
 
-    OPT_TSR_1 = TRSRule(
+    OPT_TSR_1 = CanonicalRule(
         "OPT-TSR-1",
         lhs = parse(r'''0X TSRO O0'''),
         rhs = parse(r'''0X''')
     )
     rules.append(OPT_TSR_1)
 
-    OPT_TSR_2 = TRSRule(
+    OPT_TSR_2 = CanonicalRule(
         "OPT-TSR-2",
         lhs = parse(r'''O0 TSRO 0X'''),
         rhs = parse(r'''0X''')
     )
     rules.append(OPT_TSR_2)
 
-    OPT_TSR_3 = TRSRule(
+    OPT_TSR_3 = CanonicalRule(
         "OPT-TSR-3",
         lhs = parse(r''' 1O TSRO 1O '''),
         rhs = parse(r''' 1O ''')
     )
     rules.append(OPT_TSR_3)
 
-    OPT_TSR_4 = TRSRule(
+    OPT_TSR_4 = CanonicalRule(
         "OPT-TSR-4",
         lhs = parse(r'''(K1 OUTER B1) TSRO (K2 OUTER B2)'''),
         rhs = parse(r'''(K1 TSRK K2) OUTER (B1 TSRB B2)''')
     )
     rules.append(OPT_TSR_4)
 
-    OPT_TSR_5 = TRSRule(
+    OPT_TSR_5 = CanonicalRule(
         "OPT-TSR-5",
         lhs = parse(r'''(S0 SCR O1) TSRO O2'''),
         rhs = parse(r'''S0 SCR (O1 TSRO O2)''')
     )
     rules.append(OPT_TSR_5)
 
-    OPT_TSR_6 = TRSRule(
+    OPT_TSR_6 = CanonicalRule(
         "OPT-TSR-6",
         lhs = parse(r'''O1 TSRO (S0 SCR O2)'''),
         rhs = parse(r'''S0 SCR (O1 TSRO O2)''')
     )
     rules.append(OPT_TSR_6)
 
-    def opt_tsr_7_rewrite(rule, trs, term, side_info):
+    def opt_tsr_7_rewrite(rule, trs, term):
         if isinstance(term, OpTensor) and isinstance(term.args[0], Add):
             new_args = tuple(OpTensor(arg, term[1]) for arg in term.args[0].args)
             return Add(*new_args)
@@ -1237,7 +1237,7 @@ def construct_trs(
     )
     rules.append(OPT_TSR_7)
 
-    def opt_tsr_8_rewrite(rule, trs, term, side_info):
+    def opt_tsr_8_rewrite(rule, trs, term):
         if isinstance(term, OpTensor) and isinstance(term.args[1], Add):
             new_args = tuple(OpTensor(term[0], arg) for arg in term.args[1].args)
             return Add(*new_args)

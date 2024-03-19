@@ -36,35 +36,35 @@ def construct_trs(
     #####################################################
     # transpose
 
-    TRANS_UNI_1 = TRSRule(
+    TRANS_UNI_1 = CanonicalRule(
         "TRANS-UNI-1",
         lhs = parse(r'''TP(0X)'''),
         rhs = parse(r'''0X'''),
     )
     rules.append(TRANS_UNI_1)
 
-    TRANS_UNI_2 = TRSRule(
+    TRANS_UNI_2 = CanonicalRule(
         "TRANS-UNI-2",
         lhs = parse(r'''TP(ADJ(X0))'''),
         rhs = parse(r'''ADJ(TP(X0))''')
     )
     rules.append(TRANS_UNI_2)
 
-    TRANS_UNI_3 = TRSRule(
+    TRANS_UNI_3 = CanonicalRule(
         "TRANS-UNI-3",
         lhs = parse(r'''TP(TP(X0))'''),
         rhs = parse(r'''X0'''),
     )
     rules.append(TRANS_UNI_3)
 
-    TRANS_UNI_4 = TRSRule(
+    TRANS_UNI_4 = CanonicalRule(
         "TRANS-UNI-4",
         lhs = parse(r'''TP(S0 SCR X0)'''),
         rhs = parse(r'''S0 SCR TP(X0)'''),
     )
     rules.append(TRANS_UNI_4)
 
-    def trans_5_rewrite(rule, trs, term, side_info):
+    def trans_5_rewrite(rule, trs, term):
         if isinstance(term, Transpose) and isinstance(term.args[0], Add):
                 new_args = tuple(Transpose(arg) for arg in term.args[0].args)
                 return Add(*new_args)
@@ -76,70 +76,70 @@ def construct_trs(
     )
     rules.append(TRANS_UNI_5)
 
-    TRANS_KET_1 = TRSRule(
+    TRANS_KET_1 = CanonicalRule(
         "TRANS-KET-1",
         lhs = parse(r'''TP(BRA(s))'''),
         rhs = parse(r'''KET(s)'''),
     )
     rules.append(TRANS_KET_1)
 
-    TRANS_KET_2 = TRSRule(
+    TRANS_KET_2 = CanonicalRule(
         "TRANS-KET-2",
         lhs = parse(r'''TP(B0 MLTB O0)'''),
         rhs = parse(r'''TP(O0) MLTK TP(B0)''')
     )
     rules.append(TRANS_KET_2)
 
-    TRANS_KET_3 = TRSRule(
+    TRANS_KET_3 = CanonicalRule(
         "TRANS-KET-3",
         lhs = parse(r'''TP(B1 TSRB B2)'''),
         rhs = parse(r'''TP(B1) TSRK TP(B2)''')
     )
     rules.append(TRANS_KET_3)
 
-    TRANS_BRA_1 = TRSRule(
+    TRANS_BRA_1 = CanonicalRule(
         "TRANS-BRA-1",
         lhs = parse(r'''TP(KET(s))'''),
         rhs = parse(r'''BRA(s)'''),
     )
     rules.append(TRANS_BRA_1)
 
-    TRANS_BRA_2 = TRSRule(
+    TRANS_BRA_2 = CanonicalRule(
         "TRANS-BRA-2",
         lhs = parse(r'''TP(O0 MLTK K0)'''),
         rhs = parse(r'''TP(K0) MLTB TP(O0)''')
     )
     rules.append(TRANS_BRA_2)
 
-    TRANS_BRA_3 = TRSRule(
+    TRANS_BRA_3 = CanonicalRule(
         "TRANS-BRA-3",
         lhs = parse(r'''TP(K1 TSRK K2)'''),
         rhs = parse(r'''TP(K1) TSRB TP(K2)''')
     )
     rules.append(TRANS_BRA_3)
 
-    TRANS_OPT_1 = TRSRule(
+    TRANS_OPT_1 = CanonicalRule(
         "TRANS-OPT-1",
         lhs = parse(r'''TP(1O)'''),
         rhs = parse(r'''1O'''),
     )
     rules.append(TRANS_OPT_1)
 
-    TRANS_OPT_2 = TRSRule(
+    TRANS_OPT_2 = CanonicalRule(
         "TRANS-OPT-2",
         lhs = parse(r'''TP(K0 OUTER B0)'''),
         rhs = parse(r'''TP(B0) OUTER TP(K0)''')
     )
     rules.append(TRANS_OPT_2)
 
-    TRANS_OPT_3 = TRSRule(
+    TRANS_OPT_3 = CanonicalRule(
         "TRANS-OPT-3",
         lhs = parse(r'''TP(O1 MLTO O2)'''),
         rhs = parse(r'''TP(O2) MLTO TP(O1)''')
     )
     rules.append(TRANS_OPT_3)
 
-    TRANS_OPT_4 = TRSRule(
+    TRANS_OPT_4 = CanonicalRule(
         "TRANS-OPT-4",
         lhs = parse(r'''TP(O1 TSRO O2)'''),
         rhs = parse(r'''TP(O1) TSRO TP(O2)''')
@@ -148,7 +148,7 @@ def construct_trs(
 
     #####################################################
     # set-simp
-    def set_simp_1_rewrite(rule, trs, term, side_info):
+    def set_simp_1_rewrite(rule, trs, term):
         if isinstance(term, UnionSet):
             for s in term.args:
                 if s == UniversalSet():
@@ -162,7 +162,7 @@ def construct_trs(
     )
     rules.append(SET_SIMP_1)
 
-    def set_simp_2_rewrite(rule, trs, term, side_info):
+    def set_simp_2_rewrite(rule, trs, term):
         if isinstance(term, UnionSet):
             for i, s in enumerate(term.args):
                 if s == EmptySet():
@@ -179,7 +179,7 @@ def construct_trs(
     #####################################################
     # sum-elim
 
-    def sum_elim_1_rewrite(rule, trs, term, side_info):
+    def sum_elim_1_rewrite(rule, trs, term):
         if isinstance(term, SumS) and term.body == CScalar.zero():
             return CScalar.zero()
     SUM_ELIM_1 = TRSRule(
@@ -191,7 +191,7 @@ def construct_trs(
     rules.append(SUM_ELIM_1)
 
 
-    def sum_elim_2_rewrite(rule, trs, term, side_info):
+    def sum_elim_2_rewrite(rule, trs, term):
         if isinstance(term, Sum) and isinstance(term.body, Zero):
             return type(term.body)()
     SUM_ELIM_2 = TRSRule(
@@ -205,7 +205,7 @@ def construct_trs(
 
 
 
-    def sum_elim_3_rewrite(rule, trs, term, side_info):
+    def sum_elim_3_rewrite(rule, trs, term):
         if isinstance(term, SumS) and isinstance(term.body, ScalarDelta):
             for i, v in enumerate(term.bind_vars):
                 if v[0] == term.body.args[0]:
@@ -227,7 +227,7 @@ def construct_trs(
     )
     rules.append(SUM_ELIM_3)
 
-    def sum_elim_4_rewrite(rule, trs, term, side_info):
+    def sum_elim_4_rewrite(rule, trs, term):
         if isinstance(term, SumS) and isinstance(term.body, ScalarMlt):
             for i, item in enumerate(term.body.args):
                 if isinstance(item, ScalarDelta):
@@ -254,7 +254,7 @@ def construct_trs(
     rules.append(SUM_ELIM_4)
 
 
-    def sum_elim_5_rewrite(rule, trs, term, side_info):
+    def sum_elim_5_rewrite(rule, trs, term):
         if isinstance(term, Sum) and isinstance(term.body, Scal) and isinstance(term.body.args[0], ScalarDelta):
             delta = term.body.args[0]
             for i, v in enumerate(term.bind_vars):
@@ -282,7 +282,7 @@ def construct_trs(
     rules.append(SUM_ELIM_5)
 
 
-    def sum_elim_6_rewrite(rule, trs, term, side_info):
+    def sum_elim_6_rewrite(rule, trs, term):
         if isinstance(term, Sum) and isinstance(term.body, Scal) and isinstance(term.body.args[0], ScalarMlt):
             for i, delta in enumerate(term.body.args[0].args):
                 if isinstance(delta, ScalarDelta):
@@ -312,7 +312,7 @@ def construct_trs(
 
 
 
-    def sum_dist_1_rewrite(rule, trs, term, side_info):
+    def sum_dist_1_rewrite(rule, trs, term):
         if isinstance(term, SumS) and isinstance(term.body, ScalarMlt):
             for i, item in enumerate(term.body.args):
                 if set(v[0].name for v in term.bind_vars) & item.variables() == set():
@@ -327,7 +327,7 @@ def construct_trs(
     rules.append(SUM_DIST_1)
 
 
-    def sum_dist_2_rewrite(rule, trs, term, side_info):
+    def sum_dist_2_rewrite(rule, trs, term):
         if isinstance(term, ScalarConj) and isinstance(term.args[0], SumS):
             return SumS(term.args[0].bind_vars, ScalarConj(term.args[0].body))
     SUM_DIST_2 = TRSRule(
@@ -340,7 +340,7 @@ def construct_trs(
 
 
 
-    def sum_dist_3_rewrite(rule, trs, term, side_info):
+    def sum_dist_3_rewrite(rule, trs, term):
         if isinstance(term, Adj) and isinstance(term.args[0], Sum):
             return Sum(term.args[0].bind_vars, Adj(term.args[0].body))
     SUM_DIST_3 = TRSRule(
@@ -352,7 +352,7 @@ def construct_trs(
     rules.append(SUM_DIST_3)
 
 
-    def sum_dist_4_rewrite(rule, trs, term, side_info):
+    def sum_dist_4_rewrite(rule, trs, term):
         if isinstance(term, Transpose) and isinstance(term.args[0], Sum):
             return Sum(term.args[0].bind_vars, Transpose(term.args[0].body))
     SUM_DIST_4 = TRSRule(
@@ -364,7 +364,7 @@ def construct_trs(
     rules.append(SUM_DIST_4)
 
 
-    def sum_dist_5_rewrite(rule, trs, term, side_info):
+    def sum_dist_5_rewrite(rule, trs, term):
         if isinstance(term, Sum) and isinstance(term.body, Scal) and \
             set(v[0].name for v in term.bind_vars) & term.body.args[0].variables() == set():
             return Scal(term.body.args[0], Sum(term.bind_vars, term.body.args[1]))
@@ -376,7 +376,7 @@ def construct_trs(
     )
     rules.append(SUM_DIST_5)
 
-    def sum_dist_6_rewrite(rule, trs, term, side_info):
+    def sum_dist_6_rewrite(rule, trs, term):
         if isinstance(term, Sum) and isinstance(term.body, Scal) and \
             set(v[0].name for v in term.bind_vars) & term.body.args[1].variables() == set():
             return Scal(SumS(term.bind_vars, term.body.args[0]), term.body.args[1])
@@ -391,7 +391,7 @@ def construct_trs(
     #####################################################
     # sum-distribution
 
-    def sum_dist_7_rewrite(rule, trs, term, side_info):
+    def sum_dist_7_rewrite(rule, trs, term):
         if isinstance(term, Sum) and isinstance(term.body, (ScalarDot, KetApply, BraApply, OpApply)) and \
             set(v[0].name for v in term.bind_vars) & term.body.args[1].variables() == set():
             return type(term.body)(Sum(term.bind_vars, term.body.args[0]), term.body.args[1])
@@ -403,7 +403,7 @@ def construct_trs(
     )
     rules.append(SUM_DIST_7)
 
-    def sum_dist_8_rewrite(rule, trs, term, side_info):
+    def sum_dist_8_rewrite(rule, trs, term):
         if isinstance(term, Sum) and isinstance(term.body, (ScalarDot, KetApply, BraApply, OpApply)) and \
             set(v[0].name for v in term.bind_vars) & term.body.args[0].variables() == set():
             return type(term.body)(term.body.args[0], Sum(term.bind_vars, term.body.args[1]))
@@ -416,7 +416,7 @@ def construct_trs(
     rules.append(SUM_DIST_8)
 
 
-    def sum_dist_9_rewrite(rule, trs, term, side_info):
+    def sum_dist_9_rewrite(rule, trs, term):
         if isinstance(term, Sum) and isinstance(term.body, (KetTensor, BraTensor, OpOuter, OpTensor)) and \
             set(v[0].name for v in term.bind_vars) & term.body.args[1].variables() == set():
             return type(term.body)(Sum(term.bind_vars, term.body.args[0]), term.body.args[1])     
@@ -429,7 +429,7 @@ def construct_trs(
     rules.append(SUM_DIST_9)
 
 
-    def sum_dist_10_rewrite(rule, trs, term, side_info):
+    def sum_dist_10_rewrite(rule, trs, term):
         if isinstance(term, Sum) and isinstance(term.body, (KetTensor, BraTensor, OpOuter, OpTensor)) and \
             set(v[0].name for v in term.bind_vars) & term.body.args[0].variables() == set():
             return type(term.body)(term.body.args[0], Sum(term.bind_vars, term.body.args[1]))
@@ -441,7 +441,7 @@ def construct_trs(
     )
     rules.append(SUM_DIST_10)
 
-    def sum_comp_1_rewrite(rule, trs, term, side_info):
+    def sum_comp_1_rewrite(rule, trs, term):
         if isinstance(term, (ScalarDot, KetApply, BraApply, OpApply)) and isinstance(term.args[0], Sum):
 
             # we have to rename if necessary
@@ -452,7 +452,7 @@ def construct_trs(
                 renamed_sum = term.args[0]
 
             combined_term = type(term)(renamed_sum.body, term.args[1])
-            norm_term = trs.normalize(combined_term, **side_info['trs-args'])
+            norm_term = trs.normalize(combined_term)
             if norm_term != combined_term:
                 if type(term) == ScalarDot:
                     return SumS(renamed_sum.bind_vars, norm_term)
@@ -466,7 +466,7 @@ def construct_trs(
     )
     rules.append(SUM_COMP_1)
 
-    def sum_comp_2_rewrite(rule, trs, term, side_info):
+    def sum_comp_2_rewrite(rule, trs, term):
         if isinstance(term, (ScalarDot, KetApply, BraApply, OpApply)) and isinstance(term.args[1], Sum):
 
             # we have to rename if necessary
@@ -477,7 +477,7 @@ def construct_trs(
                 renamed_sum = term.args[1]
 
             combined_term = type(term)(term.args[0], renamed_sum.body)
-            norm_term = trs.normalize(combined_term, **side_info['trs-args'])
+            norm_term = trs.normalize(combined_term)
             if norm_term != combined_term:
                 if type(term) == ScalarDot:
                     return SumS(renamed_sum.bind_vars, norm_term)
@@ -492,7 +492,7 @@ def construct_trs(
     rules.append(SUM_COMP_2)
 
 
-    def sum_comp_3_rewrite(rule, trs, term, side_info):
+    def sum_comp_3_rewrite(rule, trs, term):
         if isinstance(term, (KetTensor, BraTensor, OpOuter, OpTensor)) and isinstance(term.args[0], Sum):
 
             # we have to rename if necessary
@@ -503,7 +503,7 @@ def construct_trs(
                 renamed_sum = term.args[0]
 
             combined_term = type(term)(renamed_sum.body, term.args[1])
-            norm_term = trs.normalize(combined_term, **side_info['trs-args'])
+            norm_term = trs.normalize(combined_term)
             if norm_term != combined_term:
                 return Sum(renamed_sum.bind_vars, norm_term)
     SUM_COMP_3 = TRSRule(
@@ -514,7 +514,7 @@ def construct_trs(
     )
     rules.append(SUM_COMP_3)
 
-    def sum_comp_4_rewrite(rule, trs, term, side_info):
+    def sum_comp_4_rewrite(rule, trs, term):
         if isinstance(term, (KetTensor, BraTensor, OpOuter, OpTensor)) and isinstance(term.args[1], Sum):
 
             # we have to rename if necessary
@@ -525,7 +525,7 @@ def construct_trs(
                 renamed_sum = term.args[1]
 
             combined_term = type(term)(term.args[0], renamed_sum.body)
-            norm_term = trs.normalize(combined_term, **side_info['trs-args'])
+            norm_term = trs.normalize(combined_term)
             if norm_term != combined_term:
                 return Sum(renamed_sum.bind_vars, norm_term)
     SUM_COMP_4 = TRSRule(
@@ -536,7 +536,7 @@ def construct_trs(
     )
     rules.append(SUM_COMP_4)
 
-    def sum_comp_5_rewrite(rule, trs, term, side_info):
+    def sum_comp_5_rewrite(rule, trs, term):
         if isinstance(term, SumS) and \
             set(v[0].name for v in term.bind_vars) & term.body.variables() == set():
             if term.body != CScalar.one():
@@ -551,7 +551,7 @@ def construct_trs(
     rules.append(SUM_COMP_5)
 
 
-    def sum_comp_6_rewrite(rule, trs, term, side_info):
+    def sum_comp_6_rewrite(rule, trs, term):
         if isinstance(term, Sum) and \
             set(v[0].name for v in term.bind_vars) & term.body.variables() == set():
             return Scal(SumS(term.bind_vars, CScalar.one()), term.body)
@@ -564,7 +564,7 @@ def construct_trs(
     )
     rules.append(SUM_COMP_6)
 
-    # def sum_add_1_rewrite(rule, trs, term, side_info):
+    # def sum_add_1_rewrite(rule, trs, term):
     #     if isinstance(term, ScalarAdd):
     #         for i, itemA in enumerate(term.args):
     #             if isinstance(itemA, SumS):
@@ -593,7 +593,7 @@ def construct_trs(
     # rules.append(SUM_ADD_1)
 
 
-    # def sum_add_2_rewrite(rule, trs, term, side_info):
+    # def sum_add_2_rewrite(rule, trs, term):
     #     if isinstance(term, Add):
     #         for i, itemA in enumerate(term.args):
     #             if isinstance(itemA, Sum):
@@ -624,7 +624,7 @@ def construct_trs(
     #####################################################
     # beta-reduction
 
-    def beta_reduction_rewrite(rule, trs, term, side_info):
+    def beta_reduction_rewrite(rule, trs, term):
         if isinstance(term, Apply):
             f, x = term.args
             if isinstance(f, Abstract):
@@ -685,7 +685,7 @@ def construct_entry_trs(
     
     rules = []
 
-    def sum_elim_7_rewrite(rule, trs, term, side_info):
+    def sum_elim_7_rewrite(rule, trs, term):
         if isinstance(term, Sum):
             if isinstance(term.body, Scal) and\
                 isinstance(term.body.args[0], ScalarDot) and\
@@ -704,7 +704,7 @@ def construct_entry_trs(
     )
     rules.append(SUM_ELIM_7)
 
-    def sum_elim_8_rewrite(rule, trs, term, side_info):
+    def sum_elim_8_rewrite(rule, trs, term):
         if isinstance(term, Sum):
             if isinstance(term.body, Scal) and\
                 isinstance(term.body.args[0], ScalarDot) and\
@@ -723,7 +723,7 @@ def construct_entry_trs(
     )
     rules.append(SUM_ELIM_8)
 
-    def sum_elim_9_rewrite(rule, trs, term, side_info):
+    def sum_elim_9_rewrite(rule, trs, term):
         '''
         Note: only SUM-SWAP-EQ is considered in matching.
         '''
@@ -754,7 +754,7 @@ def construct_entry_trs(
     )
     rules.append(SUM_ELIM_9)
 
-    def sum_elim_10_rewrite(rule, trs, term, side_info):
+    def sum_elim_10_rewrite(rule, trs, term):
         '''
         Note: only SUM-SWAP-EQ is considered in matching.
         '''

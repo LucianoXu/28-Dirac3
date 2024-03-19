@@ -690,56 +690,24 @@ class Matching:
 # note that there are different mechanisms for matching the rules and the terms
 # for common rules we use normal matching, and for rules with equational theories, we write specified matching algorithms.
 # this is a good balance of generality and efficiency.
-    
-def check_special_symbol(term : Term) -> bool:
-    '''
-    iteratively check whether there are subterms of AC or TRS_CommBinary.
-    return True if there are.
-    '''
-    if isinstance(term, AC) or isinstance(term, CommBinary):
-        return True
-    else:
-        if isinstance(term, Var):
-            return False
-        elif isinstance(term, StdTerm):
-            for arg in term.args:
-                if check_special_symbol(arg):
-                    return True
-            return False
-        else:
-            return False
 
 
-def normal_rewrite(self, trs: TRS, term : Term, side_info : dict[str, Any]) -> Term | None:
-        '''
-        The rewrite method for normal rules.
-
-        try rewriting the term using this rule. Return the result if successful, otherwise return None.
-        '''
-        subst = Matching.single_match(self.lhs, term)
-        if subst is None:
-            return None
-        else:
-            return subst(self.rhs)
 
 class TRSRule:
     def __init__(self, 
                  rule_name:str,
                  lhs: Term|str, 
                  rhs: Term|str,
-                 rewrite_method : Callable[[TRSRule, TRS, Term, dict[str, Any]], Term|None] = normal_rewrite,
+                 rewrite_method : Callable[[TRSRule, TRS, Term], Term|None],
                  rule_repr: str|None = None):
         '''
         note: the rewrite_method checks whether the current rule can rewrite the given term (not including subterms)
         '''
-        self.rewrite_method = rewrite_method
-
-        if isinstance(lhs, StdTerm) and check_special_symbol(lhs):
-            raise ValueError(f"The rule {{{lhs}->{rhs}}} should not contain special symbols in the LHS.")
-
+    
         self.rule_name = rule_name
         self.lhs = lhs
         self.rhs = rhs
+        self.rewrite_method = rewrite_method
         self.rule_repr = rule_repr
 
     def __str__(self) -> str:
@@ -754,6 +722,36 @@ class TRSRule:
         str_lhs = self.lhs if isinstance(self.lhs, str) else repr(self.lhs)
         str_rhs = self.rhs if isinstance(self.rhs, str) else repr(self.rhs)
         return f'{str_lhs} -> {str_rhs} ;'
+    
+##################################################################
+# canonical rewriting rule
+
+def canonical_rewrite(rule: CanonicalRule, trs : TRS, term : Term) -> Term | None:
+        '''
+        The rewrite method for canonical rules.
+
+        try rewriting the term using this rule. Return the result if successful, otherwise return None.
+
+        (The parameter [trs] is necessary to be consistent with customized rewriting methods.)
+        '''
+        subst = Matching.single_match(rule.lhs, term)
+        if subst is None:
+            return None
+        else:
+            return subst(rule.rhs)
+        
+class CanonicalRule(TRSRule):
+    def __init__(self, 
+                 rule_name:str,
+                 lhs: Term, 
+                 rhs: Term,
+                 rule_repr: str|None = None):
+        
+        self.rule_name = rule_name
+        self.lhs = lhs
+        self.rhs = rhs
+        self.rule_repr = repr
+        self.rewrite_method = canonical_rewrite
 
         
 # define rule for AC symbols by defining new class
@@ -811,7 +809,6 @@ class TRS:
 
     def normalize(self, 
             term : Term, 
-            side_info : dict[str, Any] = {},
             verbose: bool = False, 
             stream: TextIO = sys.stdout,
             step_limit : int | None = None,
@@ -831,17 +828,6 @@ class TRS:
 
         else:
             renamed_trs = self
-
-        # execute the preprocess of side information
-        final_side_info = side_info.copy()
-
-        final_side_info['trs-args'] = {
-            'side_info': side_info, 
-            'verbose': verbose, 
-            'stream': stream,
-            'step_limit': step_limit,
-            'alg': alg
-            }
 
         current_term = term          
 
@@ -865,7 +851,7 @@ class TRS:
                 stream.write(str(current_term)+"\n\n")
                 
             # check whether rewrite rules are applicable
-            new_term = rewrite(current_term, final_side_info, verbose, stream)
+            new_term = rewrite(current_term, verbose, stream)
 
             if new_term is None:
                 if verbose:
@@ -876,7 +862,7 @@ class TRS:
             
     
 
-    def rewrite_outer_most(self, term : Term, side_info: dict[str, Any], verbose:bool = False, stream: TextIO = sys.stdout) -> Term | None:
+    def rewrite_outer_most(self, term : Term, verbose:bool = False, stream: TextIO = sys.stdout) -> Term | None:
         '''
         rewrite the term using the rules. Return the result.
         return None when no rewriting is applicable
@@ -886,7 +872,7 @@ class TRS:
 
         # try to rewrite the term using the rules
         for rule in self.rules:
-            new_term = rule.rewrite_method(rule, self, term, side_info)
+            new_term = rule.rewrite_method(rule, self, term)
             if new_term is not None:
                 # output information
                 if verbose:
@@ -902,26 +888,26 @@ class TRS:
         if isinstance(term, StdTerm):
             # try to rewrite the subterms
             for i in range(len(term.args)):
-                new_subterm = self.rewrite_outer_most(term.args[i], side_info, verbose, stream)
+                new_subterm = self.rewrite_outer_most(term.args[i], verbose, stream)
                 if new_subterm is not None:
                     return type(term)(*term.args[:i], new_subterm, *term.args[i+1:])
                 
         elif isinstance(term, BindVarTerm):
-            new_body = self.rewrite_outer_most(term.body, side_info, verbose, stream)
+            new_body = self.rewrite_outer_most(term.body, verbose, stream)
             if new_body is not None:
                 # risk exists: term.bind_var may collide with new_body
                 # but normal rewriting rules should not cause this problem because there are no free variables on the RHS
                 return type(term)(term.bind_var, new_body)
             
         elif isinstance(term, MultiBindTerm):
-            new_body = self.rewrite_outer_most(term.body, side_info, verbose, stream)
+            new_body = self.rewrite_outer_most(term.body, verbose, stream)
             if new_body is not None:
                 return type(term)(term.bind_vars, new_body)
             
         return None
     
 
-    def rewrite_inner_most(self, term : Term, side_info: dict[str, Any], verbose:bool = False, stream:TextIO = sys.stdout) -> Term | None:
+    def rewrite_inner_most(self, term : Term, verbose:bool = False, stream:TextIO = sys.stdout) -> Term | None:
         '''
         rewrite the term using the rules. Return the result.
         return None when no rewriting is applicable
@@ -932,19 +918,19 @@ class TRS:
         if isinstance(term, StdTerm):
             # try to rewrite the subterms
             for i in range(len(term.args)):
-                new_subterm = self.rewrite_inner_most(term.args[i], side_info, verbose, stream)
+                new_subterm = self.rewrite_inner_most(term.args[i], verbose, stream)
                 if new_subterm is not None:
                     return type(term)(*term.args[:i], new_subterm, *term.args[i+1:])
                 
         elif isinstance(term, BindVarTerm):
-            new_body = self.rewrite_inner_most(term.body, side_info, verbose, stream)
+            new_body = self.rewrite_inner_most(term.body, verbose, stream)
             if new_body is not None:
                 # risk exists: term.bind_var may collide with new_body
                 # but normal rewriting rules should not cause this problem because there are no free variables on the RHS
                 return type(term)(term.bind_var, new_body)
             
         elif isinstance(term, MultiBindTerm):
-            new_body = self.rewrite_inner_most(term.body, side_info, verbose, stream)
+            new_body = self.rewrite_inner_most(term.body, verbose, stream)
             if new_body is not None:
                 return type(term)(term.bind_vars, new_body)
 
@@ -952,7 +938,7 @@ class TRS:
 
         # try to rewrite the term using the rules
         for rule in self.rules:
-            new_term = rule.rewrite_method(rule, self, term, side_info)
+            new_term = rule.rewrite_method(rule, self, term)
             if new_term is not None:
                 # output information
                 if verbose:

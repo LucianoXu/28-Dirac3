@@ -30,7 +30,7 @@ def modify_trs(
 
     #########################################
     # extra rules for delta
-    def delta_ast_1_rewrite(rule, trs, term, side_info):
+    def delta_ast_1_rewrite(rule, trs, term):
         if isinstance(term, ScalarDelta):
             if term.args[0] == term.args[1]:
                 return C1
@@ -44,7 +44,7 @@ def modify_trs(
     rules.append(DELTA_AST_1)
 
 
-    def delta_ast_2_rewrite(rule, trs, term, side_info):
+    def delta_ast_2_rewrite(rule, trs, term):
         if isinstance(term, ScalarDelta):
             t0 = term[0]
             t1 = term[1]
