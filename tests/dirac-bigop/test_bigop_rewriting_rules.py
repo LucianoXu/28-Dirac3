@@ -344,13 +344,13 @@ def test_SUM_DIST_10():
 
 def test_SUM_COMP_1():
     with wolfram_backend.wolfram_session():
-        a = parse(r''' SUM(i, USET, BRA(i)) DOT KET('0') ''')
+        a = parse(r''' SUMS(i, USET, BRA(i)) DOT KET('0') ''')
         b = parse(r''' "1" ''')
         assert trs.normalize(a) == trs.normalize(b)
 
 def test_SUM_COMP_2():
     with wolfram_backend.wolfram_session():
-        a = parse(r''' BRA('0') DOT SUM(i, USET, KET(i)) ''')
+        a = parse(r''' BRA('0') DOT SUMS(i, USET, KET(i)) ''')
         b = parse(r''' "1" ''')
         assert trs.normalize(a) == trs.normalize(b)
 

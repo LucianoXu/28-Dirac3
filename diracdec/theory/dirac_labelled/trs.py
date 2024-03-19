@@ -541,14 +541,14 @@ def construct_trs(
     LABEL_LIFT_17 = TRSRule(
         "LABEL-LIFT-17",
         lhs = parse(''' (K0 OUTER B0)[R] '''),
-        rhs = parse(''' (K0[R]) OUTER (B0[R]) ''')
+        rhs = parse(''' (K0[R]) OUTERL (B0[R]) ''')
     )
     rules.append(LABEL_LIFT_17)
 
     LABEL_LIFT_18 = TRSRule(
         "LABEL-LIFT-18",
         lhs = parse(''' (K0 OUTER B0)[Q; R] '''),
-        rhs = parse(''' (K0[Q]) OUTER (B0[R]) ''')
+        rhs = parse(''' (K0[Q]) OUTERL (B0[R]) ''')
     )
     rules.append(LABEL_LIFT_18)
 
@@ -614,6 +614,8 @@ def construct_trs(
     )
     rules.append(OPT_EXT_3)
 
+
+
     def label_sum_1_rewrite(rule, trs, term, side_info):
         if isinstance(term, Labelled1) and isinstance(term.args[0], Sum):
             return Sum(term.args[0].bind_vars, Labelled1(term.args[0].body, term.args[1]))
@@ -638,6 +640,101 @@ def construct_trs(
     rules.append(LABEL_SUM_2)
 
 
+    def label_sum_3_rewrite(rule, trs, term, side_info):
+        if isinstance(term, ScalarDotL) and isinstance(term.args[0], SumS) or isinstance(term, (KetApplyL, BraApplyL, OpApplyL)) and isinstance(term.args[0], Sum):
+
+            # we have to rename if necessary
+            if set(v[0].name for v in term.args[0].bind_vars) & term.args[1].free_variables() == set():
+                new_var = var_rename_ls(term.args[0].variables() | term.args[1].variables(), len(term.args[0].bind_vars))
+                renamed_sum = term.args[0].rename_bind(tuple(TRSVar(v) for v in new_var))
+            else:
+                renamed_sum = term.args[0]
+
+            combined_term = type(term)(renamed_sum.body, term.args[1])
+            norm_term = trs.normalize(combined_term, **side_info['trs-args'])
+            if norm_term != combined_term:
+                if type(term) == ScalarDotL:
+                    return SumS(renamed_sum.bind_vars, norm_term)
+                else:
+                    return Sum(renamed_sum.bind_vars, norm_term)
+    LABEL_SUM_3 = TRSRule(
+        "LABEL-SUM-3",
+        lhs = "SUM(i, T, A) {DOT/MLTK/MLTB/MLTO} X (with side condition)",
+        rhs = "SUM(i, T, A {DOT/MLTK/MLTB/MLTO} X)",
+        rewrite_method = label_sum_3_rewrite
+    )
+    rules.append(LABEL_SUM_3)
+
+    def label_sum_4_rewrite(rule, trs, term, side_info):
+        if isinstance(term, ScalarDotL) and isinstance(term.args[1], SumS) or isinstance(term, (KetApplyL, BraApplyL, OpApplyL)) and isinstance(term.args[1], Sum):
+
+            # we have to rename if necessary
+            if set(v[0].name for v in term.args[1].bind_vars) & term.args[0].free_variables() == set():
+                new_var = var_rename_ls(term.args[1].variables() | term.args[0].variables(), len(term.args[1].bind_vars))
+                renamed_sum = term.args[1].rename_bind(tuple(TRSVar(v) for v in new_var))
+            else:
+                renamed_sum = term.args[1]
+
+            combined_term = type(term)(term.args[0], renamed_sum.body)
+            norm_term = trs.normalize(combined_term, **side_info['trs-args'])
+            if norm_term != combined_term:
+                if type(term) == ScalarDotL:
+                    return SumS(renamed_sum.bind_vars, norm_term)
+                else:
+                    return Sum(renamed_sum.bind_vars, norm_term)
+    LABEL_SUM_4 = TRSRule(
+        "LABEL-SUM-4",
+        lhs = "X {DOT/MLTK/MLTB/MLTO} SUM(i, T, A) (with side condition)",
+        rhs = "SUM(i, T, X {DOT/MLTK/MLTB/MLTO} A)",
+        rewrite_method = label_sum_4_rewrite
+    )
+    rules.append(LABEL_SUM_4)
+
+
+    # def label_sum_5_rewrite(rule, trs, term, side_info):
+    #     if isinstance(term, (KetTensorL, BraTensorL, OpOuterL, OpTensorL)) and isinstance(term.args[0], Sum):
+
+    #         # we have to rename if necessary
+    #         if set(v[0].name for v in term.args[0].bind_vars) & term.args[1].free_variables() == set():
+    #             new_var = var_rename_ls(term.args[0].variables() | term.args[1].variables(), len(term.args[0].bind_vars))
+    #             renamed_sum = term.args[0].rename_bind(tuple(TRSVar(v) for v in new_var))
+    #         else:
+    #             renamed_sum = term.args[0]
+
+    #         combined_term = type(term)(renamed_sum.body, term.args[1])
+    #         norm_term = trs.normalize(combined_term, **side_info['trs-args'])
+    #         if norm_term != combined_term:
+    #             return Sum(renamed_sum.bind_vars, norm_term)
+    # LABEL_SUM_5 = TRSRule(
+    #     "LABEL-SUM-5",
+    #     lhs = "SUM(i, T, A) {TSRK/TSRB/OUTER/TSRO} X (with side condition)",
+    #     rhs = "SUM(i, T, A {TSRK/TSRB/OUTER/TSRO} X)",
+    #     rewrite_method = label_sum_5_rewrite
+    # )
+    # rules.append(LABEL_SUM_5)
+
+    # def label_sum_6_rewrite(rule, trs, term, side_info):
+    #     if isinstance(term, (KetTensorL, BraTensorL, OpOuterL, OpTensorL)) and isinstance(term.args[1], Sum):
+
+    #         # we have to rename if necessary
+    #         if set(v[0].name for v in term.args[1].bind_vars) & term.args[0].free_variables() == set():
+    #             new_var = var_rename_ls(term.args[1].variables() | term.args[0].variables(), len(term.args[1].bind_vars))
+    #             renamed_sum = term.args[1].rename_bind(tuple(TRSVar(v) for v in new_var))
+    #         else:
+    #             renamed_sum = term.args[1]
+
+    #         combined_term = type(term)(term.args[0], renamed_sum.body)
+    #         norm_term = trs.normalize(combined_term, **side_info['trs-args'])
+    #         if norm_term != combined_term:
+    #             return Sum(renamed_sum.bind_vars, norm_term)
+    # LABEL_SUM_6 = TRSRule(
+    #     "LABEL-SUM-6",
+    #     lhs = "X {TSRK/TSRB/OUTER/TSRO} SUM(i, T, A) (with side condition)",
+    #     rhs = "SUM(i, T, X {TSRK/TSRB/OUTER/TSRO} A)",
+    #     rewrite_method = label_sum_6_rewrite
+    # )
+    # rules.append(LABEL_SUM_6)
+
     #############################################
     # temporary rules
 
@@ -657,6 +754,33 @@ def construct_trs(
     )
     rules.append(LABEL_TEMP_1)
 
+
+    LABEL_TEMP_1O = TRSRule(
+        "LABEL-TEMP-1O",
+        lhs = parse("A MLTOL (K[Q] OUTERL X)"),
+        rhs = parse("(A MLTKL K[Q]) OUTERL X"),
+    )
+    rules.append(LABEL_TEMP_1O)
+
+    def label_temp_1b_rewrite(rule, trs, term, side_info):
+        if isinstance(term, BraApplyL) and isinstance(term.args[0], BraTensorL) and isinstance(term.args[1], OpOuterL) and isinstance(term.args[1].args[0], Labelled1):
+            for i, t in enumerate(term.args[0].args):
+                if isinstance(t, Labelled1) and t.args[1] == term.args[1].args[0].args[1]:
+                    return ScalL(
+                        ScalarDot(t.args[0], term.args[1].args[0].args[0]),
+                        BraTensorL(
+                            BraTensorL(*term.args[0].remained_terms(i)),
+                            term.args[1].args[1]
+                        )
+                    )
+    LABEL_TEMP_1B = TRSRule(
+        "LABEL-TEMP-1B",
+        lhs = "(Y TSRBL B[R]) MLTBL (K[R] OUTERL X)",
+        rhs = "(B DOT K) SCRL (Y TSRBL X)",
+        rewrite_method = label_temp_1b_rewrite
+    )
+    rules.append(LABEL_TEMP_1B)
+
     def label_temp_2_rewrite(rule, trs, term, side_info):
         if (isinstance(term, KetApplyL) and isinstance(term.args[0], OpTensorL) or isinstance(term, BraApplyL) and isinstance(term.args[0], BraTensorL) or isinstance(term, OpApplyL) and isinstance(term.args[0], OpTensorL)) and isinstance(term.args[1], Labelled1) :
             for i, t in enumerate(term.args[0].args):
@@ -673,6 +797,32 @@ def construct_trs(
     )
     rules.append(LABEL_TEMP_2)
 
+
+    LABEL_TEMP_2O = TRSRule(
+        "LABEL-TEMP-2O",
+        lhs = parse("(X OUTERL B[Q]) MLTOL A"),
+        rhs = parse("X OUTERL (B[Q] MLTBL A)"),
+    )
+    rules.append(LABEL_TEMP_2O)
+
+    def label_temp_2b_rewrite(rule, trs, term, side_info):
+        if isinstance(term, KetApplyL) and isinstance(term.args[1], KetTensorL) and isinstance(term.args[0], OpOuterL) and isinstance(term.args[0].args[1], Labelled1):
+            for i, t in enumerate(term.args[1].args):
+                if isinstance(t, Labelled1) and t.args[1] == term.args[0].args[1].args[1]:
+                    return ScalL(
+                        ScalarDot(term.args[0].args[1].args[0], t.args[0]),
+                        KetTensorL(
+                            term.args[0].args[0],
+                            KetTensorL(*term.args[1].remained_terms(i))
+                        )
+                    )
+    LABEL_TEMP_2B = TRSRule(
+        "LABEL-TEMP-2B",
+        lhs = "(X OUTERL B[R]) MLTKL (K[R] TSRKL Y)",
+        rhs = "(B DOT K) SCRL (X TSRKL Y)",
+        rewrite_method = label_temp_2b_rewrite
+    )
+    rules.append(LABEL_TEMP_2B)
 
     def label_temp_3_rewrite(rule, trs, term, side_info):
         if isinstance(term, ScalarDot) and isinstance(term.args[0], Labelled1) and isinstance(term.args[1], KetTensorL):

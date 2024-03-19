@@ -250,7 +250,7 @@ class Labelled1(LDiracNotation, StdTerm):
         return str(HSeqBlock(str(self.args[0]), '[', str(self.args[1]), ']'))
 
     def tex(self) -> str:
-        return rf" {self.args[0].tex()}_{{ {self.args[1].tex()} }}"
+        return rf" \left ({self.args[0].tex()} \right )_{{ {self.args[1].tex()} }}"
 
 class Labelled2(LDiracNotation, StdTerm):
     fsymbol_print = "LABELLED2"
@@ -263,7 +263,7 @@ class Labelled2(LDiracNotation, StdTerm):
         return str(HSeqBlock(str(self.args[0]), '[', str(self.args[1]), ';', str(self.args[2]), ']'))
 
     def tex(self) -> str:
-        return rf" {self.args[0].tex()}_{{ {self.args[1].tex()}; {self.args[2].tex()} }}"
+        return rf" \left ({self.args[0].tex()} \right )_{{ {self.args[1].tex()}; {self.args[2].tex()} }}"
 
 class AdjL(LDiracNotation, StdTerm):
     fsymbol_print = "ADJL"
