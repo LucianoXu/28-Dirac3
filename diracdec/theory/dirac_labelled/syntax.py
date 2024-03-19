@@ -5,7 +5,7 @@ from typing import Optional
 from ..dirac.syntax import *
 from ..dirac_bigop.syntax import *
 
-from ..trs import BindVarTerm, MultiBindTerm, var_rename, var_rename_ls, seq_content_eq
+from ..trs import BindVarTerm, MultiBindTerm, new_var, new_var_ls, seq_content_eq
 
 import itertools
 

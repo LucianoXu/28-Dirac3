@@ -45,8 +45,8 @@ def test_wolfram_variables():
 def test_wolfram_substitute():
     with wolfram_backend.wolfram_session():
         sub = Subst({
-            "a" : parse(''' "1" '''),
-            "b" : parse(''' 'a + a' '''),
+            Var("a") : parse(''' "1" '''),
+            Var("b") : parse(''' 'a + a' '''),
         })
         a = parse(''' "a" ''')
         b = parse(''' "1" ''')
@@ -59,8 +59,8 @@ def test_wolfram_substitute():
 def test_wolfram_substitue_TRSVar():
     with wolfram_backend.wolfram_session():
         sub = Subst({
-            "a" : parse(''' x '''),
-            "b" : parse(''' y '''),
+            Var("a") : parse(''' x '''),
+            Var("b") : parse(''' y '''),
         })
         a = parse(''' "a" ''')
         b = parse(''' "x" ''')

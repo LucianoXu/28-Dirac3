@@ -4,7 +4,7 @@ The architecture of the term rewriting system
 
 from __future__ import annotations
 import sys
-from typing import Callable, TextIO, Tuple, Any, Dict, List, Sequence
+from typing import Callable, TextIO, Tuple, Any, Dict, List, Sequence, Container
 
 from abc import ABC, abstractmethod
 
@@ -16,21 +16,24 @@ from ..backends import render_tex, render_tex_to_svg
 
 import itertools
 
-def var_rename(vars: set[str], prefix: str = "x") -> str:
+def new_var(vars: Container[str|Var], prefix: str = "x") -> Var:
     '''
     return the new variable name that is not in the vars.
     '''
     i = 0
     while prefix + str(i) in vars:
         i += 1
-    return prefix + str(i)
+    return Var(prefix + str(i))
 
-def var_rename_ls(vars: set[str], count:int, prefix: str = "x") -> tuple[str, ...]:
+def new_var_ls(vars: Container[str|Var], count:int, prefix: str = "x") -> tuple[Var, ...]:
+    '''
+    return the new variable names that are not in the vars.
+    '''
     i = 0
     res = []
     while len(res) < count:
         if prefix + str(i) not in vars:
-            res.append(prefix + str(i))
+            res.append(Var(prefix + str(i)))
         i += 1
     return tuple(res)
 
@@ -85,11 +88,12 @@ class TRSTerm(ABC):
     def size(self) -> int:
         pass
 
+    # TODO merge into one?
     @abstractmethod
-    def variables(self) -> set[str]:
+    def variables(self) -> set[Var]:
         pass
 
-    def free_variables(self) -> set[str]:
+    def free_variables(self) -> set[Var]:
         return self.variables()
 
     @property
@@ -116,11 +120,12 @@ class TRSTerm(ABC):
         return render_tex_to_svg(self.tex(), filename)
         
 
-class TRSVar(TRSTerm):
+class Var(TRSTerm):
     fsymbol_print = "var"
     fsymbol = "VAR"
 
     def __init__(self, name: str):
+        assert isinstance(name, str)
         self.name = name
 
     def __str__(self) -> str:
@@ -133,14 +138,23 @@ class TRSVar(TRSTerm):
         new_name = self.name.replace('_',r'\_')
         return rf" \mathit{{{new_name}}}"
     
-    def __eq__(self, other: TRSVar) -> bool:
-        return isinstance(other, TRSVar) and self.name == other.name
+    def __eq__(self, other: Var|str) -> bool:
+        '''
+        Can be compared with Var or str instances
+        '''
+        if isinstance(other, str):
+            return self.name == other
+        
+        return isinstance(other, Var) and self.name == other.name
     
     def size(self) -> int:
         return 1
     
-    def variables(self) -> set[str]:
-        return {self.name}
+    def __hash__(self):
+        return hash(self.name)
+    
+    def variables(self) -> set[Var]:
+        return {self}
     
     def substitute(self, sigma: Subst) -> TRSTerm:
         return self if self.name not in sigma else sigma[self.name]
@@ -184,7 +198,7 @@ class StdTerm(TRSTerm):
         '''
         return 1 + sum(arg.size() for arg in self.args)
     
-    def variables(self) -> set[str]:
+    def variables(self) -> set[Var]:
         '''
         Return a set of (the name of) all variables in this term. (including the bind variables)
         '''
@@ -207,7 +221,7 @@ class BindVarTerm(TRSTerm):
     '''
     The TRSTerm with a bind variable
     '''
-    def __init__(self, bind_var: TRSVar, body: TRSTerm):
+    def __init__(self, bind_var: Var, body: TRSTerm):
         self.bind_var = bind_var
         self.body = body
 
@@ -239,8 +253,8 @@ class BindVarTerm(TRSTerm):
             if self.bind_var == __value.bind_var:
                 return self.body == __value.body
             else:
-                new_v = var_rename(self.variables() | __value.variables())
-                return self.rename_bind(TRSVar(new_v)) == __value.rename_bind(TRSVar(new_v))
+                new_v = new_var(self.variables() | __value.variables())
+                return self.rename_bind(new_v) == __value.rename_bind(new_v)
         
         else:
             return False
@@ -248,12 +262,12 @@ class BindVarTerm(TRSTerm):
     def size(self) -> int:
         return self.body.size() + 2
     
-    def variables(self) -> set[str]:
-        return self.body.variables() | {self.bind_var.name}
+    def variables(self) -> set[Var]:
+        return self.body.variables() | {self.bind_var}
     
-    def free_variables(self) -> set[str]:
+    def free_variables(self) -> set[Var]:
         res = self.body.variables()
-        res.discard(self.bind_var.name)
+        res.discard(self.bind_var)
         return res
     
     @property
@@ -261,11 +275,11 @@ class BindVarTerm(TRSTerm):
         return len(self.free_variables()) == 0
 
 
-    def rename_bind(self, new_v: TRSVar) -> BindVarTerm:
+    def rename_bind(self, new_v: Var) -> BindVarTerm:
         '''
         rename the bind variable to a new one.
         '''
-        return type(self)(new_v, self.body.substitute(Subst({self.bind_var.name: new_v})))
+        return type(self)(new_v, self.body.substitute(Subst({self.bind_var: new_v})))
     
     def substitute(self, sigma: Subst) -> BindVarTerm:
         '''
@@ -273,11 +287,11 @@ class BindVarTerm(TRSTerm):
         change the bind variable if so.
         '''
         vset = sigma.domain | sigma.vrange
-        if self.bind_var.name not in vset:
+        if self.bind_var not in vset:
             return type(self)(self.bind_var, self.body.substitute(sigma))
         else:
-            new_v = TRSVar(var_rename(vset))
-            new_sigma = sigma.composite(Subst({self.bind_var.name : new_v}))
+            new_v = new_var(vset)
+            new_sigma = sigma.composite(Subst({self.bind_var : new_v}))
             return type(self)(new_v, self.body.substitute(new_sigma))
         
 
@@ -289,7 +303,7 @@ class MultiBindTerm(TRSTerm):
     The TRSTerm with multiple bind variable 
     (different bind variable order are equivalent)
     '''
-    def __new__(cls, bind_vars: Tuple[TRSVar, ...], body: TRSTerm):
+    def __new__(cls, bind_vars: Tuple[Var, ...], body: TRSTerm):
         if len(bind_vars) == 0:
             return body
         else:
@@ -297,7 +311,7 @@ class MultiBindTerm(TRSTerm):
             MultiBindTerm.__init__(obj, bind_vars, body)
             return obj
 
-    def __init__(self, bind_vars: Tuple[TRSVar, ...], body: TRSTerm):
+    def __init__(self, bind_vars: Tuple[Var, ...], body: TRSTerm):
         # try to flatten
         if isinstance(body, type(self)):
             bind_vars = bind_vars + body.bind_vars
@@ -329,13 +343,13 @@ class MultiBindTerm(TRSTerm):
                 return False
             
             # first find common bind variable renaming list
-            new_vars = var_rename_ls(self.variables() | __value.variables(), len(self.bind_vars))
+            new_vars = new_var_ls(self.variables() | __value.variables(), len(self.bind_vars))
 
-            self_renamed = self.rename_bind(tuple(TRSVar(v) for v in new_vars))
+            self_renamed = self.rename_bind(tuple(v for v in new_vars))
 
             # try different bind variable sequences
             for perm in itertools.permutations(new_vars):
-                other_renamed = __value.rename_bind(tuple(TRSVar(v) for v in perm))
+                other_renamed = __value.rename_bind(tuple(v for v in perm))
                 if self_renamed.body == other_renamed.body:
                     return True
                 
@@ -348,19 +362,19 @@ class MultiBindTerm(TRSTerm):
     def size(self) -> int:
         return self.body.size() + len(self.bind_vars) + 1
     
-    def variables(self) -> set[str]:
-        return self.body.variables() | set(map(lambda x:x.name, self.bind_vars))
+    def variables(self) -> set[Var]:
+        return self.body.variables() | set(self.bind_vars)
     
-    def free_variables(self) -> set[str]:
+    def free_variables(self) -> set[Var]:
         res = self.body.variables()
-        return res - set(map(lambda x:x.name, self.bind_vars))
+        return res - set(self.bind_vars)
     
     @property
     def is_ground(self) -> bool:
         return len(self.free_variables()) == 0
 
 
-    def rename_bind(self, new_vars: Tuple[TRSVar, ...]) -> MultiBindTerm:
+    def rename_bind(self, new_vars: Tuple[Var, ...]) -> MultiBindTerm:
         '''
         rename the bind variables in order
         '''
@@ -376,17 +390,17 @@ class MultiBindTerm(TRSTerm):
         change the bind variable if so.
         '''
         vset = sigma.domain | sigma.vrange
-        bind_vars_set = set(map(lambda x:x.name, self.bind_vars))
+        bind_vars_set = set(self.bind_vars)
         if len(bind_vars_set & vset) == 0:
             return type(self)(self.bind_vars, self.body.substitute(sigma))
         else:
-            new_vars = var_rename_ls(vset, len(self.bind_vars))
+            new_vars = new_var_ls(vset, len(self.bind_vars))
 
-            new_vars = tuple(TRSVar(v) for v in new_vars)
+            new_vars = tuple(v for v in new_vars)
 
             sub_dist = {}
             for i, new_v in enumerate(new_vars):
-                sub_dist[self.bind_vars[i].name] = new_v
+                sub_dist[self.bind_vars[i]] = new_v
 
             new_sigma = sigma.composite(Subst(sub_dist))
             return type(self)(new_vars, self.body.substitute(new_sigma))
@@ -502,7 +516,7 @@ class TRS_AC(StdTerm):
 # universal algebra methods
 
 class Subst:
-    def __init__(self, data : Dict[str, TRSTerm]):
+    def __init__(self, data : Dict[Var, TRSTerm]):
         self.data = data.copy()
 
 
@@ -521,7 +535,7 @@ class Subst:
     def __str__(self):
         blocks : List[str|FormBlock] = [' ']
         for key in self.data:
-            blocks.append(HSeqBlock(' ', key, ' ↦ ', str(self.data[key]), ' '))
+            blocks.append(HSeqBlock(' ', str(key), ' ↦ ', str(self.data[key]), ' '))
             blocks.append(' ')
         return str(FrameBlock(VSeqBlock(*blocks, h_align='l')))
     
@@ -540,7 +554,7 @@ class Subst:
     # universal algebra methods
     
     @property
-    def domain(self) -> set[str]:
+    def domain(self) -> set[Var]:
         return set(self.data.keys())
 
     @property
@@ -548,7 +562,7 @@ class Subst:
         return set(self.data.values())
     
     @property
-    def vrange(self) -> set[str]:
+    def vrange(self) -> set[Var]:
         '''
         variable range: the variables occuring in the range
         '''
@@ -609,7 +623,7 @@ class Matching:
         return "{" + ", ".join([f"{lhs} ≲? {rhs}" for lhs, rhs in self.ineqs]) + "}"
     
     @property
-    def variables(self) -> set[str]:
+    def variables(self) -> set[Var]:
         res = set()
         for lhs, rhs in self.ineqs:
             res |= lhs.variables() | rhs.variables()
@@ -622,26 +636,26 @@ class Matching:
     @staticmethod
     def solve_matching(ineqs: List[Tuple[TRSTerm, TRSTerm]]) -> Subst | None:
 
-        subst : Dict[str, TRSTerm] = {}
+        subst : Dict[Var, TRSTerm] = {}
 
         while len(ineqs) > 0:
             lhs, rhs = ineqs[0]
 
-            if isinstance(lhs, TRSVar):
-                if lhs.name in subst.keys():
+            if isinstance(lhs, Var):
+                if lhs in subst.keys():
                     if Subst(subst)(lhs) == rhs:
                         ineqs = ineqs[1:]
                         continue
                     else:
                         return None
                 else:
-                    subst[lhs.name] = rhs
+                    subst[lhs] = rhs
                     ineqs = ineqs[1:]
                     continue
 
             # being function constructions
             elif isinstance(lhs, StdTerm):
-                if isinstance(rhs, TRSVar):
+                if isinstance(rhs, Var):
                     return None
             
                 elif isinstance(rhs, StdTerm):
@@ -686,7 +700,7 @@ def check_special_symbol(term : TRSTerm) -> bool:
     if isinstance(term, TRS_AC) or isinstance(term, TRSCommBinary):
         return True
     else:
-        if isinstance(term, TRSVar):
+        if isinstance(term, Var):
             return False
         elif isinstance(term, StdTerm):
             for arg in term.args:
@@ -762,7 +776,7 @@ class TRS:
     def __add__(self, other: TRS) -> TRS:
         return TRS(self.rules + other.rules)
 
-    def variables(self) -> set[str]:
+    def variables(self) -> set[Var]:
         '''
         Return a set of all free variables in the rules.
         (This method is not that rigorous, and only acts as a hint.)
@@ -812,7 +826,7 @@ class TRS:
 
             subst = {}
             for var in overlap:
-                subst[var] = TRSVar(var_rename(overlap|set(subst.keys()), var))
+                subst[var] = new_var(overlap|set(subst.keys()), var.name)
             
             renamed_trs = self.substitute(Subst(subst))
 

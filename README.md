@@ -67,7 +67,7 @@ The keywords are the symbols in captial letters in the following definition. A v
     ```
     It takes about 5 seconds.
 
-- Now the variables of dirac notation and wolfram language are unified. Meaning, we can substitute the symbols in wolfram language now. And since we will always operate wolfram expression in the Global context, we delete the "Global`" prefix when calculating the variables. Also, it allowed to substitute the symbols in wolfram language by TRSVar  instances directly.
+- Now the variables of dirac notation and wolfram language are unified. Meaning, we can substitute the symbols in wolfram language now. And since we will always operate wolfram expression in the Global context, we delete the "Global`" prefix when calculating the variables. Also, it allowed to substitute the symbols in wolfram language by Var  instances directly.
 
 - Use `HoldForm` in the Wolfram Language to keep the input expression unchanged. The trs have rules to release the hold during reduction.
 

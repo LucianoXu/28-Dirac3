@@ -1,7 +1,7 @@
 
 from __future__ import annotations
 
-from ..trs import TRSTerm, TRSVar, StdTerm, TRS_AC, TRSCommBinary, TRSInfixBinary, Subst
+from ..trs import TRSTerm, Var, StdTerm, TRS_AC, TRSCommBinary, TRSInfixBinary, Subst
 
 from ...backends.formprint import *
 

@@ -7,7 +7,7 @@ The script to construct rewriting systems and corresponding parsers with differe
 
 
 from typing import Any
-from .theory.trs import TRSTerm, TRSVar, Subst
+from .theory.trs import TRSTerm, Var, Subst
 from .components import wolU
 
 #########################

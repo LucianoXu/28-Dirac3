@@ -4,27 +4,27 @@ from diracdec.theory.trs import *
 from diracdec import parse
 
 def test_bind_alpha_conv():
-    a = BindVarTerm(TRSVar("x"), TRSVar("x"))
-    b = BindVarTerm(TRSVar("y"), TRSVar("y"))
+    a = BindVarTerm(Var("x"), Var("x"))
+    b = BindVarTerm(Var("y"), Var("y"))
     assert a == b
 
-    a = BindVarTerm(TRSVar("x"), TRSVar("z"))
-    b = BindVarTerm(TRSVar("y"), TRSVar("z"))
+    a = BindVarTerm(Var("x"), Var("z"))
+    b = BindVarTerm(Var("y"), Var("z"))
     assert a == b
 
 def test_bind_substitute():
     sub = Subst({
-        "a" : TRSVar("z"),
+        "a" : Var("z"),
     })
-    a = BindVarTerm(TRSVar("a"), TRSVar("a"))
+    a = BindVarTerm(Var("a"), Var("a"))
     assert sub(a) == a
 
-    a = BindVarTerm(TRSVar("b"), TRSVar("a"))
-    b = BindVarTerm(TRSVar("c"), TRSVar("z"))
+    a = BindVarTerm(Var("b"), Var("a"))
+    b = BindVarTerm(Var("c"), Var("z"))
     assert sub(a) == b
 
 
-    a = BindVarTerm(TRSVar("z"), TRSVar("a"))
-    b = BindVarTerm(TRSVar("y"), TRSVar("z"))
+    a = BindVarTerm(Var("z"), Var("a"))
+    b = BindVarTerm(Var("y"), Var("z"))
     assert sub(a) == b
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from ..dirac.syntax import *
 
-from ..trs import BindVarTerm, MultiBindTerm, var_rename, var_rename_ls, seq_content_eq
+from ..trs import BindVarTerm, MultiBindTerm, new_var, new_var_ls, seq_content_eq
 
 import itertools
 
@@ -96,7 +96,7 @@ class SumTemplate(MultiBindTerm):
     fsymbol_print = 'SumTemplate'
     fsymbol = 'SumTemplate'
 
-    def __new__(cls, bind_vars: Tuple[Tuple[TRSVar, TRSTerm], ...], body: TRSTerm):
+    def __new__(cls, bind_vars: Tuple[Tuple[Var, TRSTerm], ...], body: TRSTerm):
         if len(bind_vars) == 0:
             return body
         else:
@@ -104,7 +104,7 @@ class SumTemplate(MultiBindTerm):
             SumTemplate.__init__(obj, bind_vars, body)
             return obj
 
-    def __init__(self, bind_vars: Tuple[Tuple[TRSVar, TRSTerm], ...], body: TRSTerm):
+    def __init__(self, bind_vars: Tuple[Tuple[Var, TRSTerm], ...], body: TRSTerm):
         # try to flatten
         if isinstance(body, type(self)):
             bind_vars = bind_vars + body.bind_vars
@@ -134,13 +134,13 @@ class SumTemplate(MultiBindTerm):
                 return False
             
             # first find common bind variable renaming list
-            new_vars = var_rename_ls(self.variables() | __value.variables(), len(self.bind_vars))
+            new_vars = new_var_ls(self.variables() | __value.variables(), len(self.bind_vars))
 
-            self_renamed = self.rename_bind(tuple(TRSVar(v) for v in new_vars))
+            self_renamed = self.rename_bind(tuple(v for v in new_vars))
 
             # try different bind variable sequences
             for perm in itertools.permutations(new_vars):
-                other_renamed = __value.rename_bind(tuple(TRSVar(v) for v in perm))
+                other_renamed = __value.rename_bind(tuple(v for v in perm))
                 # we check two parts: the body are the same, and the bind variables (with sets) have same contents
                 if self_renamed.body == other_renamed.body and \
                     seq_content_eq(self_renamed.bind_vars, other_renamed.bind_vars):
@@ -155,14 +155,14 @@ class SumTemplate(MultiBindTerm):
     def size(self) -> int:
         return self.body.size() + len(self.bind_vars) + 1
     
-    def variables(self) -> set[str]:
+    def variables(self) -> set[Var]:
         bind_vars = set()
         for v, t in self.bind_vars:
             bind_vars.add(v.name)
             bind_vars |= t.variables()
         return self.body.variables() | bind_vars
     
-    def free_variables(self) -> set[str]:
+    def free_variables(self) -> set[Var]:
         bind_vars = set()
         for v, t in self.bind_vars:
             bind_vars.add(v.name)
@@ -178,13 +178,13 @@ class SumTemplate(MultiBindTerm):
         return len(self.free_variables()) == 0
 
 
-    def rename_bind(self, new_vars: Tuple[TRSVar, ...]) -> SumTemplate:
+    def rename_bind(self, new_vars: Tuple[Var, ...]) -> SumTemplate:
         '''
         rename the bind variables in order
         '''
         sub_dist = {}
         for i, new_v in enumerate(new_vars):
-            sub_dist[self.bind_vars[i][0].name] = new_v
+            sub_dist[self.bind_vars[i][0]] = new_v
 
         new_vars_with_set = tuple(zip(new_vars, [t.substitute(Subst(sub_dist)) for v, t in self.bind_vars]))
 
@@ -196,19 +196,19 @@ class SumTemplate(MultiBindTerm):
         change the bind variable if so.
         '''
         vset = sigma.domain | sigma.vrange
-        bind_vars_set = set(map(lambda x:x[0].name, self.bind_vars))
+        bind_vars_set = set(map(lambda x:x[0], self.bind_vars))
         
         if len(bind_vars_set & vset) == 0:
             new_vars_with_set = tuple([(v, t.substitute(sigma)) for v, t in self.bind_vars])
             return type(self)(new_vars_with_set, self.body.substitute(sigma))
         else:
-            new_vars = var_rename_ls(vset, len(self.bind_vars))
+            new_vars = new_var_ls(vset, len(self.bind_vars))
 
             sub_dist = {}
             for i, new_v in enumerate(new_vars):
-                sub_dist[self.bind_vars[i][0].name] = TRSVar(new_v)
+                sub_dist[self.bind_vars[i][0]] = new_v
 
-            new_vars_with_set = tuple([(TRSVar(new_vars[i]), self.bind_vars[i][1].substitute(sigma)) for i in range(len(new_vars))])
+            new_vars_with_set = tuple([(new_vars[i], self.bind_vars[i][1].substitute(sigma)) for i in range(len(new_vars))])
 
             new_sigma = sigma.composite(Subst(sub_dist))
             return type(self)(new_vars_with_set, self.body.substitute(new_sigma))

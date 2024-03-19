@@ -5,15 +5,15 @@ from diracdec import parse
 
 def test_1():
     with wolfram_backend.wolfram_session():
-        a = ScalarAdd(TRSVar('A'), TRSVar('B'), TRSVar('A'))
-        b = ScalarAdd(TRSVar('A'), TRSVar('A'), TRSVar('B'))
+        a = ScalarAdd(Var('A'), Var('B'), Var('A'))
+        b = ScalarAdd(Var('A'), Var('A'), Var('B'))
         assert a == b
 
 
 def test_2():
     with wolfram_backend.wolfram_session():
-        a = ScalarAdd(TRSVar('A'), TRSVar('A'), TRSVar('B'))
-        b = ScalarMlt(TRSVar('A'), TRSVar('A'), TRSVar('B'))
+        a = ScalarAdd(Var('A'), Var('A'), Var('B'))
+        b = ScalarMlt(Var('A'), Var('A'), Var('B'))
         assert a != b
 
 def test_subst_idempotent():

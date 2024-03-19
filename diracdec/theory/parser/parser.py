@@ -49,7 +49,7 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
         '''
         trs-var     : ID
         '''
-        p[0] = TRSVar(p[1])
+        p[0] = Var(p[1])
 
 
     def p_diracbase1(p):
@@ -298,7 +298,7 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
         if len(p) == 1:
             p[0] = {}
         else:
-            p[1][p[2].name] = p[4]
+            p[1][p[2]] = p[4]
             p[0] = p[1]
 
 

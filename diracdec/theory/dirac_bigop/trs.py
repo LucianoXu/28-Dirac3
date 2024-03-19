@@ -242,7 +242,7 @@ def construct_trs(
                         if v[0].name not in s.free_variables() and v[1] == UniversalSet():
                             new_bind_vars = term.bind_vars[:j]+term.bind_vars[j+1:]
 
-                            sub = Subst({v[0].name : s})
+                            sub = Subst({v[0] : s})
                             return SumS(new_bind_vars, ScalarMlt(*term.body.remained_terms(i)).substitute(sub))
                                     
     SUM_ELIM_4 = TRSRule(
@@ -269,7 +269,7 @@ def construct_trs(
                 if v[0].name not in s.free_variables() and v[1] == UniversalSet():
                     new_bind_vars = term.bind_vars[:i]+term.bind_vars[i+1:]
 
-                    sub = Subst({v[0].name : s})
+                    sub = Subst({v[0] : s})
                     return Sum(new_bind_vars, term.body.args[1].substitute(sub))
             
             
@@ -297,7 +297,7 @@ def construct_trs(
                         if v[0].name not in s.free_variables() and v[1] == UniversalSet():
                             new_bind_vars = term.bind_vars[:j]+term.bind_vars[j+1:]
 
-                            sub = Subst({v[0].name : s})
+                            sub = Subst({v[0] : s})
 
                             return Sum(new_bind_vars, type(term.body)(ScalarMlt(*term.body.args[0].remained_terms(i)).substitute(sub), term.body.args[1].substitute(sub)))
                         
@@ -446,8 +446,8 @@ def construct_trs(
 
             # we have to rename if necessary
             if set(v[0].name for v in term.args[0].bind_vars) & term.args[1].free_variables() == set():
-                new_var = var_rename_ls(term.args[0].variables() | term.args[1].variables(), len(term.args[0].bind_vars))
-                renamed_sum = term.args[0].rename_bind(tuple(TRSVar(v) for v in new_var))
+                new_var = new_var_ls(term.args[0].variables() | term.args[1].variables(), len(term.args[0].bind_vars))
+                renamed_sum = term.args[0].rename_bind(tuple(v for v in new_var))
             else:
                 renamed_sum = term.args[0]
 
@@ -471,8 +471,8 @@ def construct_trs(
 
             # we have to rename if necessary
             if set(v[0].name for v in term.args[1].bind_vars) & term.args[0].free_variables() == set():
-                new_var = var_rename_ls(term.args[1].variables() | term.args[0].variables(), len(term.args[1].bind_vars))
-                renamed_sum = term.args[1].rename_bind(tuple(TRSVar(v) for v in new_var))
+                new_var = new_var_ls(term.args[1].variables() | term.args[0].variables(), len(term.args[1].bind_vars))
+                renamed_sum = term.args[1].rename_bind(tuple(v for v in new_var))
             else:
                 renamed_sum = term.args[1]
 
@@ -497,8 +497,8 @@ def construct_trs(
 
             # we have to rename if necessary
             if set(v[0].name for v in term.args[0].bind_vars) & term.args[1].free_variables() == set():
-                new_var = var_rename_ls(term.args[0].variables() | term.args[1].variables(), len(term.args[0].bind_vars))
-                renamed_sum = term.args[0].rename_bind(tuple(TRSVar(v) for v in new_var))
+                new_var = new_var_ls(term.args[0].variables() | term.args[1].variables(), len(term.args[0].bind_vars))
+                renamed_sum = term.args[0].rename_bind(tuple(v for v in new_var))
             else:
                 renamed_sum = term.args[0]
 
@@ -519,8 +519,8 @@ def construct_trs(
 
             # we have to rename if necessary
             if set(v[0].name for v in term.args[1].bind_vars) & term.args[0].free_variables() == set():
-                new_var = var_rename_ls(term.args[1].variables() | term.args[0].variables(), len(term.args[1].bind_vars))
-                renamed_sum = term.args[1].rename_bind(tuple(TRSVar(v) for v in new_var))
+                new_var = new_var_ls(term.args[1].variables() | term.args[0].variables(), len(term.args[1].bind_vars))
+                renamed_sum = term.args[1].rename_bind(tuple(v for v in new_var))
             else:
                 renamed_sum = term.args[1]
 
@@ -571,7 +571,7 @@ def construct_trs(
     #                 for j in range(i+1, len(term.args)):
     #                     itemB = term.args[j]
     #                     if isinstance(itemB, SumS):
-    #                         new_bind_var = TRSVar(var_rename(itemA.variables() | itemB.variables()))
+    #                         new_bind_var = Var(new_var(itemA.variables() | itemB.variables()))
     #                         subA = Subst({
     #                             itemA.bind_var.name: new_bind_var,
     #                         })
@@ -600,7 +600,7 @@ def construct_trs(
     #                 for j in range(i+1, len(term.args)):
     #                     itemB = term.args[j]
     #                     if isinstance(itemB, Sum):
-    #                         new_bind_var = TRSVar(var_rename(itemA.variables() | itemB.variables()))
+    #                         new_bind_var = Var(new_var(itemA.variables() | itemB.variables()))
     #                         subA = Subst({
     #                             itemA.bind_var.name: new_bind_var,
     #                         })
@@ -628,7 +628,7 @@ def construct_trs(
         if isinstance(term, Apply):
             f, x = term.args
             if isinstance(f, Abstract):
-                return f.body.substitute(Subst({f.bind_var.name: x}))
+                return f.body.substitute(Subst({f.bind_var: x}))
             
     BETA_REDUCTION = TRSRule(
         "BETA-REDUCTION",

@@ -3,47 +3,50 @@ from diracdec.theory.dirac_bigop import *
 from diracdec import parse, dirac_bigop_delta_trs as trs, juxt
 
 with wolfram_backend.wolfram_session():
-    sub = Subst({
-        "ket0" : parse('''KET('0')'''),
-        "bra0" : parse('''BRA('0')'''),
-        "ket1" : parse('''KET('1')'''),
-        "bra1" : parse('''BRA('1')'''),
-        "ketP" : parse(''' "Sqrt[1/2]" SCR (ket0 ADD ket1) '''),
-        "braP" : parse(''' "Sqrt[1/2]" SCR (bra0 ADD bra1) '''),
-        "ketM" : parse(''' "Sqrt[1/2]" SCR (ket0 ADD ("-1" MLTK ket1)) '''),
-        "braM" : parse(''' "Sqrt[1/2]" SCR (bra0 ADD ("-1" MLTB bra1)) '''),
+    sub = parse(
+        '''
+{
+        ket0 : KET('0');
+        bra0 : BRA('0');
+        ket1 : KET('1');
+        bra1 : BRA('1');
+        ketP :  "Sqrt[1/2]" SCR (ket0 ADD ket1) ;
+        braP :  "Sqrt[1/2]" SCR (bra0 ADD bra1) ;
+        ketM :  "Sqrt[1/2]" SCR (ket0 ADD ("-1" MLTK ket1)) ;
+        braM :  "Sqrt[1/2]" SCR (bra0 ADD ("-1" MLTB bra1)) ;
 
-        "beta00" : parse(''' "Sqrt[1/2]" SCR ((ket0 TSRK ket0) ADD (ket1 TSRK ket1))'''),
+        beta00 :  "Sqrt[1/2]" SCR ((ket0 TSRK ket0) ADD (ket1 TSRK ket1));
 
-        "I2" : parse('''(ket0 OUTER bra0) ADD (ket1 OUTER bra1)'''),
+        I2 : (ket0 OUTER bra0) ADD (ket1 OUTER bra1);
 
-        "Z" : parse('''(ket0 OUTER bra0) ADD ("-1" SCR (ket1 OUTER bra1))'''),
+        Z : (ket0 OUTER bra0) ADD ("-1" SCR (ket1 OUTER bra1));
 
-        "X" : parse('''(ket0 OUTER bra1) ADD (ket1 OUTER bra0)'''),
+        X : (ket0 OUTER bra1) ADD (ket1 OUTER bra0);
 
-        "Y" : parse('''("-I" SCR (ket0 OUTER bra1)) ADD ("I" SCR (ket1 OUTER bra0))'''),
+        Y : ("-I" SCR (ket0 OUTER bra1)) ADD ("I" SCR (ket1 OUTER bra0));
 
 
-        "H" : parse(''' "Sqrt[1/2]" SCR ((ket0 OUTER bra0) ADD (ket0 OUTER bra1) ADD (ket1 OUTER bra0) ADD ("-1" SCR (ket1 OUTER bra1)))'''),
+        H :  "Sqrt[1/2]" SCR ((ket0 OUTER bra0) ADD (ket0 OUTER bra1) ADD (ket1 OUTER bra0) ADD ("-1" SCR (ket1 OUTER bra1)));
 
-        "CX": parse(''' ((ket0 TSRK ket0) OUTER (bra0 TSRB bra0))
+        CX :  ((ket0 TSRK ket0) OUTER (bra0 TSRB bra0))
                     ADD ((ket0 TSRK ket1) OUTER (bra0 TSRB bra1)) 
                     ADD ((ket1 TSRK ket1) OUTER (bra1 TSRB bra0))
-                    ADD ((ket1 TSRK ket0) OUTER (bra1 TSRB bra1))'''),
+                    ADD ((ket1 TSRK ket0) OUTER (bra1 TSRB bra1));
 
-        "CZ": parse(''' ((ket0 TSRK ket0) OUTER (bra0 TSRB bra0))
+        CZ :  ((ket0 TSRK ket0) OUTER (bra0 TSRB bra0))
                     ADD ((ket0 TSRK ket1) OUTER (bra0 TSRB bra1)) 
                     ADD ((ket1 TSRK ket0) OUTER (bra1 TSRB bra0))
-                    ADD ("-1" SCR ((ket1 TSRK ket1) OUTER (bra1 TSRB bra1)))'''),
-
-    }).get_idempotent()
+                    ADD ("-1" SCR ((ket1 TSRK ket1) OUTER (bra1 TSRB bra1)));
+        }
+          '''
+    ).get_idempotent()
 
 
 def test_1():
     with wolfram_backend.wolfram_session():
         a = parse(''' SUM(a, "a")''')
         sub = Subst({
-            "a" : parse(''' "1" '''),
+            Var("a") : parse(''' "1" '''),
         })
         assert a == sub(a)
 
@@ -65,8 +68,8 @@ def test_QCQI_Theorem_4_1_with_abstraction():
     with wolfram_backend.wolfram_session():
         # define the rotation gates
         sub_rot = Subst({
-            "Rz" : sub(parse(''' FUN beta . ( ("Cos[beta/2]" SCR I2) ADD ("- Sin[beta/2] I" SCR Z) )''')),
-            "Ry" : sub(parse(''' FUN gamma . ( ("Cos[gamma/2]" SCR I2) ADD ("- Sin[gamma/2] I" SCR Y) )''')),
+            Var("Rz") : sub(parse(''' FUN beta . ( ("Cos[beta/2]" SCR I2) ADD ("- Sin[beta/2] I" SCR Z) )''')),
+            Var("Ry") : sub(parse(''' FUN gamma . ( ("Cos[gamma/2]" SCR I2) ADD ("- Sin[gamma/2] I" SCR Y) )''')),
         })
 
         # get the idempotent operation
@@ -141,7 +144,7 @@ def test_ASigma_bigop():
 def test_choi():
     with wolfram_backend.wolfram_session():
         sub = Subst({
-            "choi" : parse(r''' 
+            Var("choi") : parse(r''' 
             FUN A . SUM(i, 
                         SUM(j, 
                             (BRA(i) DOT (A MLTK KET(j)))
@@ -158,7 +161,7 @@ def test_choi():
 def test_unchoi():
     with wolfram_backend.wolfram_session():
         sub = Subst({
-            "unchoi" : parse(r'''
+            Var("unchoi") : parse(r'''
             FUN A . SUM(i,
                         SUM(j,
                             (BRA(PAIR(i, j)) DOT A)
@@ -175,14 +178,14 @@ def test_unchoi():
 def test_choi_unchoi():
     with wolfram_backend.wolfram_session():
         sub = Subst({
-        "choi" : parse(r''' 
+        Var("choi") : parse(r''' 
         FUN A . SUM(i, 
                     SUM(j, 
                         (BRA(i) DOT (A MLTK KET(j)))
                         SCR KET(PAIR(i,j))
                     )    
                 ) '''),
-        "unchoi" : parse(r'''
+        Var("unchoi") : parse(r'''
         FUN A . SUM(i,
                     SUM(j,
                         (BRA(PAIR(i, j)) DOT A)

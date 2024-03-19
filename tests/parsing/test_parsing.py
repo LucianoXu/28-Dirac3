@@ -5,37 +5,37 @@ from diracdec import parse
 def test_basic_base():
     with wolfram_backend.wolfram_session():
         a = parse(r''' PAIR(s, t) ''')
-        b = BasePair(TRSVar('s'), TRSVar('t'))
+        b = BasePair(Var('s'), Var('t'))
         assert a == b
 
         a = parse(r''' FST(s) ''')
-        b = BaseFst(TRSVar('s'))
+        b = BaseFst(Var('s'))
         assert a == b
 
         a = parse(r''' SND(s) ''')
-        b = BaseSnd(TRSVar('s'))
+        b = BaseSnd(Var('s'))
         assert a == b
 
 def test_basic_S():
     with wolfram_backend.wolfram_session():
         a = parse(r''' DELTA(s, t) ''')
-        b = ScalarDelta(TRSVar('s'), TRSVar('t'))
+        b = ScalarDelta(Var('s'), Var('t'))
         assert a == b
 
         a = parse(r''' A ADDS B ''')
-        b = ScalarAdd(TRSVar('A'), TRSVar('B'))
+        b = ScalarAdd(Var('A'), Var('B'))
         assert a == b
 
         a = parse(r''' A MLTS B MLTS A ''')
-        b = ScalarMlt(TRSVar('A'), TRSVar('A'), TRSVar('B'))
+        b = ScalarMlt(Var('A'), Var('A'), Var('B'))
         assert a == b
         
         a = parse(r''' CONJS(A) ''')
-        b = ScalarConj(TRSVar('A'))
+        b = ScalarConj(Var('A'))
         assert a == b
 
         a = parse(r''' A DOT B ''')
-        b = ScalarDot(TRSVar('A'), TRSVar('B'))
+        b = ScalarDot(Var('A'), Var('B'))
         assert a == b
 
 def test_basic_K():
@@ -45,27 +45,27 @@ def test_basic_K():
         assert a == b
 
         a = parse(r''' KET(s) ''')
-        b = KetBase(TRSVar('s'))
+        b = KetBase(Var('s'))
         assert a == b
 
         a = parse(r''' ADJ(s) ''')
-        b = Adj(TRSVar('s'))
+        b = Adj(Var('s'))
         assert a == b
         
         a = parse(r''' S SCR K ''')
-        b = Scal(TRSVar('S'), TRSVar('K'))
+        b = Scal(Var('S'), Var('K'))
         assert a == b
 
         a = parse(r''' K1 ADD K2 ADD K3 ''')
-        b = Add(TRSVar('K1'), TRSVar('K2'), TRSVar('K3'))
+        b = Add(Var('K1'), Var('K2'), Var('K3'))
         assert a == b
 
         a = parse(r''' O MLTK K ''')
-        b = KetApply(TRSVar('O'), TRSVar('K'))
+        b = KetApply(Var('O'), Var('K'))
         assert a == b
 
         a = parse(r''' K1 TSRK K2 ''')
-        b = KetTensor(TRSVar('K1'), TRSVar('K2'))
+        b = KetTensor(Var('K1'), Var('K2'))
         assert a == b
 
 def test_basic_B():
@@ -75,27 +75,27 @@ def test_basic_B():
         assert a == b
 
         a = parse(r''' BRA(s) ''')
-        b = BraBase(TRSVar('s'))
+        b = BraBase(Var('s'))
         assert a == b
 
         a = parse(r''' ADJ(s) ''')
-        b = Adj(TRSVar('s'))
+        b = Adj(Var('s'))
         assert a == b
         
         a = parse(r''' S SCR B ''')
-        b = Scal(TRSVar('S'), TRSVar('B'))
+        b = Scal(Var('S'), Var('B'))
         assert a == b
 
         a = parse(r''' B1 ADD B2 ADD B3 ''')
-        b = Add(TRSVar('B1'), TRSVar('B2'), TRSVar('B3'))
+        b = Add(Var('B1'), Var('B2'), Var('B3'))
         assert a == b
 
         a = parse(r''' B MLTB O ''')
-        b = BraApply(TRSVar('B'), TRSVar('O'))
+        b = BraApply(Var('B'), Var('O'))
         assert a == b
 
         a = parse(r''' B1 TSRB B2 ''')
-        b = BraTensor(TRSVar('B1'), TRSVar('B2'))
+        b = BraTensor(Var('B1'), Var('B2'))
         assert a == b
 
 def test_basic_O():
@@ -109,27 +109,27 @@ def test_basic_O():
         assert a == b
 
         a = parse(r''' K OUTER B ''')
-        b = OpOuter(TRSVar('K'), TRSVar('B'))
+        b = OpOuter(Var('K'), Var('B'))
         assert a == b
 
         a = parse(r''' ADJ(O)''')
-        b = Adj(TRSVar('O'))
+        b = Adj(Var('O'))
         assert a == b
         
         a = parse(r''' S SCR O ''')
-        b = Scal(TRSVar('S'), TRSVar('O'))
+        b = Scal(Var('S'), Var('O'))
         assert a == b
 
         a = parse(r''' O1 ADD O2 ADD O3 ''')
-        b = Add(TRSVar('O1'), TRSVar('O2'), TRSVar('O3'))
+        b = Add(Var('O1'), Var('O2'), Var('O3'))
         assert a == b
 
         a = parse(r''' O1 MLTO O2 ''')
-        b = OpApply(TRSVar('O1'), TRSVar('O2'))
+        b = OpApply(Var('O1'), Var('O2'))
         assert a == b
 
         a = parse(r''' O1 TSRO O2 ''')
-        b = OpTensor(TRSVar('O1'), TRSVar('O2'))
+        b = OpTensor(Var('O1'), Var('O2'))
         assert a == b
 
 def test_subst():
@@ -139,7 +139,7 @@ def test_subst():
             t : BRA(b);
         }''')
         b = Subst({
-            "s" : KetBase(TRSVar('a')),
-            "t" : BraBase(TRSVar('b')),
+            "s" : KetBase(Var('a')),
+            "t" : BraBase(Var('b')),
         })
         assert a == b

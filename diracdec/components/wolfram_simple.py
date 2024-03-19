@@ -10,7 +10,7 @@ from diracdec.theory.trs import Subst, TRSTerm
 from ..theory.atomic_base import AtomicBase
 from ..theory.complex_scalar import ComplexScalar
 
-from ..theory import TRSTerm, TRSVar, Subst
+from ..theory import TRSTerm, Var, Subst
 
 from ..backends.wolfram_backend import *
 
@@ -55,13 +55,13 @@ class WolframABase(AtomicBase):
         return 1
     
 
-    def variables(self) -> set[str]:
+    def variables(self) -> set[Var]:
         '''
         Special symbols like "Inifinity" will also match _Symbol, and we rule them out.
 
         Notice: the "Global`" prefix is removed
         '''
-        return set(v.name.replace("Global`", "") 
+        return set(Var(v.name.replace("Global`", ""))
                    for v in session.evaluate(wl.Cases(self.simp_expr, wl.Blank(wl.Symbol), wl.Infinity)) 
                    if isinstance(v, WLSymbol)
                    )
@@ -77,7 +77,7 @@ class WolframABase(AtomicBase):
             return self.simp_expr == other.simp_expr
         
         else:
-            vars = wl.List(*[wl.Symbol(v) for v in common_vars])
+            vars = wl.List(*[wl.Symbol(v.name) for v in common_vars])
             res = session.evaluate(wl.FindInstance(wl.Equal(self.simp_expr, other.simp_expr), vars))
             return res != ()
         
@@ -86,10 +86,10 @@ class WolframABase(AtomicBase):
         # create the substitution in Wolfram Language
         wolfram_sub = []
         for k, v in sigma.data.items():
-            if isinstance(v, TRSVar):
-                wolfram_sub.append(wl.Rule(wl.Symbol(k), wl.Symbol(v.name)))
+            if isinstance(v, Var):
+                wolfram_sub.append(wl.Rule(wl.Symbol(k.name), wl.Symbol(v.name)))
             elif isinstance(v, WolframABase) or isinstance(v, WolframCScalar):
-                wolfram_sub.append(wl.Rule(wl.Symbol(k), v.simp_expr))
+                wolfram_sub.append(wl.Rule(wl.Symbol(k.name), v.simp_expr))
         if len(wolfram_sub) == 0:
             return self
 
@@ -151,11 +151,11 @@ class WolframCScalar(ComplexScalar):
     def size(self) -> int:
         return 1
     
-    def variables(self) -> set[str]:
+    def variables(self) -> set[Var]:
         '''
         Special symbols like "Inifinity" will also match _Symbol, and we rule them out.
         '''
-        return set(v.name.replace("Global`", "") 
+        return set(Var(v.name.replace("Global`", ""))
                    for v in session.evaluate(wl.Cases(self.simp_expr, wl.Blank(wl.Symbol), wl.Infinity)) 
                    if isinstance(v, WLSymbol)
                    )
@@ -164,10 +164,10 @@ class WolframCScalar(ComplexScalar):
         # create the substitution in Wolfram Language
         wolfram_sub = []
         for k, v in sigma.data.items():
-            if isinstance(v, TRSVar):
-                wolfram_sub.append(wl.Rule(wl.Symbol(k), wl.Symbol(v.name)))
+            if isinstance(v, Var):
+                wolfram_sub.append(wl.Rule(wl.Symbol(k.name), wl.Symbol(v.name)))
             elif isinstance(v, WolframCScalar) or isinstance(v, WolframABase):
-                wolfram_sub.append(wl.Rule(wl.Symbol(k), v.simp_expr))
+                wolfram_sub.append(wl.Rule(wl.Symbol(k.name), v.simp_expr))
         if len(wolfram_sub) == 0:
             return self
 

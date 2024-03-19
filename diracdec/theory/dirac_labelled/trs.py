@@ -645,8 +645,8 @@ def construct_trs(
 
             # we have to rename if necessary
             if set(v[0].name for v in term.args[0].bind_vars) & term.args[1].free_variables() == set():
-                new_var = var_rename_ls(term.args[0].variables() | term.args[1].variables(), len(term.args[0].bind_vars))
-                renamed_sum = term.args[0].rename_bind(tuple(TRSVar(v) for v in new_var))
+                new_var = new_var_ls(term.args[0].variables() | term.args[1].variables(), len(term.args[0].bind_vars))
+                renamed_sum = term.args[0].rename_bind(tuple(v for v in new_var))
             else:
                 renamed_sum = term.args[0]
 
@@ -670,8 +670,8 @@ def construct_trs(
 
             # we have to rename if necessary
             if set(v[0].name for v in term.args[1].bind_vars) & term.args[0].free_variables() == set():
-                new_var = var_rename_ls(term.args[1].variables() | term.args[0].variables(), len(term.args[1].bind_vars))
-                renamed_sum = term.args[1].rename_bind(tuple(TRSVar(v) for v in new_var))
+                new_var = new_var_ls(term.args[1].variables() | term.args[0].variables(), len(term.args[1].bind_vars))
+                renamed_sum = term.args[1].rename_bind(tuple(v for v in new_var))
             else:
                 renamed_sum = term.args[1]
 
@@ -696,8 +696,8 @@ def construct_trs(
 
     #         # we have to rename if necessary
     #         if set(v[0].name for v in term.args[0].bind_vars) & term.args[1].free_variables() == set():
-    #             new_var = var_rename_ls(term.args[0].variables() | term.args[1].variables(), len(term.args[0].bind_vars))
-    #             renamed_sum = term.args[0].rename_bind(tuple(TRSVar(v) for v in new_var))
+    #             new_var = new_var_ls(term.args[0].variables() | term.args[1].variables(), len(term.args[0].bind_vars))
+    #             renamed_sum = term.args[0].rename_bind(tuple(Var(v) for v in new_var))
     #         else:
     #             renamed_sum = term.args[0]
 
@@ -718,8 +718,8 @@ def construct_trs(
 
     #         # we have to rename if necessary
     #         if set(v[0].name for v in term.args[1].bind_vars) & term.args[0].free_variables() == set():
-    #             new_var = var_rename_ls(term.args[1].variables() | term.args[0].variables(), len(term.args[1].bind_vars))
-    #             renamed_sum = term.args[1].rename_bind(tuple(TRSVar(v) for v in new_var))
+    #             new_var = new_var_ls(term.args[1].variables() | term.args[0].variables(), len(term.args[1].bind_vars))
+    #             renamed_sum = term.args[1].rename_bind(tuple(Var(v) for v in new_var))
     #         else:
     #             renamed_sum = term.args[1]
 

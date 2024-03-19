@@ -1,7 +1,7 @@
 
 from . import trs
 
-from .trs import TRSTerm, TRSVar, Subst
+from .trs import TRSTerm, Var, Subst
 
 from . import dirac
 
