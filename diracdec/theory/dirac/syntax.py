@@ -169,17 +169,8 @@ class Add(DiracNotation, TRS_AC):
 
     def __init__(self, *tup : TRSTerm):
         TRS_AC.__init__(self, *tup)
-
-class Tensor(DiracNotation, TRSInfixBinary):
-    fsymbol_print = "⊗"
-    fsymbol = "TSR"
-
-    def __init__(self, X1: TRSTerm, X2: TRSTerm) :
-        TRSInfixBinary.__init__(self, X1, X2)
-
-    def tex(self) -> str:
-        return rf" \left ({self.args[0].tex()} \otimes {self.args[1].tex()} \right)"
-
+    
+        
 ############################################
 # DiracKet
         
@@ -209,6 +200,17 @@ class KetApply(DiracNotation, TRSInfixBinary):
             return rf" {self.args[0].tex()} {self.args[1].tex()}"
         else:
             return rf" {self.args[0].tex()} \cdot {self.args[1].tex()}"
+
+
+class KetTensor(DiracNotation, TRSInfixBinary):
+    fsymbol_print = "⊗"
+    fsymbol = "TSRK"
+
+    def __init__(self, K1: TRSTerm, K2: TRSTerm) :
+        TRSInfixBinary.__init__(self, K1, K2)
+
+    def tex(self) -> str:
+        return rf" \left ({self.args[0].tex()} \otimes {self.args[1].tex()} \right)"
     
 
 ############################################
@@ -240,6 +242,17 @@ class BraApply(DiracNotation, TRSInfixBinary):
             return rf" {self.args[0].tex()} {self.args[1].tex()}"
         else:
             return rf" {self.args[0].tex()} \cdot {self.args[1].tex()}"
+
+    
+class BraTensor(DiracNotation, TRSInfixBinary):
+    fsymbol_print = "⊗"
+    fsymbol = "TSRB"
+
+    def __init__(self, B1: TRSTerm, B2: TRSTerm) :
+        TRSInfixBinary.__init__(self, B1, B2)
+
+    def tex(self) -> str:
+        return rf" \left ( {self.args[0].tex()} \otimes {self.args[1].tex()} \right )"
 
 
 ############################################
@@ -285,3 +298,14 @@ class OpApply(DiracNotation, TRSInfixBinary):
 
     def tex(self) -> str:
         return rf" {self.args[0].tex()} \cdot {self.args[1].tex()}"
+
+
+class OpTensor(DiracNotation, TRSInfixBinary):
+    fsymbol_print = "⊗"
+    fsymbol = "TSRO"
+
+    def __init__(self, O1: TRSTerm, O2: TRSTerm) :
+        TRSInfixBinary.__init__(self, O1, O2)
+
+    def tex(self) -> str:
+        return rf" \left ( {self.args[0].tex()} \otimes {self.args[1].tex()} \right ) "

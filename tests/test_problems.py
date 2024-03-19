@@ -17,6 +17,6 @@ def test_problem_2():
     sum elimination is not complete. these two terms can be not joinable when X is pushed inside the sum first.
     '''
     with wolfram_backend.wolfram_session():
-        a = parse('''X TSR SUM(i, (BRA(i) DOT K0) SCR KET(i))''')
-        b = parse('''X TSR K0''')
+        a = parse('''X TSRK SUM(i, (BRA(i) DOT K0) SCR KET(i))''')
+        b = parse('''X TSRK K0''')
         assert entry_trs.normalize(trs.normalize(a)) == entry_trs.normalize(trs.normalize(b))

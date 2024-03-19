@@ -52,8 +52,8 @@ def test_TRANS_KET_2():
 
 def test_TRANS_KET_3():
     with wolfram_backend.wolfram_session():
-        a = parse(r'''TP(B1 TSR B2)''')
-        b = parse(r'''TP(B1) TSR TP(B2)''')
+        a = parse(r'''TP(B1 TSRB B2)''')
+        b = parse(r'''TP(B1) TSRK TP(B2)''')
         assert trs.normalize(a) == trs.normalize(b)
 
 
@@ -75,8 +75,8 @@ def test_TRANS_BRA_2():
 
 def test_TRANS_BRA_3():
     with wolfram_backend.wolfram_session():
-        a = parse(r'''TP(K1 TSR K2)''')
-        b = parse(r'''TP(K1) TSR TP(K2)''')
+        a = parse(r'''TP(K1 TSRK K2)''')
+        b = parse(r'''TP(K1) TSRB TP(K2)''')
         assert trs.normalize(a) == trs.normalize(b)
 
 def test_TRANS_OPT_1():
@@ -103,8 +103,8 @@ def test_TRANS_OPT_3():
 
 def test_TRANS_OPT_4():
     with wolfram_backend.wolfram_session():
-        a = parse(r'''TP(O1 TSR O2)''')
-        b = parse(r'''TP(O1) TSR TP(O2)''')
+        a = parse(r'''TP(O1 TSRO O2)''')
+        b = parse(r'''TP(O1) TSRO TP(O2)''')
         assert trs.normalize(a) == trs.normalize(b)
 
 
@@ -296,12 +296,12 @@ def test_SUM_DIST_8():
 
 def test_SUM_DIST_9():
     with wolfram_backend.wolfram_session():
-        a = parse(r'''SUM(x, T, K1 TSR K2)''')
-        b = parse(r'''SUM(x, T, K1) TSR K2''')
+        a = parse(r'''SUM(x, T, K1 TSRK K2)''')
+        b = parse(r'''SUM(x, T, K1) TSRK K2''')
         assert trs.normalize(a) == trs.normalize(b)
 
-        a = parse(r'''SUM(x, T, B1 TSR B2)''')
-        b = parse(r'''SUM(x, T, B1) TSR B2''')
+        a = parse(r'''SUM(x, T, B1 TSRB B2)''')
+        b = parse(r'''SUM(x, T, B1) TSRB B2''')
         assert trs.normalize(a) == trs.normalize(b)
 
         a = parse(r'''SUM(x, T, K0 OUTER B0)''')
@@ -313,56 +313,56 @@ def test_SUM_DIST_9():
         assert trs.normalize(a) == trs.normalize(b)
 
         # check variable renaming
-        a = parse(r'''SUM(y, T, K0 TSR x)''')
-        b = parse(r'''SUM(x, T, K0) TSR x''')
+        a = parse(r'''SUM(y, T, K0 TSRK x)''')
+        b = parse(r'''SUM(x, T, K0) TSRK x''')
         assert trs.normalize(a) == trs.normalize(b)
 
 
 def test_SUM_DIST_10():
     with wolfram_backend.wolfram_session():
-        a = parse(r'''SUM(x, T, K1 TSR K2)''')
-        b = parse(r'''K1 TSR SUM(x, T, K2)''')
+        a = parse(r'''SUM(x, T, K1 TSRK K2)''')
+        b = parse(r'''K1 TSRK SUM(x, T, K2)''')
         assert trs.normalize(a) == trs.normalize(b)
 
-        a = parse(r'''SUM(x, T, B1 TSR B2)''')
-        b = parse(r'''B1 TSR SUM(x, T, B2)''')
+        a = parse(r'''SUM(x, T, B1 TSRB B2)''')
+        b = parse(r'''B1 TSRB SUM(x, T, B2)''')
         assert trs.normalize(a) == trs.normalize(b)
 
         a = parse(r'''SUM(x, T, K0 OUTER B0)''')
         b = parse(r'''K0 OUTER SUM(x, T, B0)''')
         assert trs.normalize(a) == trs.normalize(b)
 
-        a = parse(r'''SUM(x, T, O1 TSR O2)''')
-        b = parse(r'''O1 TSR SUM(x, T, O2)''')
+        a = parse(r'''SUM(x, T, O1 TSRO O2)''')
+        b = parse(r'''O1 TSRO SUM(x, T, O2)''')
         assert trs.normalize(a) == trs.normalize(b)
 
         # check variable renaming
-        a = parse(r'''SUM(y, T, x TSR K0)''')
-        b = parse(r'''x TSR SUM(x, T, K0)''')
+        a = parse(r'''SUM(y, T, x TSRK K0)''')
+        b = parse(r'''x TSRK SUM(x, T, K0)''')
         assert trs.normalize(a) == trs.normalize(b)
 
 
 def test_SUM_COMP_1():
     with wolfram_backend.wolfram_session():
-        a = parse(r''' SUM(i, USET, BRA(i)) DOT KET('0') ''')
+        a = parse(r''' SUMS(i, USET, BRA(i)) DOT KET('0') ''')
         b = parse(r''' "1" ''')
         assert trs.normalize(a) == trs.normalize(b)
 
 def test_SUM_COMP_2():
     with wolfram_backend.wolfram_session():
-        a = parse(r''' BRA('0') DOT SUM(i, USET, KET(i)) ''')
+        a = parse(r''' BRA('0') DOT SUMS(i, USET, KET(i)) ''')
         b = parse(r''' "1" ''')
         assert trs.normalize(a) == trs.normalize(b)
 
 def test_SUM_COMP_3():
     with wolfram_backend.wolfram_session():
-        a = parse(r''' SUM(i, T, KET(i)) TSR KET(j) ''')
+        a = parse(r''' SUM(i, T, KET(i)) TSRK KET(j) ''')
         b = parse(r''' SUM(i, T, KET(PAIR(i, j))) ''')
         assert trs.normalize(a) == trs.normalize(b)
 
 def test_SUM_COMP_4():
     with wolfram_backend.wolfram_session():
-        a = parse(r''' BRA(j) TSR SUM(i, T, BRA(i)) ''')
+        a = parse(r''' BRA(j) TSRB SUM(i, T, BRA(i)) ''')
         b = parse(r''' SUM(i, T, BRA(PAIR(j, i))) ''')
         assert trs.normalize(a) == trs.normalize(b)
 

@@ -15,18 +15,20 @@ reserved = {
 
     # unified symbol
     'ADJ'        : 'ADJ',
-    'SCR'        : 'SCR',       # infix binary
-    'ADD'        : 'ADD',       # AC
-    'TSR'        : 'TSR',       # infix binary
+    'SCR'        : 'SCR',
+    'ADD'        : 'ADD',
 
     'KET'        : 'KET',
     'MLTK'       : 'MLTK',      # infix binary
+    'TSRK'       : 'TSRK',      # infix binary
 
     'BRA'        : 'BRA',
     'MLTB'       : 'MLTB',      # infix binary
+    'TSRB'       : 'TSRB',      # infix binary
 
     'OUTER'      : 'OUTER',     # infix binary
     'MLTO'       : 'MLTO',      # infix binary
+    'TSRO'       : 'TSRO',      # infix binary
 
     ########################################
     # transpose
@@ -62,7 +64,17 @@ reserved = {
 
     ########################################
     # labeleld Dirac
-    'TSRL'     : 'TSRL',
+    'DOTL'      : 'DOTL',
+    'ADJL'      : 'ADJL',
+    'SCRL'      : 'SCRL',
+    'ADDL'      : 'ADDL',
+    'MLTKL'     : 'MLTKL',
+    'TSRKL'     : 'TSRKL',
+    'MLTBL'     : 'MLTBL',
+    'TSRBL'     : 'TSRBL',
+    'MLTOL'     : 'MLTOL',
+    'TSROL'     : 'TSROL',
+    'OUTERL'    : 'OUTERL',
 }
 
 tokens = [

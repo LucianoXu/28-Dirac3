@@ -2,7 +2,7 @@ import io
 from flask import Flask, request, render_template
 
 from diracdec import *
-from diracdec import dirac_bigop_delta_parse as parse, dirac_bigop_delta_trs as trs, juxt, sumeq, wolU
+from diracdec import parse, dirac_bigop_delta_trs as trs, juxt, wolU
 import signal
 
 app = Flask(__name__)
@@ -17,7 +17,7 @@ default_subst = '''{
         ketM :  "Sqrt[1/2]" SCR (ket0 ADD ("-1" MLTK ket1)) ;
         braM :  "Sqrt[1/2]" SCR (bra0 ADD ("-1" MLTB bra1)) ;
 
-        beta00 :  "Sqrt[1/2]" SCR ((ket0 TSR ket0) ADD (ket1 TSR ket1));
+        beta00 :  "Sqrt[1/2]" SCR ((ket0 TSRK ket0) ADD (ket1 TSRK ket1));
 
         I2 : (ket0 OUTER bra0) ADD (ket1 OUTER bra1);
 
@@ -30,29 +30,29 @@ default_subst = '''{
 
         H :  "Sqrt[1/2]" SCR ((ket0 OUTER bra0) ADD (ket0 OUTER bra1) ADD (ket1 OUTER bra0) ADD ("-1" SCR (ket1 OUTER bra1)));
 
-        CX :  ((ket0 TSR ket0) OUTER (bra0 TSR bra0))
-                    ADD ((ket0 TSR ket1) OUTER (bra0 TSR bra1)) 
-                    ADD ((ket1 TSR ket1) OUTER (bra1 TSR bra0))
-                    ADD ((ket1 TSR ket0) OUTER (bra1 TSR bra1));
+        CX :  ((ket0 TSRK ket0) OUTER (bra0 TSRB bra0))
+                    ADD ((ket0 TSRK ket1) OUTER (bra0 TSRB bra1)) 
+                    ADD ((ket1 TSRK ket1) OUTER (bra1 TSRB bra0))
+                    ADD ((ket1 TSRK ket0) OUTER (bra1 TSRB bra1));
 
-        CZ :  ((ket0 TSR ket0) OUTER (bra0 TSR bra0))
-                    ADD ((ket0 TSR ket1) OUTER (bra0 TSR bra1)) 
-                    ADD ((ket1 TSR ket0) OUTER (bra1 TSR bra0))
-                    ADD ("-1" SCR ((ket1 TSR ket1) OUTER (bra1 TSR bra1)));
+        CZ :  ((ket0 TSRK ket0) OUTER (bra0 TSRB bra0))
+                    ADD ((ket0 TSRK ket1) OUTER (bra0 TSRB bra1)) 
+                    ADD ((ket1 TSRK ket0) OUTER (bra1 TSRB bra0))
+                    ADD ("-1" SCR ((ket1 TSRK ket1) OUTER (bra1 TSRB bra1)));
         }'''
 
 default_termA = '''
 (
     (
-        SUM(i, KET(i) OUTER BRA(i)) TSR 1O
+        SUM(i, KET(i) OUTER BRA(i)) TSRO 1O
     ) 
-    MLTO (A TSR 1O)
+    MLTO (A TSRO 1O)
 ) 
 MLTK (SUM(i, KET(PAIR(i, i)))) 
 '''
 default_termB = '''
 (
-    (1O TSR SUM(i, KET(i) OUTER BRA(i))) MLTO (1O TSR TP(A))
+    (1O TSRO SUM(i, KET(i) OUTER BRA(i))) MLTO (1O TSRO TP(A))
 ) 
 MLTK 
 (SUM(i, KET(PAIR(i, i)))) 
@@ -95,7 +95,7 @@ def calculate():
     termA = None
     try:
         termA = parse(termA_code).substitute(sub_idempotent)
-        norm_termA = wolU(trs.normalize(juxt(sumeq(trs.normalize(termA, verbose=True, stream=proofA_stream)))))
+        norm_termA = wolU(trs.normalize(juxt(trs.normalize(termA, verbose=True, stream=proofA_stream))))
         norm_termA_text = str(norm_termA)
 
     except Exception as e:
@@ -109,7 +109,7 @@ def calculate():
     termB = None
     try:
         termB = parse(termB_code).substitute(sub_idempotent)
-        norm_termB = wolU(trs.normalize(juxt(sumeq(trs.normalize(termB, verbose=True, stream=proofB_stream)))))
+        norm_termB = wolU(trs.normalize(juxt(trs.normalize(termB, verbose=True, stream=proofB_stream))))
         norm_termB_text = str(norm_termB)
     
     except Exception as e:
