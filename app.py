@@ -2,7 +2,7 @@ import io
 from flask import Flask, request, render_template
 
 from diracdec import *
-from diracdec import dirac_bigop_delta_parse as parse, dirac_bigop_delta_trs as trs, juxt, sumeq, wolU
+from diracdec import parse, dirac_bigop_delta_trs as trs, juxt, wolU
 import signal
 
 app = Flask(__name__)
@@ -95,7 +95,7 @@ def calculate():
     termA = None
     try:
         termA = parse(termA_code).substitute(sub_idempotent)
-        norm_termA = wolU(trs.normalize(juxt(sumeq(trs.normalize(termA, verbose=True, stream=proofA_stream)))))
+        norm_termA = wolU(trs.normalize(juxt(trs.normalize(termA, verbose=True, stream=proofA_stream))))
         norm_termA_text = str(norm_termA)
 
     except Exception as e:
@@ -109,7 +109,7 @@ def calculate():
     termB = None
     try:
         termB = parse(termB_code).substitute(sub_idempotent)
-        norm_termB = wolU(trs.normalize(juxt(sumeq(trs.normalize(termB, verbose=True, stream=proofB_stream)))))
+        norm_termB = wolU(trs.normalize(juxt(trs.normalize(termB, verbose=True, stream=proofB_stream))))
         norm_termB_text = str(norm_termB)
     
     except Exception as e:

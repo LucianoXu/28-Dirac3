@@ -239,15 +239,15 @@ def test_LABEL_LIFT_4():
 
 def test_LABEL_LIFT_5():
     with wolfram_backend.wolfram_session():
-        a = parse(r''' (A[R]) ADDL (B[R]) ADDL X ''')
-        b = parse(r''' (A ADD B)[R] ADDL X ''')
+        a = parse(r''' (A ADD B)[R] ADDL X ''')
+        b = parse(r''' (A[R]) ADDL (B[R]) ADDL X ''')
         assert label_trs.normalize(a) == label_trs.normalize(b)
 
 
 def test_LABEL_LIFT_6():
     with wolfram_backend.wolfram_session():
-        a = parse(r''' (A[Q; R]) ADDL (B[Q; R]) ADDL X ''')
-        b = parse(r''' (A ADD B)[Q; R] ADDL X ''')
+        a = parse(r''' (A ADD B)[Q; R] ADDL X ''')
+        b = parse(r''' (A[Q; R]) ADDL (B[Q; R]) ADDL X ''')
         assert label_trs.normalize(a) == label_trs.normalize(b)
 
 def test_LABEL_LIFT_7():
@@ -305,6 +305,14 @@ def test_LABEL_LIFT_14():
 
 def test_LABEL_LIFT_15():
     with wolfram_backend.wolfram_session():
+        a = parse(r''' (A[R]) MLTKL (B[R]) ''')
+        b = parse(r''' (A MLTK B)[R] ''')
+        assert label_trs.normalize(a) == label_trs.normalize(b)
+
+        a = parse(r''' (A[R]) MLTBL (B[R]) ''')
+        b = parse(r''' (A MLTB B)[R] ''')
+        assert label_trs.normalize(a) == label_trs.normalize(b)
+
         a = parse(r''' (A[R]) MLTOL (B[R]) ''')
         b = parse(r''' (A MLTO B)[R] ''')
         assert label_trs.normalize(a) == label_trs.normalize(b)
@@ -315,6 +323,20 @@ def test_LABEL_LIFT_16():
         a = parse(r''' (A[R]) DOTL (B[R]) ''')
         b = parse(r''' A DOT B ''')
         assert label_trs.normalize(a) == label_trs.normalize(b)
+
+def test_LABEL_LIFT_17():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' (K0 OUTER B0)[R] ''')
+        b = parse(r''' (K0[R]) OUTER (B0[R]) ''')
+        assert label_trs.normalize(a) == label_trs.normalize(b)
+
+
+def test_LABEL_LIFT_18():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' (K0 OUTER B0)[Q; R] ''')
+        b = parse(r''' (K0[Q]) OUTER (B0[R]) ''')
+        assert label_trs.normalize(a) == label_trs.normalize(b)
+
 
 def test_OPT_EXT_1():
     with wolfram_backend.wolfram_session():
@@ -344,13 +366,39 @@ def test_OPT_EXT_3():
 
 def test_LABEL_SUM_1():
     with wolfram_backend.wolfram_session():
-        a = parse(r''' SUM(x, T, A[R]) ''')
-        b = parse(r''' SUM(x, T, A)[R] ''')
+        a = parse(r''' SUM(x, T, A)[R] ''')
+        b = parse(r''' SUM(x, T, A[R]) ''')
         assert label_trs.normalize(a) == label_trs.normalize(b)
 
 
 def test_LABEL_SUM_2():
     with wolfram_backend.wolfram_session():
-        a = parse(r''' SUM(x, T, A[Q; R]) ''')
-        b = parse(r''' SUM(x, T, A)[Q; R] ''')
+        a = parse(r''' SUM(x, T, A)[Q; R] ''')
+        b = parse(r''' SUM(x, T, A[Q; R]) ''')
+        assert label_trs.normalize(a) == label_trs.normalize(b)
+
+
+
+def test_LABEL_TEMP_1():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' A[R] MLTOL (B[PAIRR(R, Q)] TSROL X) ''')
+        b = parse(r''' (A[R] MLTOL B[PAIRR(R, Q)]) TSROL X ''')
+        assert label_trs.normalize(a) == label_trs.normalize(b)
+
+def test_LABEL_TEMP_2():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' (B[PAIRR(R, Q)] TSROL X) MLTOL A[R] ''')
+        b = parse(r''' (B[PAIRR(R, Q)] MLTOL A[R]) TSROL X ''')
+        assert label_trs.normalize(a) == label_trs.normalize(b)
+
+def test_LABEL_TEMP_3():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' A[R] DOT (B[R] TSRKL X) ''')
+        b = parse(r''' (A[R] DOT B[R]) SCR X ''')
+        assert label_trs.normalize(a) == label_trs.normalize(b)
+
+def test_LABEL_TEMP_4():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' (A[R] TSRBL X) DOT B[R] ''')
+        b = parse(r''' (A[R] DOT B[R]) SCR X ''')
         assert label_trs.normalize(a) == label_trs.normalize(b)

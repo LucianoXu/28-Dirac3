@@ -222,6 +222,9 @@ class SumS(DiracNotation, SumTemplate):
         vars_names = ", ".join([f'{v.name} ∈ {str(t)}' for v, t in self.bind_vars])
         return str(HSeqBlock(
             IndexBlock('__\n\\ \n/ \n‾‾', D_index=vars_names), " ", str(self.body)))
+    
+    def __repr__(self) -> str:
+        return f"SumS({repr(self.bind_vars)}, {repr(self.body)})"
 
     def tex(self) -> str:
         vars_names = ", ".join([rf'{v.name} \in {t.tex()}' for v, t in self.bind_vars])
@@ -236,6 +239,9 @@ class Sum(DiracNotation, SumTemplate):
         vars_names = ", ".join([f'{v.name} ∈ {str(t)}' for v, t in self.bind_vars])
         return str(HSeqBlock(
             IndexBlock('__\n\\ \n/ \n‾‾', D_index=vars_names), " ", str(self.body)))
+    
+    def __repr__(self) -> str:
+        return f"Sum({repr(self.bind_vars)}, {repr(self.body)})"
 
     def tex(self) -> str:
         vars_names = ", ".join([rf'{v.name} \in {t.tex()}' for v, t in self.bind_vars])

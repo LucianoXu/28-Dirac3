@@ -1,4 +1,6 @@
-# DiracDec Implementation
+# REM Implementation
+
+REM stands for rigorous expression model.
 
 ## Installation
 

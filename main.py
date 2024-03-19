@@ -6,7 +6,9 @@
 # session.terminate()
 
 from diracdec import *
-from diracdec import dirac_bigop_delta_parse as parse, dirac_bigop_delta_trs as trs
+from diracdec import parse as parse, dirac_bigop_delta_trs as trs, label_trs
+
+trs = trs + label_trs
 
 
 if __name__ == "__main__":
@@ -44,8 +46,8 @@ if __name__ == "__main__":
                     ADD ((ket1 TSRK ket0) OUTER (bra1 TSRB bra0))
                     ADD ("-1" SCR ((ket1 TSRK ket1) OUTER (bra1 TSRB bra1)));
         }''')
-        a = parse(''' SUMS(i, S0) SCR X ''')
-        b = parse(''' SUM(i, S0 SCR X) ''')
+        a = parse(r''' A[R] MLTOL (B[PAIRR(R, Q)] TSROL X) ''')
+        b = parse(r''' (A[R] MLTOL B[PAIRR(R, Q)]) TSROL X ''')
         print(trs.normalize(a, verbose=True))
         print(trs.normalize(b))
 
