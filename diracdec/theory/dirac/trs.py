@@ -39,7 +39,7 @@ def construct_trs(
     def atomic_base_rewrite(rule, trs, term):
         if isinstance(term, ABase):
             return term.reduce()
-    ATOMIC_BASE = TRSRule(
+    ATOMIC_BASE = Rule(
         "ATOMIC-BASE",
         lhs = "a",
         rhs = "a",
@@ -51,7 +51,7 @@ def construct_trs(
     def complex_scalar_rewrite(rule, trs, term):
         if isinstance(term, CScalar):
             return term.reduce()
-    COMPLEX_SCALAR = TRSRule(
+    COMPLEX_SCALAR = Rule(
         "COMPLEX-SCALAR",
         lhs = "a",
         rhs = "a",
@@ -102,14 +102,6 @@ def construct_trs(
     )
     rules.append(DELTA_2)
 
-    DELTA_2_ext = CanonicalRule(
-        "DELTA-2-ext",
-        lhs = parse("DELTA(FST(s), FST(t)) MLTS DELTA(SND(s), SND(t)) MLTS X"),
-        rhs = parse("DELTA(s, t) MLTS X")
-    )
-    rules.append(DELTA_2_ext)
-
-
     #################################################
     # Scalar
 
@@ -119,7 +111,7 @@ def construct_trs(
                 if term.args[i] == C0:
                     return ScalarAdd(*term.remained_terms(i))
 
-    SCR_COP_1 = TRSRule(
+    SCR_COP_1 = Rule(
         "SCR-COP-1",
         lhs="C(0) ADDS a", 
         rhs="a",
@@ -139,7 +131,7 @@ def construct_trs(
 
                             return ScalarAdd(*new_args)
 
-    SCR_COP_2 = TRSRule(
+    SCR_COP_2 = Rule(
         "SCR-COP-2",
         lhs="C(a) ADDS C(b)", 
         rhs="C(a + b)",
@@ -155,7 +147,7 @@ def construct_trs(
                         new_args = (ScalarMlt(C2, term.args[i]),) + term.remained_terms(i, j)
                         return ScalarAdd(*new_args)
                     
-    SCR_COP_3 = TRSRule(
+    SCR_COP_3 = Rule(
         "SCR-COP-3",
         lhs = "S0 ADDS S0",
         rhs = "C(1 + 1) MLTS S0",
@@ -176,7 +168,7 @@ def construct_trs(
                                     new_args += term.remained_terms(i, k)
                                     return ScalarAdd(*new_args)
                                 
-    SCR_COP_4 = TRSRule(
+    SCR_COP_4 = Rule(
         "SCR-COP-4",
         lhs = "(C(a) MLTS S0) ADDS S0",
         rhs = "C(a + 1) MLTS S0",
@@ -201,7 +193,7 @@ def construct_trs(
                                                 new_args += term.remained_terms(i, k)
                                                 return ScalarAdd(*new_args)
 
-    SCR_COP_5 = TRSRule(
+    SCR_COP_5 = Rule(
         "SCR-COP-5",
         lhs = "(C(a) MLTS S0) ADDS (C(b) MLTS S0)",
         rhs = "C(a + b) MLTS S0",
@@ -215,7 +207,7 @@ def construct_trs(
                 if term.args[i] == C0:
                     return C0
 
-    SCR_COP_6 = TRSRule(
+    SCR_COP_6 = Rule(
         "SCR-COP-6",
         lhs="C(0) MLTS a", 
         rhs="C(0)",
@@ -228,7 +220,7 @@ def construct_trs(
             for i in range(len(term.args)):
                 if term.args[i] == C1:
                     return ScalarMlt(*term.remained_terms(i))
-    SCR_COP_7 = TRSRule(
+    SCR_COP_7 = Rule(
         "SCR-COP-7",
         lhs="C(1) MLTS a", 
         rhs="a",
@@ -248,7 +240,7 @@ def construct_trs(
 
                             return ScalarMlt(*new_args)
 
-    SCR_COP_8 = TRSRule(
+    SCR_COP_8 = Rule(
         "SCR-COP-8",
         lhs="C(a) MLTS C(b)",
         rhs="C(a * b)",
@@ -263,7 +255,7 @@ def construct_trs(
                     S1 = ScalarMlt(*term.args[:i], *term.args[i+1:])
                     new_args = tuple(ScalarMlt(S1, term.args[i][j]) for j in range(len(term.args[i].args)))
                     return ScalarAdd(*new_args)
-    SCR_COP_9 = TRSRule(
+    SCR_COP_9 = Rule(
         "SCR-COP-9",
         lhs="a MLTS (b ADDS c)",
         rhs="(a MLTS b) ADDS (a MLTS c)",
@@ -276,7 +268,7 @@ def construct_trs(
         if isinstance(term, ScalarConj):
             if isinstance(term.args[0], ComplexScalar):
                 return CScalar.conj(term.args[0])
-    SCR_COP_10 = TRSRule(
+    SCR_COP_10 = Rule(
         "SCR-COP-10",
         lhs="CONJS(C(a))",
         rhs="C(a ^*)",
@@ -290,7 +282,7 @@ def construct_trs(
             if isinstance(term.args[0], ScalarDelta):
                 return term.args[0]
             
-    SCR_COP_11 = TRSRule(
+    SCR_COP_11 = Rule(
         "SCR-COP-11",
         lhs="CONJS(DELTA(a, b))",
         rhs="DELTA(a, b)",
@@ -304,7 +296,7 @@ def construct_trs(
             if isinstance(term.args[0], ScalarAdd):
                 new_args = tuple(ScalarConj(arg) for arg in term.args[0].args)
                 return ScalarAdd(*new_args)
-    SCR_COP_12 = TRSRule(
+    SCR_COP_12 = Rule(
         "SCR-COP-12",
         lhs="CONJS(a ADDS b)",
         rhs="CONJS(a) ADDS CONJS(b)",
@@ -318,7 +310,7 @@ def construct_trs(
             if isinstance(term.args[0], ScalarMlt):
                 new_args = tuple(ScalarConj(arg) for arg in term.args[0].args)
                 return ScalarMlt(*new_args)
-    SCR_COP_13 = TRSRule(
+    SCR_COP_13 = Rule(
         "SCR-COP-13",
         lhs="CONJS(a MLTS b)",
         rhs="CONJS(a) MLTS CONJS(b)",
@@ -378,7 +370,7 @@ def construct_trs(
             if isinstance(term.args[0], Add):
                 new_args = tuple(ScalarDot(arg, term.args[1]) for arg in term.args[0].args)
                 return ScalarAdd(*new_args)
-    SCR_DOT_5 = TRSRule(
+    SCR_DOT_5 = Rule(
         "SCR-DOT-5",
         lhs = "(B1 ADD B2) DOT K0",
         rhs = "(B1 DOT K0) ADDS (B2 DOT K0)",
@@ -391,7 +383,7 @@ def construct_trs(
             if isinstance(term.args[1], Add):
                 new_args = tuple(ScalarDot(term.args[0], arg) for arg in term.args[1].args)
                 return ScalarAdd(*new_args)
-    SCR_DOT_6 = TRSRule(
+    SCR_DOT_6 = Rule(
         "SCR-DOT-6",
         lhs = "B0 DOT (K1 ADD K2)",
         rhs = "(B0 DOT K1) ADDS (B0 DOT K2)",
@@ -483,7 +475,7 @@ def construct_trs(
             if isinstance(term.args[0], Add):
                 new_args = tuple(Adj(arg) for arg in term.args[0].args)
                 return Add(*new_args)
-    ADJ_UNI_4 = TRSRule(
+    ADJ_UNI_4 = Rule(
         "ADJ-UNI-4",
         lhs = "ADJ(X1 ADD X2)",
         rhs = "ADJ(X1) ADD ADJ(X2)",
@@ -605,7 +597,7 @@ def construct_trs(
                 new_args = tuple(Scal(term.args[0], arg) for arg in term.args[1].args)
                 return Add(*new_args)
             
-    SCR_5 = TRSRule(
+    SCR_5 = Rule(
         "SCR-5",
         lhs = "S0 SCR (X1 ADD X2)",
         rhs = "(S0 SCR X1) ADD (S0 SCR X2)",
@@ -620,7 +612,7 @@ def construct_trs(
             for i in range(len(term.args)):
                 if term.args[i] == Zero():
                     return Add(*term.remained_terms(i))
-    ADD_1 = TRSRule(
+    ADD_1 = Rule(
         "ADD-1",
         lhs = "0X ADD X0",
         rhs = "X0",
@@ -635,7 +627,7 @@ def construct_trs(
                     if term.args[i] == term.args[j]:
                         new_args = (Scal(C2, term.args[i]),) + term.remained_terms(i, j)
                         return Add(*new_args)
-    ADD_2 = TRSRule(
+    ADD_2 = Rule(
         "ADD-2",
         lhs = "X0 ADD X0",
         rhs = "C(1 + 1) SCR X0",
@@ -652,7 +644,7 @@ def construct_trs(
                             new_args = (
                                 Scal(ScalarAdd(term.args[i].args[0], C1), term.args[j]),) + term.remained_terms(i, j)
                             return Add(*new_args)
-    ADD_3 = TRSRule(
+    ADD_3 = Rule(
         "ADD-3",
         lhs = "(S0 SCR X0) ADD X0",
         rhs = "(S0 ADDS C(1)) SCR X0",
@@ -669,7 +661,7 @@ def construct_trs(
                             if term.args[i].args[1] == term.args[j].args[1]:
                                 new_args = (Scal(ScalarAdd(term.args[i].args[0], term.args[j].args[0]), term.args[i].args[1]),) + term.remained_terms(i, j)
                                 return Add(*new_args)
-    ADD_4 = TRSRule(
+    ADD_4 = Rule(
         "ADD-4",
         lhs = "(S1 SCR X0) ADD (S2 SCR X0)",
         rhs = "(S1 ADDS S2) SCR X0",
@@ -722,7 +714,7 @@ def construct_trs(
         if isinstance(term, KetApply) and isinstance(term.args[0], Add):
             new_args = tuple(KetApply(arg, term[1]) for arg in term.args[0].args)
             return Add(*new_args)
-    KET_MLT_6 = TRSRule(
+    KET_MLT_6 = Rule(
         "KET-MLT-6",
         lhs = "(O1 ADD O2) MLTK K0",
         rhs = "(O1 MLTK K0) ADD (O2 MLTK K0)",
@@ -735,7 +727,7 @@ def construct_trs(
         if isinstance(term, KetApply) and isinstance(term.args[1], Add):
             new_args = tuple(KetApply(term[0], arg) for arg in term.args[1].args)
             return Add(*new_args)
-    KET_MLT_7 = TRSRule(
+    KET_MLT_7 = Rule(
         "KET-MLT-7",
         lhs = "O0 MLTK (K1 ADD K2)",
         rhs = "(O0 MLTK K1) ADD (O0 MLTK K2)",
@@ -818,7 +810,7 @@ def construct_trs(
         if isinstance(term, KetTensor) and isinstance(term.args[0], Add):
             new_args = tuple(KetTensor(arg, term[1]) for arg in term.args[0].args)
             return Add(*new_args)
-    KET_TSR_6 = TRSRule(
+    KET_TSR_6 = Rule(
         "KET-TSR-6",
         lhs = "(K1 ADD K2) TSRK K0",
         rhs = "(K1 TSRK K0) ADD (K2 TSRK K0)",
@@ -830,7 +822,7 @@ def construct_trs(
         if isinstance(term, KetTensor) and isinstance(term.args[1], Add):
             new_args = tuple(KetTensor(term[0], arg) for arg in term.args[1].args)
             return Add(*new_args)
-    KET_TSR_7 = TRSRule(
+    KET_TSR_7 = Rule(
         "KET-TSR-7",
         lhs = "K0 TSRK (K1 ADD K2)",
         rhs = "(K0 TSRK K1) ADD (K0 TSRK K2)",
@@ -882,7 +874,7 @@ def construct_trs(
         if isinstance(term, BraApply) and isinstance(term.args[1], Add):
             new_args = tuple(BraApply(term[0], arg) for arg in term.args[1].args)
             return Add(*new_args)
-    BRA_MLT_6 = TRSRule(
+    BRA_MLT_6 = Rule(
         "BRA-MLT-6",
         lhs = "B0 MLTB (O1 ADD O2)",
         rhs = "(B0 MLTB O1) ADD (B0 MLTB O2)",
@@ -895,7 +887,7 @@ def construct_trs(
         if isinstance(term, BraApply) and isinstance(term.args[0], Add):
             new_args = tuple(BraApply(arg, term[1]) for arg in term.args[0].args)
             return Add(*new_args)
-    BRA_MLT_7 = TRSRule(
+    BRA_MLT_7 = Rule(
         "BRA-MLT-7",
         lhs = "(B1 ADD B2) MLTB O0",
         rhs = "(B1 MLTB O0) ADD (B2 MLTB O0)",
@@ -980,7 +972,7 @@ def construct_trs(
         if isinstance(term, BraTensor) and isinstance(term.args[0], Add):
             new_args = tuple(BraTensor(arg, term[1]) for arg in term.args[0].args)
             return Add(*new_args)
-    BRA_TSR_6 = TRSRule(
+    BRA_TSR_6 = Rule(
         "BRA-TSR-6",
         lhs = "(B1 ADD B2) TSRB B0",
         rhs = "(B1 TSRB B0) ADD (B2 TSRB B0)",
@@ -992,7 +984,7 @@ def construct_trs(
         if isinstance(term, BraTensor) and isinstance(term.args[1], Add):
             new_args = tuple(BraTensor(term[0], arg) for arg in term.args[1].args)
             return Add(*new_args)
-    BRA_TSR_7 = TRSRule(
+    BRA_TSR_7 = Rule(
         "BRA-TSR-7",
         lhs = "B0 TSRB (B1 ADD B2)",
         rhs = "(B0 TSRB B1) ADD (B0 TSRB B2)",
@@ -1036,7 +1028,7 @@ def construct_trs(
         if isinstance(term, OpOuter) and isinstance(term.args[0], Add):
             new_args = tuple(OpOuter(arg, term[1]) for arg in term.args[0].args)
             return Add(*new_args)
-    OPT_OUTER_5 = TRSRule(
+    OPT_OUTER_5 = Rule(
         "OPT-OUTER-5",
         lhs = "(K1 ADD K2) OUTER B0",
         rhs = "(K1 OUTER B0) ADD (K2 OUTER B0)",
@@ -1048,7 +1040,7 @@ def construct_trs(
         if isinstance(term, OpOuter) and isinstance(term.args[1], Add):
             new_args = tuple(OpOuter(term[0], arg) for arg in term.args[1].args)
             return Add(*new_args)
-    OPT_OUTER_6 = TRSRule(
+    OPT_OUTER_6 = Rule(
         "OPT-OUTER-6",
         lhs = "K0 OUTER (B1 ADD B2)",
         rhs = "(K0 OUTER B1) ADD (K0 OUTER B2)",
@@ -1117,7 +1109,7 @@ def construct_trs(
         if isinstance(term, OpApply) and isinstance(term.args[0], Add):
             new_args = tuple(OpApply(arg, term[1]) for arg in term.args[0].args)
             return Add(*new_args)
-    OPT_MLT_9 = TRSRule(
+    OPT_MLT_9 = Rule(
         "OPT-MLT-9",
         lhs = "(O1 ADD O2) MLTO O0",
         rhs = "(O1 MLTO O0) ADD (O2 MLTO O0)",
@@ -1129,7 +1121,7 @@ def construct_trs(
         if isinstance(term, OpApply) and isinstance(term.args[1], Add):
             new_args = tuple(OpApply(term[0], arg) for arg in term.args[1].args)
             return Add(*new_args)
-    OPT_MLT_10 = TRSRule(
+    OPT_MLT_10 = Rule(
         "OPT-MLT-10",
         lhs = "O0 MLTO (O1 ADD O2)",
         rhs = "(O0 MLTO O1) ADD (O0 MLTO O2)",
@@ -1205,7 +1197,7 @@ def construct_trs(
         if isinstance(term, OpTensor) and isinstance(term.args[0], Add):
             new_args = tuple(OpTensor(arg, term[1]) for arg in term.args[0].args)
             return Add(*new_args)
-    OPT_TSR_7 = TRSRule(
+    OPT_TSR_7 = Rule(
         "OPT-TSR-7",
         lhs = "(O1 ADD O2) TSRO O0",
         rhs = "(O1 TSRO O0) ADD (O2 TSRO O0)",
@@ -1217,7 +1209,7 @@ def construct_trs(
         if isinstance(term, OpTensor) and isinstance(term.args[1], Add):
             new_args = tuple(OpTensor(term[0], arg) for arg in term.args[1].args)
             return Add(*new_args)
-    OPT_TSR_8 = TRSRule(
+    OPT_TSR_8 = Rule(
         "OPT-TSR-8",
         lhs = "O0 TSRO (O1 ADD O2)",
         rhs = "(O0 TSRO O1) ADD (O0 TSRO O2)",

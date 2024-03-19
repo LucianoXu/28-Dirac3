@@ -57,7 +57,7 @@ def construct_trs(
             for i, s in enumerate(term.args):
                 if s == EmptyRSet():
                     return UnionRSet(*term.remained_terms(i))
-    RSET_1 = TRSRule(
+    RSET_1 = Rule(
         "RSET-1",
         lhs = "S UNIONR ESETR",
         rhs = "S",
@@ -71,7 +71,7 @@ def construct_trs(
                 for j in range(i+1, len(term.args)):
                     if term.args[i] == term.args[j]:
                         return UnionRSet(*term.remained_terms(j))
-    RSET_2 = TRSRule(
+    RSET_2 = Rule(
         "RSET-2",
         lhs = "S UNIONR S",
         rhs = "S",
@@ -90,7 +90,7 @@ def construct_trs(
                             if ((isinstance(si.args[0], QRegFst) and isinstance(sj.args[0], QRegSnd)) or \
                                 (isinstance(si.args[0], QRegSnd) and isinstance(sj.args[0], QRegFst))) and si.args[0].args[0] == sj.args[0].args[0]:
                                 return UnionRSet(*term.remained_terms(i, j), si.args[0].args[0])
-    RSET_3 = TRSRule(
+    RSET_3 = Rule(
         "RSET-3",
         lhs = "SETR(FST(R)) UNIONR SETR(SND(R))",
         rhs = "R",
@@ -125,7 +125,7 @@ def construct_trs(
         if isinstance(term, SubRSet) and isinstance(term.args[0], UnionRSet):
             return UnionRSet(*tuple(SubRSet(item, term.args[1]) for item in term.args[0]))
 
-    RSET_7 = TRSRule(
+    RSET_7 = Rule(
         "RSET-7",
         lhs = " (S1 UNIONR S2) SUBR X ",
         rhs = " (S1 SUBR X) UNIONR (S2 SUBR X) ",
@@ -138,7 +138,7 @@ def construct_trs(
         if isinstance(term, SubRSet) and isinstance(term.args[1], UnionRSet):
             return SubRSet(SubRSet(term.args[0], term.args[1].args[0]), UnionRSet(*term.args[1].remained_terms(0)))
 
-    RSET_8 = TRSRule(
+    RSET_8 = Rule(
         "RSET-8",
         lhs = " S1 SUBR (S2 UNIONR S3) ",
         rhs = " (S1 SUBR S2) SUBR S3 ",
@@ -156,7 +156,7 @@ def construct_trs(
                         if isinstance(sj, RegRSet):
                             if QReg.is_in(si.args[0], sj.args[0]):
                                 return UnionRSet(*term.remained_terms(i))
-    RSET_9 = TRSRule(
+    RSET_9 = Rule(
         "RSET-9",
         lhs = " SETR(R1) UNIONR SETR(R2) (R1 is in R2) ",
         rhs = "SETR(R2)",
@@ -168,7 +168,7 @@ def construct_trs(
         if isinstance(term, SubRSet) and isinstance(term.args[0], RegRSet) and isinstance(term.args[1], RegRSet):
             if QReg.is_in(term.args[0].args[0], term.args[1].args[0]):
                 return EmptyRSet()
-    RSET_10 = TRSRule(
+    RSET_10 = Rule(
         "RSET-10",
         lhs = " SETR(R1) SUBR SETR(R2) (R1 is in R2) ",
         rhs = "ESETR",
@@ -184,7 +184,7 @@ def construct_trs(
                     SubRSet(RegRSet(QRegFst(term.args[0].args[0])), term.args[1]),
                     SubRSet(RegRSet(QRegSnd(term.args[0].args[0])), term.args[1]),
                     )
-    RSET_11 = TRSRule(
+    RSET_11 = Rule(
         "RSET-11",
         lhs = " SETR(R2) SUBR SETR(R1) (R1 is in R2) ",
         rhs = " SETR(FSTR(R2) SUBR SETR(R1)) UNIONR SETR(SNDR(R2) SUBR SETR(R1)) ",
@@ -196,7 +196,7 @@ def construct_trs(
         if isinstance(term, SubRSet) and isinstance(term.args[0], RegRSet) and isinstance(term.args[1], RegRSet):
             if QReg.is_disj(term.args[0].args[0], term.args[1].args[0]):
                 return term.args[0]
-    RSET_12 = TRSRule(
+    RSET_12 = Rule(
         "RSET-12",
         lhs = " SETR(R1) SUBR SETR(R2) (R1 || R2) ",
         rhs = " SETR(R1) ",
@@ -273,7 +273,7 @@ def construct_trs(
                 Labelled1(term.args[0].args[0], term.args[1].args[0]),
                 Labelled1(term.args[0].args[1], term.args[1].args[1])
             )
-    TSR_DECOMP_3 = TRSRule(
+    TSR_DECOMP_3 = Rule(
         "TSR-DECOMP-3",
         lhs = " (A {TSRK/TSRB/TSRO} B)[PAIRR(Q, R)] ",
         rhs = " (A[Q]) {TSRKL/TSRBL/TSROL} (B[R]) ",
@@ -308,7 +308,7 @@ def construct_trs(
                                         oi.args[1].args[0], oi.args[2].args[0]
                                         ),
                                     *term.remained_terms(i, j))
-    TSR_COMP_1 = TRSRule(
+    TSR_COMP_1 = Rule(
         "TSR-COMP-1",
         lhs = " (A[FSTR(Q); FSTR(R)]) TSROL (B[SNDR(Q); SNDR(R)]) ",
         rhs = " (A TSRO B)[Q; R] ",
@@ -335,7 +335,7 @@ def construct_trs(
                                         T(oi.args[0], oj.args[0]), 
                                         oi.args[1].args[0]),
                                     *term.remained_terms(i, j))
-    TSR_COMP_2 = TRSRule(
+    TSR_COMP_2 = Rule(
         "TSR-COMP-2",
         lhs = " (A[FSTR(Q)]) {TSRKL/TSRBL/TSROL} (B[SNDR(Q)]) ",
         rhs = " (A {TSRK/TSRB/TSRO} B)[Q] ",
@@ -347,7 +347,7 @@ def construct_trs(
         if isinstance(term, OpApplyL) and isinstance(term.args[0], Labelled2) and isinstance(term.args[1], Labelled2):
             if QReg.is_disj(term.args[0].args[2], term.args[1].args[1]):
                 return OpTensorL(term.args[0], term.args[1])
-    DOT_TSR_1 = TRSRule(
+    DOT_TSR_1 = Rule(
         "DOT-TSR-1",
         lhs = " (A[Q;R]) MLTOL (B[S;T]) (R || S) ",
         rhs = " (A[Q;R]) TSROL (B[S;T]) ",
@@ -388,7 +388,7 @@ def construct_trs(
     def label_lift_5_rewrite(rule, trs, term):
         if isinstance(term, Labelled1) and isinstance(term.args[0], Add):
             return AddL(*tuple(Labelled1(t, term.args[1]) for t in term.args[0].args))
-    LABEL_LIFT_5 = TRSRule(
+    LABEL_LIFT_5 = Rule(
         "LABEL-LIFT-5",
         lhs = " (A ADD B)[R] ",
         rhs = " (A[R]) ADDL (B[R]) ",
@@ -399,7 +399,7 @@ def construct_trs(
     def label_lift_6_rewrite(rule, trs, term):
         if isinstance(term, Labelled2) and isinstance(term.args[0], Add):
             return AddL(*tuple(Labelled2(t, term.args[1], term.args[2]) for t in term.args[0].args))
-    LABEL_LIFT_6 = TRSRule(
+    LABEL_LIFT_6 = Rule(
         "LABEL-LIFT-6",
         lhs = " (A ADD B)[Q; R] ",
         rhs = " (A[Q; R]) ADDL (B[Q; R]) ",
@@ -420,7 +420,7 @@ def construct_trs(
                                 ti),
                             *term.remained_terms(i, j)
                         )
-    LAEBL_LIFT_7 = TRSRule(
+    LAEBL_LIFT_7 = Rule(
         "LABEL-LIFT-7",
         lhs = " A ADDL A ",
         rhs = " C(1+1) SCRL A ",
@@ -443,7 +443,7 @@ def construct_trs(
                                     tj),
                                 *term.remained_terms(i, j)
                             )
-    LAEBL_LIFT_8 = TRSRule(
+    LAEBL_LIFT_8 = Rule(
         "LABEL-LIFT-8",
         lhs = " (S SCRL A) ADDL A ",
         rhs = " (S ADDS C(1)) SCRL A ",
@@ -465,7 +465,7 @@ def construct_trs(
                                     ti.args[1]),
                                 *term.remained_terms(i, j)
                             )
-    LAEBL_LIFT_9 = TRSRule(
+    LAEBL_LIFT_9 = Rule(
         "LABEL-LIFT-9",
         lhs = " (S1 SCRL A) ADDL (S2 SCRL A) ",
         rhs = " (S1 ADDS S2) SCRL A ",
@@ -521,7 +521,7 @@ def construct_trs(
             return Labelled1(T(term.args[0].args[0], term.args[1].args[0]), term.args[0].args[1])
 
 
-    LABEL_LIFT_15 = TRSRule(
+    LABEL_LIFT_15 = Rule(
         "LABEL-LIFT-15",
         lhs = " (A[R]) {MLTOL/MLTKL/MLTBL} (B[R]) ",
         rhs = " (A {MLTOL/MLTKL/MLTBL} B)[R] ",
@@ -578,7 +578,7 @@ def construct_trs(
                     OpApply(extA, term.args[1].args[0]),
                     term.args[1].args[1]
                 )
-    OPT_EXT_2 = TRSRule(
+    OPT_EXT_2 = Rule(
         "OPT-EXT-2",
         lhs = "(A[Q]) MLTOL (B[R]) (Q is a subterm of R at p)",
         rhs = "(ext(A, p) MLTO B)[R]",
@@ -606,7 +606,7 @@ def construct_trs(
                     OpApply(term.args[0].args[0], extB),
                     term.args[0].args[1]
                 )
-    OPT_EXT_3 = TRSRule(
+    OPT_EXT_3 = Rule(
         "OPT-EXT-3",
         lhs = "(A[Q]) MLTOL (B[R]) (R is a subterm of Q at p)",
         rhs = "(A MLTO ext(B, p))[Q]",
@@ -619,7 +619,7 @@ def construct_trs(
     def label_sum_1_rewrite(rule, trs, term):
         if isinstance(term, Labelled1) and isinstance(term.args[0], Sum):
             return Sum(term.args[0].bind_vars, Labelled1(term.args[0].body, term.args[1]))
-    LABEL_SUM_1 = TRSRule(
+    LABEL_SUM_1 = Rule(
         "LABEL-SUM-1",
         lhs = " SUM(x, T, A)[R] ",
         rhs = " SUM(x, T, A[R]) ",
@@ -631,7 +631,7 @@ def construct_trs(
     def label_sum_2_rewrite(rule, trs, term):
         if isinstance(term, Labelled2) and isinstance(term.args[0], Sum):
             return Sum(term.args[0].bind_vars, Labelled2(term.args[0].body, term.args[1], term.args[2]))
-    LABEL_SUM_2 = TRSRule(
+    LABEL_SUM_2 = Rule(
         "LABEL-SUM-2",
         lhs = " SUM(x, T, A)[Q; R] ",
         rhs = " SUM(x, T, A[Q; R]) ",
@@ -657,7 +657,7 @@ def construct_trs(
                     return SumS(renamed_sum.bind_vars, norm_term)
                 else:
                     return Sum(renamed_sum.bind_vars, norm_term)
-    LABEL_SUM_3 = TRSRule(
+    LABEL_SUM_3 = Rule(
         "LABEL-SUM-3",
         lhs = "SUM(i, T, A) {DOT/MLTK/MLTB/MLTO} X (with side condition)",
         rhs = "SUM(i, T, A {DOT/MLTK/MLTB/MLTO} X)",
@@ -682,7 +682,7 @@ def construct_trs(
                     return SumS(renamed_sum.bind_vars, norm_term)
                 else:
                     return Sum(renamed_sum.bind_vars, norm_term)
-    LABEL_SUM_4 = TRSRule(
+    LABEL_SUM_4 = Rule(
         "LABEL-SUM-4",
         lhs = "X {DOT/MLTK/MLTB/MLTO} SUM(i, T, A) (with side condition)",
         rhs = "SUM(i, T, X {DOT/MLTK/MLTB/MLTO} A)",
@@ -705,7 +705,7 @@ def construct_trs(
     #         norm_term = trs.normalize(combined_term, **side_info['trs-args'])
     #         if norm_term != combined_term:
     #             return Sum(renamed_sum.bind_vars, norm_term)
-    # LABEL_SUM_5 = TRSRule(
+    # LABEL_SUM_5 = Rule(
     #     "LABEL-SUM-5",
     #     lhs = "SUM(i, T, A) {TSRK/TSRB/OUTER/TSRO} X (with side condition)",
     #     rhs = "SUM(i, T, A {TSRK/TSRB/OUTER/TSRO} X)",
@@ -727,7 +727,7 @@ def construct_trs(
     #         norm_term = trs.normalize(combined_term, **side_info['trs-args'])
     #         if norm_term != combined_term:
     #             return Sum(renamed_sum.bind_vars, norm_term)
-    # LABEL_SUM_6 = TRSRule(
+    # LABEL_SUM_6 = Rule(
     #     "LABEL-SUM-6",
     #     lhs = "X {TSRK/TSRB/OUTER/TSRO} SUM(i, T, A) (with side condition)",
     #     rhs = "SUM(i, T, X {TSRK/TSRB/OUTER/TSRO} A)",
@@ -746,7 +746,7 @@ def construct_trs(
                         type(term)(term.args[0], t),
                         *term.args[1].remained_terms(i)
                     )
-    LABEL_TEMP_1 = TRSRule(
+    LABEL_TEMP_1 = Rule(
         "LABEL-TEMP-1",
         lhs = "A[R] {MLTO/MLTK/MLTB} (B[Q] TSRL X) (R is in Q)",
         rhs = "(A[R] {MLTO/MLTK/MLTB} B[Q]) TSRL X",
@@ -773,7 +773,7 @@ def construct_trs(
                             term.args[1].args[1]
                         )
                     )
-    LABEL_TEMP_1B = TRSRule(
+    LABEL_TEMP_1B = Rule(
         "LABEL-TEMP-1B",
         lhs = "(Y TSRBL B[R]) MLTBL (K[R] OUTERL X)",
         rhs = "(B DOT K) SCRL (Y TSRBL X)",
@@ -789,7 +789,7 @@ def construct_trs(
                         type(term)(t, term.args[1]),
                         *term.args[0].remained_terms(i)
                     )
-    LABEL_TEMP_2 = TRSRule(
+    LABEL_TEMP_2 = Rule(
         "LABEL-TEMP-2",
         lhs = "(A[Q] TSRL X) {MLTO/MLTK/MLTB} B[R] (R is in Q)",
         rhs = "(A[Q] {MLTO/MLTK/MLTB} B[R]) TSRL X",
@@ -816,7 +816,7 @@ def construct_trs(
                             KetTensorL(*term.args[1].remained_terms(i))
                         )
                     )
-    LABEL_TEMP_2B = TRSRule(
+    LABEL_TEMP_2B = Rule(
         "LABEL-TEMP-2B",
         lhs = "(X OUTERL B[R]) MLTKL (K[R] TSRKL Y)",
         rhs = "(B DOT K) SCRL (X TSRKL Y)",
@@ -832,7 +832,7 @@ def construct_trs(
                         ScalarDot(term.args[0], t),
                         KetTensorL(*term.args[1].remained_terms(i))
                     )
-    LABEL_TEMP_3 = TRSRule(
+    LABEL_TEMP_3 = Rule(
         "LABEL-TEMP-3",
         lhs = "A[R] DOT (B[R] TSRL X)",
         rhs = "(A[R] DOT B[R]) SCR X",
@@ -849,7 +849,7 @@ def construct_trs(
                         ScalarDot(t, term.args[1]),
                         BraTensorL(*term.args[0].remained_terms(i))
                     )
-    LABEL_TEMP_4 = TRSRule(
+    LABEL_TEMP_4 = Rule(
         "LABEL-TEMP-4",
         lhs = "(A[R] TSRL X) DOT B[R]",
         rhs = "(A[R] DOT B[R]) SCR X",

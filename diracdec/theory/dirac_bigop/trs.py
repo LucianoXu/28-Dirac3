@@ -68,7 +68,7 @@ def construct_trs(
         if isinstance(term, Transpose) and isinstance(term.args[0], Add):
                 new_args = tuple(Transpose(arg) for arg in term.args[0].args)
                 return Add(*new_args)
-    TRANS_UNI_5 = TRSRule(
+    TRANS_UNI_5 = Rule(
         "TRANS-UNI-5",
         lhs = "TP(X1 ADD X2)",
         rhs = "TP(X1) ADD TP(X2)",
@@ -154,7 +154,7 @@ def construct_trs(
                 if s == UniversalSet():
                     return UniversalSet()
                 
-    SET_SIMP_1 = TRSRule(
+    SET_SIMP_1 = Rule(
         "SET-SIMP-1",
         lhs = "USET UNION X",
         rhs = "USET",
@@ -168,7 +168,7 @@ def construct_trs(
                 if s == EmptySet():
                     return UnionSet(*term.remained_terms(i))
                 
-    SET_SIMP_2 = TRSRule(
+    SET_SIMP_2 = Rule(
         "SET-SIMP-2",
         lhs = "ESET UNION X",
         rhs = "X",
@@ -182,7 +182,7 @@ def construct_trs(
     def sum_elim_1_rewrite(rule, trs, term):
         if isinstance(term, SumS) and term.body == CScalar.zero():
             return CScalar.zero()
-    SUM_ELIM_1 = TRSRule(
+    SUM_ELIM_1 = Rule(
         "SUM-ELIM-1",
         lhs = "SUMS(i, T, C(0))",
         rhs = "C(0)",
@@ -194,7 +194,7 @@ def construct_trs(
     def sum_elim_2_rewrite(rule, trs, term):
         if isinstance(term, Sum) and isinstance(term.body, Zero):
             return type(term.body)()
-    SUM_ELIM_2 = TRSRule(
+    SUM_ELIM_2 = Rule(
         "SUM-ELIM-2",
         lhs = "SUM(i, T, 0X)",
         rhs = "0X",
@@ -219,7 +219,7 @@ def construct_trs(
                     new_bind_vars = term.bind_vars[:i]+term.bind_vars[i+1:]
                     return SumS(new_bind_vars, CScalar.one())
                         
-    SUM_ELIM_3 = TRSRule(
+    SUM_ELIM_3 = Rule(
         "SUM-ELIM-3",
         lhs = "SUMS(i, USET, DELTA(i, s))",
         rhs = "C(1)",
@@ -245,7 +245,7 @@ def construct_trs(
                             sub = Subst({v[0] : s})
                             return SumS(new_bind_vars, ScalarMlt(*term.body.remained_terms(i)).subst(sub))
                                     
-    SUM_ELIM_4 = TRSRule(
+    SUM_ELIM_4 = Rule(
         "SUM-ELIM-4",
         lhs = "SUMS(i, USET, DELTA(i, s) MLTS S0)",
         rhs = "S0[i:=s]",
@@ -273,7 +273,7 @@ def construct_trs(
                     return Sum(new_bind_vars, term.body.args[1].subst(sub))
             
             
-    SUM_ELIM_5 = TRSRule(
+    SUM_ELIM_5 = Rule(
         "SUM-ELIM-5",
         lhs = "SUM(i, USET, DELTA(i, s) SCR X)",
         rhs = "X[i:=s]",
@@ -302,7 +302,7 @@ def construct_trs(
                             return Sum(new_bind_vars, type(term.body)(ScalarMlt(*term.body.args[0].remained_terms(i)).subst(sub), term.body.args[1].subst(sub)))
                         
             
-    SUM_ELIM_6 = TRSRule(
+    SUM_ELIM_6 = Rule(
         "SUM-ELIM-6",
         lhs = "SUM(i, USET, (DELTA(i, s) MLTS S0) SCR X)",
         rhs = "S[i:=s] SCR X[i:=s]",
@@ -318,7 +318,7 @@ def construct_trs(
                 if set(v[0].name for v in term.bind_vars) & item.variables() == set():
                     rest_body = ScalarMlt(*term.body.remained_terms(i))
                     return ScalarMlt(item, SumS(term.bind_vars, rest_body))
-    SUM_DIST_1 = TRSRule(
+    SUM_DIST_1 = Rule(
         "SUM-DIST-1",
         rhs = "SUMS(i, T, S1 MLTS X)",
         lhs = "SUMS(i, T, S1) MLTS X",
@@ -330,7 +330,7 @@ def construct_trs(
     def sum_dist_2_rewrite(rule, trs, term):
         if isinstance(term, ScalarConj) and isinstance(term.args[0], SumS):
             return SumS(term.args[0].bind_vars, ScalarConj(term.args[0].body))
-    SUM_DIST_2 = TRSRule(
+    SUM_DIST_2 = Rule(
         "SUM-DIST-2",
         lhs = "CONJS(SUMS(i, T, A))",
         rhs = "SUMS(i, T, CONJS(A))",
@@ -343,7 +343,7 @@ def construct_trs(
     def sum_dist_3_rewrite(rule, trs, term):
         if isinstance(term, Adj) and isinstance(term.args[0], Sum):
             return Sum(term.args[0].bind_vars, Adj(term.args[0].body))
-    SUM_DIST_3 = TRSRule(
+    SUM_DIST_3 = Rule(
         "SUM-DIST-3",
         lhs = "ADJ(SUM(i, T, A))",
         rhs = "SUM(i, T, ADJ(A))",
@@ -355,7 +355,7 @@ def construct_trs(
     def sum_dist_4_rewrite(rule, trs, term):
         if isinstance(term, Transpose) and isinstance(term.args[0], Sum):
             return Sum(term.args[0].bind_vars, Transpose(term.args[0].body))
-    SUM_DIST_4 = TRSRule(
+    SUM_DIST_4 = Rule(
         "SUM-DIST-4",
         lhs = "TP(SUM(i, T, A))",
         rhs = "SUM(i, T, TP(A))",
@@ -368,7 +368,7 @@ def construct_trs(
         if isinstance(term, Sum) and isinstance(term.body, Scal) and \
             set(v[0].name for v in term.bind_vars) & term.body.args[0].variables() == set():
             return Scal(term.body.args[0], Sum(term.bind_vars, term.body.args[1]))
-    SUM_DIST_5 = TRSRule(
+    SUM_DIST_5 = Rule(
         "SUM-DIST-5",
         lhs = "SUM(i, T, X SCR A)",
         rhs = "X SCR SUM(i, T, A)",
@@ -380,7 +380,7 @@ def construct_trs(
         if isinstance(term, Sum) and isinstance(term.body, Scal) and \
             set(v[0].name for v in term.bind_vars) & term.body.args[1].variables() == set():
             return Scal(SumS(term.bind_vars, term.body.args[0]), term.body.args[1])
-    SUM_DIST_6 = TRSRule(
+    SUM_DIST_6 = Rule(
         "SUM-DIST-6",
         lhs = "SUM(i, T, A SCR X)",
         rhs = "SUMS(i, T, A) SCR X",
@@ -395,7 +395,7 @@ def construct_trs(
         if isinstance(term, Sum) and isinstance(term.body, (ScalarDot, KetApply, BraApply, OpApply)) and \
             set(v[0].name for v in term.bind_vars) & term.body.args[1].variables() == set():
             return type(term.body)(Sum(term.bind_vars, term.body.args[0]), term.body.args[1])
-    SUM_DIST_7 = TRSRule(
+    SUM_DIST_7 = Rule(
         "SUM-DIST-7",
         lhs = "SUM(x, T, x1 {DOT/MLTK/MLTB/MLTO} X)",
         rhs = "SUM(x, T, x1) {DOT/MLTK/MLTB/MLTO} X",
@@ -407,7 +407,7 @@ def construct_trs(
         if isinstance(term, Sum) and isinstance(term.body, (ScalarDot, KetApply, BraApply, OpApply)) and \
             set(v[0].name for v in term.bind_vars) & term.body.args[0].variables() == set():
             return type(term.body)(term.body.args[0], Sum(term.bind_vars, term.body.args[1]))
-    SUM_DIST_8 = TRSRule(
+    SUM_DIST_8 = Rule(
         "SUM-DIST-8",
         lhs = "SUM(x, T, X {DOT/MLTK/MLTB/MLTO} x2)",
         rhs = "X {DOT/MLTK/MLTB/MLTO} SUM(x, T, x2)",
@@ -420,7 +420,7 @@ def construct_trs(
         if isinstance(term, Sum) and isinstance(term.body, (KetTensor, BraTensor, OpOuter, OpTensor)) and \
             set(v[0].name for v in term.bind_vars) & term.body.args[1].variables() == set():
             return type(term.body)(Sum(term.bind_vars, term.body.args[0]), term.body.args[1])     
-    SUM_DIST_9 = TRSRule(
+    SUM_DIST_9 = Rule(
         "SUM-DIST-9",
         lhs = "SUM(x, T, x1 {TSRK/TSRB/OUTER/TSRO} X)",
         rhs = "SUM(x, T, x1) {TSRK/TSRB/OUTER/TSRO} X",
@@ -433,7 +433,7 @@ def construct_trs(
         if isinstance(term, Sum) and isinstance(term.body, (KetTensor, BraTensor, OpOuter, OpTensor)) and \
             set(v[0].name for v in term.bind_vars) & term.body.args[0].variables() == set():
             return type(term.body)(term.body.args[0], Sum(term.bind_vars, term.body.args[1]))
-    SUM_DIST_10 = TRSRule(
+    SUM_DIST_10 = Rule(
         "SUM-DIST-10",
         lhs = "SUM(x, T, X {TSRK/TSRB/OUTER/TSRO} x2)",
         rhs = "X {TSRK/TSRB/OUTER/TSRO} SUM(x, T, x2)",
@@ -458,7 +458,7 @@ def construct_trs(
                     return SumS(renamed_sum.bind_vars, norm_term)
                 else:
                     return Sum(renamed_sum.bind_vars, norm_term)
-    SUM_COMP_1 = TRSRule(
+    SUM_COMP_1 = Rule(
         "SUM-COMP-1",
         lhs = "SUM(i, T, A) {DOT/MLTK/MLTB/MLTO} X (with side condition)",
         rhs = "SUM(i, T, A {DOT/MLTK/MLTB/MLTO} X)",
@@ -483,7 +483,7 @@ def construct_trs(
                     return SumS(renamed_sum.bind_vars, norm_term)
                 else:
                     return Sum(renamed_sum.bind_vars, norm_term)
-    SUM_COMP_2 = TRSRule(
+    SUM_COMP_2 = Rule(
         "SUM-COMP-2",
         lhs = "X {DOT/MLTK/MLTB/MLTO} SUM(i, T, A) (with side condition)",
         rhs = "SUM(i, T, X {DOT/MLTK/MLTB/MLTO} A)",
@@ -506,7 +506,7 @@ def construct_trs(
             norm_term = trs.normalize(combined_term)
             if norm_term != combined_term:
                 return Sum(renamed_sum.bind_vars, norm_term)
-    SUM_COMP_3 = TRSRule(
+    SUM_COMP_3 = Rule(
         "SUM-COMP-3",
         lhs = "SUM(i, T, A) {TSRK/TSRB/OUTER/TSRO} X (with side condition)",
         rhs = "SUM(i, T, A {TSRK/TSRB/OUTER/TSRO} X)",
@@ -528,7 +528,7 @@ def construct_trs(
             norm_term = trs.normalize(combined_term)
             if norm_term != combined_term:
                 return Sum(renamed_sum.bind_vars, norm_term)
-    SUM_COMP_4 = TRSRule(
+    SUM_COMP_4 = Rule(
         "SUM-COMP-4",
         lhs = "X {TSRK/TSRB/OUTER/TSRO} SUM(i, T, A) (with side condition)",
         rhs = "SUM(i, T, X {TSRK/TSRB/OUTER/TSRO} A)",
@@ -542,7 +542,7 @@ def construct_trs(
             if term.body != CScalar.one():
                 return ScalarMlt(SumS(term.bind_vars, CScalar.one()), term.body)
 
-    SUM_COMP_5 = TRSRule(
+    SUM_COMP_5 = Rule(
         "SUM-COMP-5",
         lhs = "SUMS(i, T, S0)",
         rhs = "SUMS(i, T, C(1)) MLTS S0",
@@ -556,7 +556,7 @@ def construct_trs(
             set(v[0].name for v in term.bind_vars) & term.body.variables() == set():
             return Scal(SumS(term.bind_vars, CScalar.one()), term.body)
 
-    SUM_COMP_6 = TRSRule(
+    SUM_COMP_6 = Rule(
         "SUM-COMP-6",
         lhs = "SUM(i, T, A)",
         rhs = "SUMS(i, T, C(1)) SCR A",
@@ -584,7 +584,7 @@ def construct_trs(
     #                                 itemB.body.subst(subB))),
     #                             *term.remained_terms(i, j))
 
-    # SUM_ADD_1 = TRSRule(
+    # SUM_ADD_1 = Rule(
     #     "SUM-ADD-1",
     #     lhs = "SUMS(i, A) ADDS SUMS(j, B)",
     #     rhs = "SUMS(k, A[i:=k] ADDS B[j:=k])",
@@ -613,7 +613,7 @@ def construct_trs(
     #                                 itemB.body.subst(subB))),
     #                             *term.remained_terms(i, j))
 
-    # SUM_ADD_2 = TRSRule(
+    # SUM_ADD_2 = Rule(
     #     "SUM-ADD-2",
     #     lhs = "SUM(i, A) ADD SUM(j, B)",
     #     rhs = "SUM(k, A[i:=k] ADD B[j:=k])",
@@ -630,7 +630,7 @@ def construct_trs(
             if isinstance(f, Abstract):
                 return f.body.subst({f.bind_var: x})
             
-    BETA_REDUCTION = TRSRule(
+    BETA_REDUCTION = Rule(
         "BETA-REDUCTION",
         lhs = "APPLY(LAMBDA(x, A), a)",
         rhs = "A[x := a]",
@@ -696,7 +696,7 @@ def construct_entry_trs(
                             term.body.args[1].args[0] == v and \
                             T == UniversalSet():
                             return Sum(term.bind_vars[:i]+term.bind_vars[i+1:], term.body.args[0].args[1])
-    SUM_ELIM_7 = TRSRule(
+    SUM_ELIM_7 = Rule(
         "SUM-ELIM-7",
         lhs = "SUM(i, (BRA(i) DOT K0) SCR KET(i))",
         rhs = "K0",
@@ -715,7 +715,7 @@ def construct_entry_trs(
                             term.body.args[1].args[0] == v and \
                             T == UniversalSet():
                             return Sum(term.bind_vars[:i]+term.bind_vars[i+1:], term.body.args[0].args[0])
-    SUM_ELIM_8 = TRSRule(
+    SUM_ELIM_8 = Rule(
         "SUM-ELIM-8",
         lhs = "SUM(i, (B0 DOT KET(i)) SCR BRA(i))",
         rhs = "B0",
@@ -746,7 +746,7 @@ def construct_entry_trs(
                                         if j < i:
                                             i, j = j, i
                                         return Sum(term.bind_vars[:i]+term.bind_vars[i+1:j]+term.bind_vars[j+1:], term.body.args[0].args[1].args[0])
-    SUM_ELIM_9 = TRSRule(
+    SUM_ELIM_9 = Rule(
         "SUM-ELIM-9",
         lhs = "SUM(i, SUM(j, (BRA(i) DOT (A MLTK KET(j))) SCR (KET(i) OUTER BRA(j)) ))",
         rhs = "A",
@@ -779,7 +779,7 @@ def construct_entry_trs(
                                             i, j = j, i
                                         return Sum(term.bind_vars[:i]+term.bind_vars[i+1:j]+term.bind_vars[j+1:], Transpose(term.body.args[0].args[1].args[0]))
                 
-    SUM_ELIM_10 = TRSRule(
+    SUM_ELIM_10 = Rule(
         "SUM-ELIM-10",
         lhs = "SUM(i, SUM(j, (BRA(i) DOT (A MLTK KET(j))) SCR (KET(j) OUTER BRA(i)) ))",
         rhs = "TP(A)",

@@ -733,12 +733,12 @@ class Matching:
 
 
 
-class TRSRule:
+class Rule:
     def __init__(self, 
                  rule_name:str,
                  lhs: Term|str, 
                  rhs: Term|str,
-                 rewrite_method : Callable[[TRSRule, TRS, Term], Term|None],
+                 rewrite_method : Callable[[Rule, TRS, Term], Term|None],
                  rule_repr: str|None = None):
         '''
         note: the rewrite_method checks whether the current rule can rewrite the given term (not including subterms)
@@ -780,7 +780,7 @@ def canonical_rewrite(rule: CanonicalRule, trs : TRS, term : Term) -> Term | Non
         else:
             return subst[0](rule.rhs)
         
-class CanonicalRule(TRSRule):
+class CanonicalRule(Rule):
     def __init__(self, 
                  rule_name:str,
                  lhs: Term, 
@@ -803,12 +803,29 @@ class CanonicalRule(TRSRule):
 class TRS:
 
     def __init__(self, 
-                 rules: List[TRSRule], 
+                 rules: List[Rule], 
                  ):
         '''
         side_info_procs provides methods to preprocess side informations (executed in sequence)
         '''
-        self.rules : List[TRSRule] = rules
+        self.rules : List[Rule] = []
+
+        # add the extended rules
+        for rule in rules:
+            self.rules.append(rule)
+
+            # extend the rules automatically
+            if isinstance(rule, CanonicalRule) and isinstance(rule.lhs, AC):
+                for i in range(len(rule.lhs.args)):
+                    varX = new_var(rule.lhs.variables() | rule.rhs.variables(), "X")
+                    ext_rule = CanonicalRule(
+                        rule.rule_name + "-EXT",
+                        lhs = type(rule.lhs)(rule.lhs, varX),
+                        rhs = type(rule.lhs)(rule.rhs, varX)
+                    )
+                    self.rules.append(ext_rule)
+                    
+            self.rules.append(rule)
 
     def __add__(self, other: TRS) -> TRS:
         return TRS(self.rules + other.rules)
@@ -843,7 +860,7 @@ class TRS:
         for rule in self.rules:
             new_lhs = rule.lhs.subst(sigma) if isinstance(rule.lhs, Term) else rule.lhs
             new_rhs = rule.rhs.subst(sigma) if isinstance(rule.rhs, Term) else rule.rhs
-            new_rules.append(TRSRule(rule.rule_name, new_lhs, new_rhs, rule.rewrite_method, rule.rule_repr))
+            new_rules.append(Rule(rule.rule_name, new_lhs, new_rhs, rule.rewrite_method, rule.rule_repr))
 
         return TRS(new_rules)
 
