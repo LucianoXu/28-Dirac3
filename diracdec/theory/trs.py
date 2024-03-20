@@ -444,6 +444,68 @@ class CommBinary(StdTerm):
     
     def subst(self, sigma: Subst) -> Term:
         return super().subst(sigma)
+    
+class Assoc(StdTerm):
+    def __new__(cls, *tup: Any):
+        '''
+        return the element directly when tuple has only one element
+        '''
+        if len(tup) == 0:
+            raise ValueError("The tuple lengh should be at least 1.")
+        elif len(tup) == 1:
+            return tup[0]
+        else:
+            obj = object.__new__(cls)
+            Assoc.__init__(obj, *tup)
+            return obj
+        
+    def __init__(self, *tup: Any):
+        '''
+        The method of flatten the tuple of arguments for the associative symbol.
+        Assume that the items in tup are already flattened.
+        '''
+
+        new_ls = []
+        for item in tup:
+            if isinstance(item, type(self)):
+                new_ls.extend(item.args)
+            else:
+                new_ls.append(item)
+
+        self.args = tuple(new_ls)
+
+    def __eq__(self, other) -> bool:
+        if self is other:
+            return True
+        
+        if isinstance(other, type(self)):
+            return self.args == other.args
+        
+        return False
+
+
+    def __str__(self) -> str:
+        blocks = [str(self.args[0])]
+        for arg in self.args[1:]:
+            blocks.append(f" {self.fsymbol_print} ")
+            blocks.append(str(arg))
+
+        return str(ParenBlock(HSeqBlock(*blocks, v_align='c')))
+    
+    def __repr__(self) -> str:
+        return f'({f" {self.fsymbol} ".join(map(repr, self.args))})'
+    
+    def tex(self) -> str:
+        return rf' \left ({f" {self.fsymbol_print} ".join(map(lambda x: x.tex(), self.args))} \right )'
+    
+    def subst(self, sigma: Subst) -> Term:
+        return type(self)(*tuple(arg.subst(sigma) for arg in self.args))
+    
+    def remained_terms(self, *idx: int):
+        '''
+        collect the terms that are not in the idx, and return as a new tuple.
+        '''
+        return tuple(self.args[i] for i in range(len(self.args)) if i not in idx)
 
 class AC(StdTerm):
 
@@ -465,8 +527,6 @@ class AC(StdTerm):
         The method of flatten the tuple of arguments for the ac_symbol.
         Assume that the items in tup are already flattened.
         '''
-        if len(tup) < 2:
-            raise ValueError("The tuple lengh should be at least 2.")
 
         new_ls = []
         for item in tup:
@@ -663,7 +723,7 @@ class Matching:
                     return
             
                 elif isinstance(rhs, StdTerm):
-                    if lhs.fsymbol == rhs.fsymbol:
+                    if type(lhs) == type(rhs):
                         ineqs = ineqs[1:]
                         # check different situations, possibly branch into different cases
                         if isinstance(lhs, CommBinary):
@@ -671,8 +731,8 @@ class Matching:
                             Matching.solve_matching(ineqs + ((lhs[0], rhs[1]), (lhs[1], rhs[0])), subst, subst_res)
                             return
 
-                        if isinstance(rhs, AC):
-                            assert isinstance(lhs, AC)
+                        if isinstance(lhs, AC):
+                            assert isinstance(rhs, AC)
                             
                             # get all possible bipartition of rhs.args
                             bipartitions = []
@@ -696,7 +756,10 @@ class Matching:
                                 )
 
                             return
-
+                        
+                        if isinstance(lhs, Assoc):
+                            raise NotImplementedError()
+                        
                         else:
                             for i in range(len(lhs.args)):
                                 ineqs = ineqs + ((lhs.args[i], rhs.args[i]),)
