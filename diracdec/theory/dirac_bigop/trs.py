@@ -445,19 +445,16 @@ def construct_trs(
         if isinstance(term, (ScalarDot, KetApply, BraApply, OpApply)) and isinstance(term.args[0], Sum):
 
             # we have to rename if necessary
-            if set(v[0].name for v in term.args[0].bind_vars) & term.args[1].variables() == set():
-                new_var = new_var_ls(term.args[0].variables() | term.args[1].variables(), len(term.args[0].bind_vars))
-                renamed_sum = term.args[0].rename_bind(tuple(v for v in new_var))
-            else:
-                renamed_sum = term.args[0]
+            avoided_term = term.args[0].avoid_vars(term.args[1].variables())
 
-            combined_term = type(term)(renamed_sum.body, term.args[1])
+            combined_term = type(term)(avoided_term.body, term.args[1])
             norm_term = trs.normalize(combined_term)
+
             if norm_term != combined_term:
                 if type(term) == ScalarDot:
-                    return SumS(renamed_sum.bind_vars, norm_term)
+                    return SumS(avoided_term.bind_vars, norm_term)
                 else:
-                    return Sum(renamed_sum.bind_vars, norm_term)
+                    return Sum(avoided_term.bind_vars, norm_term)
     SUM_COMP_1 = Rule(
         "SUM-COMP-1",
         lhs = "SUM(i, T, A) {DOT/MLTK/MLTB/MLTO} X (with side condition)",
@@ -470,19 +467,16 @@ def construct_trs(
         if isinstance(term, (ScalarDot, KetApply, BraApply, OpApply)) and isinstance(term.args[1], Sum):
 
             # we have to rename if necessary
-            if set(v[0].name for v in term.args[1].bind_vars) & term.args[0].variables() == set():
-                new_var = new_var_ls(term.args[1].variables() | term.args[0].variables(), len(term.args[1].bind_vars))
-                renamed_sum = term.args[1].rename_bind(tuple(v for v in new_var))
-            else:
-                renamed_sum = term.args[1]
+            avoided_term = term.args[1].avoid_vars(term.args[0].variables())
 
-            combined_term = type(term)(term.args[0], renamed_sum.body)
+            combined_term = type(term)(term.args[0], avoided_term.body)
             norm_term = trs.normalize(combined_term)
+
             if norm_term != combined_term:
                 if type(term) == ScalarDot:
-                    return SumS(renamed_sum.bind_vars, norm_term)
+                    return SumS(avoided_term.bind_vars, norm_term)
                 else:
-                    return Sum(renamed_sum.bind_vars, norm_term)
+                    return Sum(avoided_term.bind_vars, norm_term)
     SUM_COMP_2 = Rule(
         "SUM-COMP-2",
         lhs = "X {DOT/MLTK/MLTB/MLTO} SUM(i, T, A) (with side condition)",
@@ -496,16 +490,13 @@ def construct_trs(
         if isinstance(term, (KetTensor, BraTensor, OpOuter, OpTensor)) and isinstance(term.args[0], Sum):
 
             # we have to rename if necessary
-            if set(v[0].name for v in term.args[0].bind_vars) & term.args[1].variables() == set():
-                new_var = new_var_ls(term.args[0].variables() | term.args[1].variables(), len(term.args[0].bind_vars))
-                renamed_sum = term.args[0].rename_bind(tuple(v for v in new_var))
-            else:
-                renamed_sum = term.args[0]
+            avoided_term = term.args[0].avoid_vars(term.args[0].variables())
 
-            combined_term = type(term)(renamed_sum.body, term.args[1])
+            combined_term = type(term)(avoided_term.body, term.args[1])
             norm_term = trs.normalize(combined_term)
+
             if norm_term != combined_term:
-                return Sum(renamed_sum.bind_vars, norm_term)
+                return Sum(avoided_term.bind_vars, norm_term)
     SUM_COMP_3 = Rule(
         "SUM-COMP-3",
         lhs = "SUM(i, T, A) {TSRK/TSRB/OUTER/TSRO} X (with side condition)",
@@ -518,16 +509,14 @@ def construct_trs(
         if isinstance(term, (KetTensor, BraTensor, OpOuter, OpTensor)) and isinstance(term.args[1], Sum):
 
             # we have to rename if necessary
-            if set(v[0].name for v in term.args[1].bind_vars) & term.args[0].variables() == set():
-                new_var = new_var_ls(term.args[1].variables() | term.args[0].variables(), len(term.args[1].bind_vars))
-                renamed_sum = term.args[1].rename_bind(tuple(v for v in new_var))
-            else:
-                renamed_sum = term.args[1]
+            avoided_term = term.args[1].avoid_vars(term.args[0].variables())
 
-            combined_term = type(term)(term.args[0], renamed_sum.body)
+            combined_term = type(term)(term.args[0], avoided_term.body)
             norm_term = trs.normalize(combined_term)
+
             if norm_term != combined_term:
-                return Sum(renamed_sum.bind_vars, norm_term)
+                return Sum(avoided_term.bind_vars, norm_term)
+            
     SUM_COMP_4 = Rule(
         "SUM-COMP-4",
         lhs = "X {TSRK/TSRB/OUTER/TSRO} SUM(i, T, A) (with side condition)",

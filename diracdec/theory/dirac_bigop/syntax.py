@@ -183,6 +183,19 @@ class SumTemplate(MultiBindTerm):
 
         return type(self)(new_vars_with_set, self.body.subst(Subst(sub_dist)))
     
+
+    def avoid_vars(self, var_set: set[Var]) -> SumTemplate:
+        '''
+        return the bind variable term which avoids bind variables in var_set
+        '''
+        bind_var_names = set(v for v, t in self.bind_vars)
+        if len(bind_var_names & var_set) > 0 :
+            new_bind_var_ls = new_var_ls(var_set | self.variables(), len(self.bind_vars))
+            return self.rename_bind(new_bind_var_ls)
+        
+        else:
+            return self
+        
     def subst(self, sigma: Subst | dict[Var, Term]) -> SumTemplate:
         '''
         check whether the bind variable appears in sigma.

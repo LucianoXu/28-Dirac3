@@ -388,7 +388,7 @@ class MultiBindTerm(Term):
         '''
         return the bind variable term which avoids bind variables in var_set
         '''
-        if set(self.bind_vars) in var_set:
+        if len(set(self.bind_vars) & var_set) > 0:
             new_bind_var_ls = new_var_ls(var_set | self.variables(), len(self.bind_vars))
             return self.rename_bind(new_bind_var_ls)
         
