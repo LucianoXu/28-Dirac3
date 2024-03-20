@@ -808,25 +808,22 @@ class TRS:
         '''
         side_info_procs provides methods to preprocess side informations (executed in sequence)
         '''
-        self.rules : List[Rule] = []
+        self.rules : List[Rule] = rules
+        self.extended_rules = []
 
         # add the extended rules
         for rule in rules:
-            self.rules.append(rule)
+            self.extended_rules.append(rule)
 
             # extend the rules automatically
             if isinstance(rule, CanonicalRule) and isinstance(rule.lhs, AC):
-                for i in range(len(rule.lhs.args)):
-                    varX = new_var(rule.lhs.variables() | rule.rhs.variables(), "X")
-                    ext_rule = CanonicalRule(
-                        rule.rule_name + "-EXT",
-                        lhs = type(rule.lhs)(rule.lhs, varX),
-                        rhs = type(rule.lhs)(rule.rhs, varX)
-                    )
-                    self.rules.append(ext_rule)
-                    
-            self.rules.append(rule)
-
+                varX = new_var(rule.lhs.variables() | rule.rhs.variables(), "X")
+                ext_rule = CanonicalRule(
+                    rule.rule_name + "-EXT",
+                    lhs = type(rule.lhs)(rule.lhs, varX),
+                    rhs = type(rule.lhs)(rule.rhs, varX)
+                )
+                self.extended_rules.append(ext_rule)
     def __add__(self, other: TRS) -> TRS:
         return TRS(self.rules + other.rules)
 
@@ -836,7 +833,7 @@ class TRS:
         (This method is not that rigorous, and only acts as a hint.)
         '''
         res = set()
-        for rule in self.rules:
+        for rule in self.extended_rules:
             if isinstance(rule.lhs, Term) and isinstance(rule.rhs, Term):
                 res |= rule.lhs.variables() | rule.rhs.variables()
         return res
@@ -848,7 +845,7 @@ class TRS:
         res = ""
 
         # print the rules
-        for rule in self.rules:
+        for rule in self.extended_rules:
             res += repr(rule) + "\n"
         return res
     
@@ -857,7 +854,7 @@ class TRS:
         Apply the substitution on the TRS. Return the result.
         '''
         new_rules = []
-        for rule in self.rules:
+        for rule in self.extended_rules:
             new_lhs = rule.lhs.subst(sigma) if isinstance(rule.lhs, Term) else rule.lhs
             new_rhs = rule.rhs.subst(sigma) if isinstance(rule.rhs, Term) else rule.rhs
             new_rules.append(Rule(rule.rule_name, new_lhs, new_rhs, rule.rewrite_method, rule.rule_repr))
@@ -928,7 +925,7 @@ class TRS:
         '''
 
         # try to rewrite the term using the rules
-        for rule in self.rules:
+        for rule in self.extended_rules:
             new_term = rule.rewrite_method(rule, self, term)
             if new_term is not None:
                 # output information
@@ -994,7 +991,7 @@ class TRS:
 
 
         # try to rewrite the term using the rules
-        for rule in self.rules:
+        for rule in self.extended_rules:
             new_term = rule.rewrite_method(rule, self, term)
             if new_term is not None:
                 # output information
