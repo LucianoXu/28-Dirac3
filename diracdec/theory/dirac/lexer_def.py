@@ -69,9 +69,9 @@ def t_ATOMICBASE_EXPR(t):
 
 # use // or /* */ to comment
 def t_COMMENT(t):
-    r'(/\*(.|\n)*?\*/)|(//.*)'
+    r'(/\*(.|[\r\n])*?\*/)|(//.*)'
     for c in t.value:
-        if c == '\n':
+        if c == '\n' or c == '\r\n':
             t.lexer.lineno += 1
 
 

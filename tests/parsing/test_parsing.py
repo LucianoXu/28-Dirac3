@@ -139,7 +139,7 @@ def test_subst():
             t : BRA(b);
         }''')
         b = Subst({
-            "s" : KetBase(Var('a')),
-            "t" : BraBase(Var('b')),
+            parse("s") : KetBase(Var('a')),
+            parse("t") : BraBase(Var('b')),
         })
         assert a == b
