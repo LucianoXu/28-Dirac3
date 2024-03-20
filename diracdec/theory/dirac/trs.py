@@ -63,6 +63,7 @@ def construct_trs(
 
     #################################################
     # Base
+
     BASIS_1 = CanonicalRule(
         "BASIS-1",
         lhs = parse("FST(PAIR(s, t))"),
@@ -87,69 +88,30 @@ def construct_trs(
     #################################################
     # Delta
 
-
-    #################################################
-    # Delta
-    def delta_1_rewrite(rule, trs, term):
-        if isinstance(term, ScalarDelta):
-            if isinstance(term.args[0], BasePair):
-                return ScalarMlt(
-                    ScalarDelta(term.args[0].args[0], BaseFst(term.args[1])),
-                    ScalarDelta(term.args[0].args[1], BaseSnd(term.args[1]))
-                    )
-            if isinstance(term.args[1], BasePair):
-                return ScalarMlt(
-                    ScalarDelta(BaseFst(term.args[0]), term.args[1].args[0]),
-                    ScalarDelta(BaseSnd(term.args[0]), term.args[1].args[1])
-                    )
-    DELTA_1 = Rule(
+    DELTA_1 = CanonicalRule(
         "DELTA-1",
-        lhs = "DELTA(s, PAIR(t1, t2))",
-        rhs = "DELTA(FST(s), t1) MLTS DELTA(SND(s), t2)",
-        rewrite_method=delta_1_rewrite
+        lhs = parse("DELTA(s, PAIR(t1, t2))"),
+        rhs = parse("DELTA(FST(s), t1) MLTS DELTA(SND(s), t2)")
     )
     rules.append(DELTA_1)
 
 
-    def delta_2_rewrite(rule, trs, term):
-        if isinstance(term, ScalarMlt):
-            for i in range(len(term.args)):
-                if isinstance(term.args[i], ScalarDelta) \
-                    and isinstance(term.args[i].args[0], BaseFst) \
-                    and isinstance(term.args[i].args[1], BaseFst):
-                    for j in range(len(term.args)):
-                        if i == j:
-                            continue
-                        if isinstance(term.args[j], ScalarDelta) \
-                            and isinstance(term.args[j].args[0], BaseSnd) \
-                            and isinstance(term.args[j].args[1], BaseSnd) \
-                            and term.args[i].args[0].args[0] == term.args[j].args[0].args[0] \
-                            and term.args[i].args[1].args[0] == term.args[j].args[1].args[0]:
-
-                            deltauv = ScalarDelta(term.args[i].args[0].args[0], term.args[i].args[1].args[0])
-
-                            return ScalarMlt(deltauv, *term.remained_terms(i, j))
-    DELTA_2 = Rule(
+    DELTA_2 = CanonicalRule(
         "DELTA-2",
-        lhs = "DELTA(FST(s), FST(t)) MLTS DELTA(SND(s), SND(t))",
-        rhs = "DELTA(s, t)",
-        rewrite_method=delta_2_rewrite
+        lhs = parse("DELTA(FST(s), FST(t)) MLTS DELTA(SND(s), SND(t))"),
+        rhs = parse("DELTA(s, t)")
     )
     rules.append(DELTA_2)
+
+
     #################################################
     # Scalar
 
-    def scr_cop_1_rewrite(rule, trs, term):
-        if isinstance(term, ScalarAdd):
-            for i in range(len(term.args)):
-                if term.args[i] == C0:
-                    return ScalarAdd(*term.remained_terms(i))
 
-    SCR_COP_1 = Rule(
+    SCR_COP_1 = CanonicalRule(
         "SCR-COP-1",
-        lhs="C(0) ADDS a", 
-        rhs="a",
-        rewrite_method=scr_cop_1_rewrite
+        lhs=parse(''' "0" ADDS a '''), 
+        rhs=parse(''' a ''')
     )
     rules.append(SCR_COP_1)
 
@@ -173,19 +135,11 @@ def construct_trs(
     )
     rules.append(SCR_COP_2)
 
-    def scr_cop_3_rewrite(rule, trs, term):
-        if isinstance(term, ScalarAdd):
-            for i in range(len(term.args)):
-                for j in range(i+1, len(term.args)):
-                    if term.args[i] == term.args[j]:
-                        new_args = (ScalarMlt(C2, term.args[i]),) + term.remained_terms(i, j)
-                        return ScalarAdd(*new_args)
                     
-    SCR_COP_3 = Rule(
+    SCR_COP_3 = CanonicalRule(
         "SCR-COP-3",
-        lhs = "S0 ADDS S0",
-        rhs = "C(1 + 1) MLTS S0",
-        rewrite_method=scr_cop_3_rewrite
+        lhs = parse(''' S0 ADDS S0 '''),
+        rhs = parse(''' "2" MLTS S0 ''')
     )
     rules.append(SCR_COP_3)
 
@@ -235,30 +189,18 @@ def construct_trs(
     )
     rules.append(SCR_COP_5)
 
-    def scr_cop_6_rewrite(rule, trs, term):
-        if isinstance(term, ScalarMlt):
-            for i in range(len(term.args)):
-                if term.args[i] == C0:
-                    return C0
 
-    SCR_COP_6 = Rule(
+    SCR_COP_6 = CanonicalRule(
         "SCR-COP-6",
-        lhs="C(0) MLTS a", 
-        rhs="C(0)",
-        rewrite_method=scr_cop_6_rewrite
+        lhs=parse(''' "0" MLTS a '''), 
+        rhs=parse(''' "0" ''')
     )
     rules.append(SCR_COP_6)
 
-    def scr_cop_7_rewrite(rule, trs, term):
-        if isinstance(term, ScalarMlt):
-            for i in range(len(term.args)):
-                if term.args[i] == C1:
-                    return ScalarMlt(*term.remained_terms(i))
-    SCR_COP_7 = Rule(
+    SCR_COP_7 = CanonicalRule(
         "SCR-COP-7",
-        lhs="C(1) MLTS a", 
-        rhs="a",
-        rewrite_method=scr_cop_7_rewrite
+        lhs=parse(''' "1" MLTS a '''), 
+        rhs=parse(''' a ''')
     )
     rules.append(SCR_COP_7)
 
@@ -282,18 +224,10 @@ def construct_trs(
     )
     rules.append(SCR_COP_8)
 
-    def scr_cop_9_rewrite(rule, trs, term):
-        if isinstance(term, ScalarMlt):
-            for i in range(len(term.args)):
-                if isinstance(term.args[i], ScalarAdd):
-                    S1 = ScalarMlt(*term.args[:i], *term.args[i+1:])
-                    new_args = tuple(ScalarMlt(S1, term.args[i][j]) for j in range(len(term.args[i].args)))
-                    return ScalarAdd(*new_args)
-    SCR_COP_9 = Rule(
+    SCR_COP_9 = CanonicalRule(
         "SCR-COP-9",
-        lhs="a MLTS (b ADDS c)",
-        rhs="(a MLTS b) ADDS (a MLTS c)",
-        rewrite_method=scr_cop_9_rewrite
+        lhs= parse("a MLTS (b ADDS c)"),
+        rhs= parse("(a MLTS b) ADDS (a MLTS c)")
     )
     rules.append(SCR_COP_9)
 
@@ -310,45 +244,27 @@ def construct_trs(
     )
     rules.append(SCR_COP_10)
         
-
-    def scr_cop_11_rewrite(rule, trs, term):
-        if isinstance(term, ScalarConj):
-            if isinstance(term.args[0], ScalarDelta):
-                return term.args[0]
             
-    SCR_COP_11 = Rule(
+    SCR_COP_11 = CanonicalRule(
         "SCR-COP-11",
-        lhs="CONJS(DELTA(a, b))",
-        rhs="DELTA(a, b)",
-        rewrite_method=scr_cop_11_rewrite
+        lhs= parse("CONJS(DELTA(a, b))"),
+        rhs= parse("DELTA(a, b)")
     )
     rules.append(SCR_COP_11)
 
 
-    def scr_cop_12_rewrite(rule, trs, term):
-        if isinstance(term, ScalarConj):
-            if isinstance(term.args[0], ScalarAdd):
-                new_args = tuple(ScalarConj(arg) for arg in term.args[0].args)
-                return ScalarAdd(*new_args)
-    SCR_COP_12 = Rule(
+    SCR_COP_12 = CanonicalRule(
         "SCR-COP-12",
-        lhs="CONJS(a ADDS b)",
-        rhs="CONJS(a) ADDS CONJS(b)",
-        rewrite_method=scr_cop_12_rewrite
+        lhs= parse("CONJS(a ADDS b)"),
+        rhs= parse("CONJS(a) ADDS CONJS(b)")
     )
     rules.append(SCR_COP_12)
 
 
-    def scr_cop_13_rewrite(rule, trs, term):
-        if isinstance(term, ScalarConj):
-            if isinstance(term.args[0], ScalarMlt):
-                new_args = tuple(ScalarConj(arg) for arg in term.args[0].args)
-                return ScalarMlt(*new_args)
-    SCR_COP_13 = Rule(
+    SCR_COP_13 = CanonicalRule(
         "SCR-COP-13",
-        lhs="CONJS(a MLTS b)",
-        rhs="CONJS(a) MLTS CONJS(b)",
-        rewrite_method=scr_cop_13_rewrite
+        lhs= parse("CONJS(a MLTS b)"),
+        rhs= parse("CONJS(a) MLTS CONJS(b)")
     )
     rules.append(SCR_COP_13)
 
@@ -399,29 +315,19 @@ def construct_trs(
     )
     rules.append(SCR_DOT_4)
 
-    def scr_dot_5_rewrite(rule, trs, term):
-        if isinstance(term, ScalarDot):
-            if isinstance(term.args[0], Add):
-                new_args = tuple(ScalarDot(arg, term.args[1]) for arg in term.args[0].args)
-                return ScalarAdd(*new_args)
-    SCR_DOT_5 = Rule(
+
+    SCR_DOT_5 = CanonicalRule(
         "SCR-DOT-5",
-        lhs = "(B1 ADD B2) DOT K0",
-        rhs = "(B1 DOT K0) ADDS (B2 DOT K0)",
-        rewrite_method=scr_dot_5_rewrite
+        lhs = parse("(B1 ADD B2) DOT K0"),
+        rhs = parse("(B1 DOT K0) ADDS (B2 DOT K0)")
     )
     rules.append(SCR_DOT_5)
 
-    def scr_dot_6_rewrite(rule, trs, term):
-        if isinstance(term, ScalarDot):
-            if isinstance(term.args[1], Add):
-                new_args = tuple(ScalarDot(term.args[0], arg) for arg in term.args[1].args)
-                return ScalarAdd(*new_args)
-    SCR_DOT_6 = Rule(
+
+    SCR_DOT_6 = CanonicalRule(
         "SCR-DOT-6",
-        lhs = "B0 DOT (K1 ADD K2)",
-        rhs = "(B0 DOT K1) ADDS (B0 DOT K2)",
-        rewrite_method=scr_dot_6_rewrite
+        lhs = parse("B0 DOT (K1 ADD K2)"),
+        rhs = parse("(B0 DOT K1) ADDS (B0 DOT K2)")
     )
     rules.append(SCR_DOT_6)
 
@@ -504,16 +410,10 @@ def construct_trs(
     rules.append(ADJ_UNI_3)
 
     
-    def adj_uni_4_rewrite(rule, trs, term):
-        if isinstance(term, Adj):
-            if isinstance(term.args[0], Add):
-                new_args = tuple(Adj(arg) for arg in term.args[0].args)
-                return Add(*new_args)
-    ADJ_UNI_4 = Rule(
+    ADJ_UNI_4 = CanonicalRule(
         "ADJ-UNI-4",
-        lhs = "ADJ(X1 ADD X2)",
-        rhs = "ADJ(X1) ADD ADJ(X2)",
-        rewrite_method=adj_uni_4_rewrite
+        lhs = parse("ADJ(X1 ADD X2)"),
+        rhs = parse("ADJ(X1) ADD ADJ(X2)")
     )
     rules.append(ADJ_UNI_4)
 
@@ -624,82 +524,39 @@ def construct_trs(
     )
     rules.append(SCR_4)
 
-
-    def scr_5_rewrite(rule, trs, term):
-        if isinstance(term, Scal):
-            if isinstance(term.args[1], Add):
-                new_args = tuple(Scal(term.args[0], arg) for arg in term.args[1].args)
-                return Add(*new_args)
-            
-    SCR_5 = Rule(
+    SCR_5 = CanonicalRule(
         "SCR-5",
-        lhs = "S0 SCR (X1 ADD X2)",
-        rhs = "(S0 SCR X1) ADD (S0 SCR X2)",
-        rewrite_method=scr_5_rewrite
+        lhs = parse("S0 SCR (X1 ADD X2)"),
+        rhs = parse("(S0 SCR X1) ADD (S0 SCR X2)")
     )
     rules.append(SCR_5)
 
 
-
-    def add_1_rewrite(rule, trs, term):
-        if isinstance(term, Add):
-            for i in range(len(term.args)):
-                if term.args[i] == Zero():
-                    return Add(*term.remained_terms(i))
-    ADD_1 = Rule(
+    ADD_1 = CanonicalRule(
         "ADD-1",
-        lhs = "0X ADD X0",
-        rhs = "X0",
-        rewrite_method=add_1_rewrite
+        lhs = parse("0X ADD X0"),
+        rhs = parse("X0")
     )
     rules.append(ADD_1)
 
-    def add_2_rewrite(rule, trs, term):
-        if isinstance(term, Add):
-            for i in range(len(term.args)):
-                for j in range(i+1, len(term.args)):
-                    if term.args[i] == term.args[j]:
-                        new_args = (Scal(C2, term.args[i]),) + term.remained_terms(i, j)
-                        return Add(*new_args)
-    ADD_2 = Rule(
+    ADD_2 = CanonicalRule(
         "ADD-2",
-        lhs = "X0 ADD X0",
-        rhs = "C(1 + 1) SCR X0",
-        rewrite_method=add_2_rewrite
+        lhs = parse("X0 ADD X0"),
+        rhs = parse(''' "2" SCR X0 ''')
     )
     rules.append(ADD_2)
 
-    def add_3_rewrite(rule, trs, term):
-        if isinstance(term, Add):
-            for i in range(len(term.args)):
-                if isinstance(term.args[i], Scal):
-                    for j in range(len(term.args)):
-                        if term.args[i].args[1] == term.args[j]:
-                            new_args = (
-                                Scal(ScalarAdd(term.args[i].args[0], C1), term.args[j]),) + term.remained_terms(i, j)
-                            return Add(*new_args)
-    ADD_3 = Rule(
+    ADD_3 = CanonicalRule(
         "ADD-3",
-        lhs = "(S0 SCR X0) ADD X0",
-        rhs = "(S0 ADDS C(1)) SCR X0",
-        rewrite_method=add_3_rewrite
+        lhs = parse(''' (S0 SCR X0) ADD X0 '''),
+        rhs = parse(''' (S0 ADDS "1") SCR X0 ''')
     )
     rules.append(ADD_3)
 
-    def add_4_rewrite(rule, trs, term):
-        if isinstance(term, Add):
-            for i in range(len(term.args)):
-                if isinstance(term.args[i], Scal):
-                    for j in range(i+1, len(term.args)):
-                        if isinstance(term.args[j], Scal):
-                            if term.args[i].args[1] == term.args[j].args[1]:
-                                new_args = (Scal(ScalarAdd(term.args[i].args[0], term.args[j].args[0]), term.args[i].args[1]),) + term.remained_terms(i, j)
-                                return Add(*new_args)
-    ADD_4 = Rule(
+    ADD_4 = CanonicalRule(
         "ADD-4",
-        lhs = "(S1 SCR X0) ADD (S2 SCR X0)",
-        rhs = "(S1 ADDS S2) SCR X0",
-        rewrite_method=add_4_rewrite
+        lhs = parse("(S1 SCR X0) ADD (S2 SCR X0)"),
+        rhs = parse("(S1 ADDS S2) SCR X0")
     )
     rules.append(ADD_4)
 
@@ -744,28 +601,18 @@ def construct_trs(
     rules.append(KET_MLT_5)
 
 
-    def ket_mlt_6_rewrite(rule, trs, term):
-        if isinstance(term, KetApply) and isinstance(term.args[0], Add):
-            new_args = tuple(KetApply(arg, term[1]) for arg in term.args[0].args)
-            return Add(*new_args)
-    KET_MLT_6 = Rule(
+    KET_MLT_6 = CanonicalRule(
         "KET-MLT-6",
-        lhs = "(O1 ADD O2) MLTK K0",
-        rhs = "(O1 MLTK K0) ADD (O2 MLTK K0)",
-        rewrite_method=ket_mlt_6_rewrite
+        lhs = parse("(O1 ADD O2) MLTK K0"),
+        rhs = parse("(O1 MLTK K0) ADD (O2 MLTK K0)")
     )
     rules.append(KET_MLT_6)
 
 
-    def ket_mlt_7_rewrite(rule, trs, term):
-        if isinstance(term, KetApply) and isinstance(term.args[1], Add):
-            new_args = tuple(KetApply(term[0], arg) for arg in term.args[1].args)
-            return Add(*new_args)
-    KET_MLT_7 = Rule(
+    KET_MLT_7 = CanonicalRule(
         "KET-MLT-7",
-        lhs = "O0 MLTK (K1 ADD K2)",
-        rhs = "(O0 MLTK K1) ADD (O0 MLTK K2)",
-        rewrite_method=ket_mlt_7_rewrite
+        lhs = parse("O0 MLTK (K1 ADD K2)"),
+        rhs = parse("(O0 MLTK K1) ADD (O0 MLTK K2)"),
     )
     rules.append(KET_MLT_7)
 
@@ -840,27 +687,19 @@ def construct_trs(
     )
     rules.append(KET_TSR_5)
 
-    def ket_tsr_6_rewrite(rule, trs, term):
-        if isinstance(term, KetTensor) and isinstance(term.args[0], Add):
-            new_args = tuple(KetTensor(arg, term[1]) for arg in term.args[0].args)
-            return Add(*new_args)
-    KET_TSR_6 = Rule(
+
+    KET_TSR_6 = CanonicalRule(
         "KET-TSR-6",
-        lhs = "(K1 ADD K2) TSRK K0",
-        rhs = "(K1 TSRK K0) ADD (K2 TSRK K0)",
-        rewrite_method=ket_tsr_6_rewrite
+        lhs = parse("(K1 ADD K2) TSRK K0"),
+        rhs = parse("(K1 TSRK K0) ADD (K2 TSRK K0)")
     )
     rules.append(KET_TSR_6)
 
-    def ket_tsr_7_rewrite(rule, trs, term):
-        if isinstance(term, KetTensor) and isinstance(term.args[1], Add):
-            new_args = tuple(KetTensor(term[0], arg) for arg in term.args[1].args)
-            return Add(*new_args)
-    KET_TSR_7 = Rule(
+
+    KET_TSR_7 = CanonicalRule(
         "KET-TSR-7",
-        lhs = "K0 TSRK (K1 ADD K2)",
-        rhs = "(K0 TSRK K1) ADD (K0 TSRK K2)",
-        rewrite_method=ket_tsr_7_rewrite
+        lhs = parse("K0 TSRK (K1 ADD K2)"),
+        rhs = parse("(K0 TSRK K1) ADD (K0 TSRK K2)")
     )
     rules.append(KET_TSR_7)
 
@@ -904,30 +743,21 @@ def construct_trs(
     rules.append(BRA_MLT_5)
 
 
-    def bra_mlt_6_rewrite(rule, trs, term):
-        if isinstance(term, BraApply) and isinstance(term.args[1], Add):
-            new_args = tuple(BraApply(term[0], arg) for arg in term.args[1].args)
-            return Add(*new_args)
-    BRA_MLT_6 = Rule(
+    BRA_MLT_6 = CanonicalRule(
         "BRA-MLT-6",
-        lhs = "B0 MLTB (O1 ADD O2)",
-        rhs = "(B0 MLTB O1) ADD (B0 MLTB O2)",
-        rewrite_method=bra_mlt_6_rewrite
+        lhs = parse("B0 MLTB (O1 ADD O2)"),
+        rhs = parse("(B0 MLTB O1) ADD (B0 MLTB O2)")
     )
     rules.append(BRA_MLT_6)
 
 
-    def bra_mlt_7_rewrite(rule, trs, term):
-        if isinstance(term, BraApply) and isinstance(term.args[0], Add):
-            new_args = tuple(BraApply(arg, term[1]) for arg in term.args[0].args)
-            return Add(*new_args)
-    BRA_MLT_7 = Rule(
+    BRA_MLT_7 = CanonicalRule(
         "BRA-MLT-7",
-        lhs = "(B1 ADD B2) MLTB O0",
-        rhs = "(B1 MLTB O0) ADD (B2 MLTB O0)",
-        rewrite_method=bra_mlt_7_rewrite
+        lhs = parse("(B1 ADD B2) MLTB O0"),
+        rhs = parse("(B1 MLTB O0) ADD (B2 MLTB O0)")
     )
     rules.append(BRA_MLT_7)
+
 
     BRA_MLT_8 = CanonicalRule(
         "BRA-MLT-8",
@@ -1002,27 +832,17 @@ def construct_trs(
     )
     rules.append(BRA_TSR_5)
 
-    def bra_tsr_6_rewrite(rule, trs, term):
-        if isinstance(term, BraTensor) and isinstance(term.args[0], Add):
-            new_args = tuple(BraTensor(arg, term[1]) for arg in term.args[0].args)
-            return Add(*new_args)
-    BRA_TSR_6 = Rule(
+    BRA_TSR_6 = CanonicalRule(
         "BRA-TSR-6",
-        lhs = "(B1 ADD B2) TSRB B0",
-        rhs = "(B1 TSRB B0) ADD (B2 TSRB B0)",
-        rewrite_method=bra_tsr_6_rewrite
+        lhs = parse("(B1 ADD B2) TSRB B0"),
+        rhs = parse("(B1 TSRB B0) ADD (B2 TSRB B0)")
     )
     rules.append(BRA_TSR_6)
 
-    def bra_tsr_7_rewrite(rule, trs, term):
-        if isinstance(term, BraTensor) and isinstance(term.args[1], Add):
-            new_args = tuple(BraTensor(term[0], arg) for arg in term.args[1].args)
-            return Add(*new_args)
-    BRA_TSR_7 = Rule(
+    BRA_TSR_7 = CanonicalRule(
         "BRA-TSR-7",
-        lhs = "B0 TSRB (B1 ADD B2)",
-        rhs = "(B0 TSRB B1) ADD (B0 TSRB B2)",
-        rewrite_method=bra_tsr_7_rewrite
+        lhs = parse("B0 TSRB (B1 ADD B2)"),
+        rhs = parse("(B0 TSRB B1) ADD (B0 TSRB B2)")
     )
     rules.append(BRA_TSR_7)
 
@@ -1058,27 +878,18 @@ def construct_trs(
     )
     rules.append(OPT_OUTER_4)
 
-    def opt_outer_5_rewrite(rule, trs, term):
-        if isinstance(term, OpOuter) and isinstance(term.args[0], Add):
-            new_args = tuple(OpOuter(arg, term[1]) for arg in term.args[0].args)
-            return Add(*new_args)
-    OPT_OUTER_5 = Rule(
+
+    OPT_OUTER_5 = CanonicalRule(
         "OPT-OUTER-5",
-        lhs = "(K1 ADD K2) OUTER B0",
-        rhs = "(K1 OUTER B0) ADD (K2 OUTER B0)",
-        rewrite_method=opt_outer_5_rewrite
+        lhs = parse("(K1 ADD K2) OUTER B0"),
+        rhs = parse("(K1 OUTER B0) ADD (K2 OUTER B0)")
     )
     rules.append(OPT_OUTER_5)
 
-    def opt_outer_6_rewrite(rule, trs, term):
-        if isinstance(term, OpOuter) and isinstance(term.args[1], Add):
-            new_args = tuple(OpOuter(term[0], arg) for arg in term.args[1].args)
-            return Add(*new_args)
-    OPT_OUTER_6 = Rule(
+    OPT_OUTER_6 = CanonicalRule(
         "OPT-OUTER-6",
-        lhs = "K0 OUTER (B1 ADD B2)",
-        rhs = "(K0 OUTER B1) ADD (K0 OUTER B2)",
-        rewrite_method=opt_outer_6_rewrite
+        lhs = parse("K0 OUTER (B1 ADD B2)"),
+        rhs = parse("(K0 OUTER B1) ADD (K0 OUTER B2)")
     )
     rules.append(OPT_OUTER_6)
 
