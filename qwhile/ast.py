@@ -12,104 +12,96 @@ from abc import abstractmethod, ABC
 
 INDENT = "  "
 
-class Ast(ABC):
+class QWhileAst(StdTerm):
 
-    @abstractmethod
-    def __str__(self) -> str:
+    def tex(self) -> str:
         raise NotImplementedError()
     
-    @abstractmethod
-    def __eq__(self, other) -> bool:
-        raise NotImplementedError()
-    
-    def __matmul__(self, other: Ast) -> Ast:
-        return Seq((self, other))
+    def __matmul__(self, other: QWhileAst) -> QWhileAst:
+        return Seq(self, other)
 
 
 #####################################################################
 # different program structures
     
 
-class Abort(Ast):
+class Abort(QWhileAst):
+    fsymbol_print = 'abort'
+    fsymbol = 'abort'
+
     def __init__(self):
         super().__init__()
 
     def __str__(self) -> str:
         return "abort;"
-    
-    def __eq__(self, other) -> bool:
-        return isinstance(other, Abort)
-    
 
-class Skip(Ast):
+
+class Skip(QWhileAst):
+    fsymbol_print = 'skip'
+    fsymbol = 'skip'
+
     def __init__(self):
         super().__init__()
 
     def __str__(self) -> str:
         return "skip;"
     
-    def __eq__(self, other) -> bool:
-        return isinstance(other, Skip)
-    
 
-class Init(Ast):
+
+class Init(QWhileAst):
+    fsymbol_print = 'init'
+    fsymbol = 'init'
+
     def __init__(self, qvar : Term):
+        super().__init__(qvar)
         self.qvar = qvar
     
     def __str__(self, prefix="") -> str:
         return str(HSeqBlock(str(self.qvar), ":=0", v_align='c'))
     
-    def __eq__(self, other) -> bool:
-        return isinstance(other, Init) and self.qvar == other.qvar
 
     
-class Unitary(Ast):
+class Unitary(QWhileAst):
+    fsymbol_print = 'unitary'
+    fsymbol = 'unitary'
+
     def __init__(self, U : Term):
+        super().__init__(U)
         self.U = U
 
     def __str__(self) -> str:
         return str(HSeqBlock(str(self.U), ";", v_align='c'))
-    
-    def __eq__(self, other) -> bool:
-        return isinstance(other, Unitary) and self.U == other.U
-    
 
 
-# class Assert(Ast):
-#     def __init__(self, P : Term):
-#         self.P = P
+class Seq(QWhileAst):
+    fsymbol_print = 'seq'
+    fsymbol = 'seq'
 
-#     def __str__(self) -> str:
-#         return str(self.P)
-    
+    def __init__(self, S0 : QWhileAst, S1: QWhileAst):
 
+        # restructure the sequential composition, so that it is always associated to the right
+        if isinstance(S0, Seq):
+            S0, S1 = S0.S0, Seq(S0.S1, S1)
 
-class Seq(Ast):
-    def __init__(self, S_ls : Tuple[Ast, ...]):
-        super().__init__()
+        super().__init__(S0, S1)
         
-        self.S_ls = []
-        
-        # flatten the sequence
-        for prog in S_ls:
-            if isinstance(prog, Seq):
-                self.S_ls = self.S_ls + prog.S_ls
-            else:
-                self.S_ls.append(prog)
+        self.S0 = S0
+        self.S1 = S1
 
     
     def __str__(self) -> str:
         return str(VSeqBlock(
-            *tuple(str(s) for s in self.S_ls),
+            str(self.S0),
+            str(self.S1),
             h_align='l'))
     
-    def __eq__(self, other) -> bool:
-        return isinstance(other, Seq) and self.S_ls == other.S_ls
-    
 
-class If(Ast):
-    def __init__(self, M : Term, S1 : Ast, S0 : Ast):
-        super().__init__()
+class If(QWhileAst):
+    fsymbol_print = 'if'
+    fsymbol = 'if'
+
+    def __init__(self, M : Term, S1 : QWhileAst, S0 : QWhileAst):
+        super().__init__(M, S1, S0)
         
         self.M = M
         self.S1 = S1
@@ -124,12 +116,13 @@ class If(Ast):
             "end;",
             h_align='l'))
     
-    def __eq__(self, other) -> bool:
-        return isinstance(other, If) and self.M == other.M and self.S1 == other.S1 and self.S0 == other.S0
 
-class While(Ast):
-    def __init__(self, M : Term, S : Ast):
-        super().__init__()
+class While(QWhileAst):
+    fsymbol_print = 'while'
+    fsymbol = 'while'
+
+    def __init__(self, M : Term, S : QWhileAst):
+        super().__init__(M, S)
         
         self.M = M
         self.S = S
@@ -141,6 +134,3 @@ class While(Ast):
             HSeqBlock(INDENT, str(self.S)),
             "end;",
             h_align='l'))
-    
-    def __eq__(self, other) -> bool:
-        return isinstance(other, While) and self.M == other.M and self.S == other.S

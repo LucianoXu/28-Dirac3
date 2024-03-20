@@ -60,3 +60,11 @@ def test_seq():
         a = parse(r''' while ADJ(ADJ(P[q])) do U; end; skip;''')
         b = While(Adj(Adj(Labelled1(Var('P'), Var('q')))), Unitary(Var('U'))) @ Skip()
         assert a == b
+
+        a = parse(r''' abort; abort; abort; abort;''')
+        b = Abort() @ (Abort() @ (Abort() @ Abort()))
+        assert a == b
+
+        b = Abort() @ (Abort() @ Abort()) @ Abort()
+        a = Abort() @ (Abort() @ (Abort() @ Abort()))
+        assert a == b

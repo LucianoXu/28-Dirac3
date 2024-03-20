@@ -57,7 +57,7 @@ def p_statement(p):
     
     # sequential composition
     elif type_match(p, ("statement", "statement")):
-        p[0] = Seq((p[1], p[2]))
+        p[0] = Seq(p[1], p[2])
 
     # if
     elif type_match(p, ("IF", "trs-term", "THEN", "statement", "ELSE", "statement", "END", ';')):
