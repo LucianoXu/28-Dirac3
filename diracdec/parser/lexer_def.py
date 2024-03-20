@@ -1,34 +1,10 @@
 
-from ply import lex
+
+from ..theory.dirac import lexer_def as dirac_lex
+
+from ..theory.dirac.lexer_def import *
 
 reserved = {
-    'PAIR'       : 'PAIR',
-    'FST'        : 'FST',
-    'SND'        : 'SND',
-    
-    # note: the symbol "C" for complex scalars is ommited
-    'DELTA'      : 'DELTA',
-    'ADDS'       : 'ADDS',      # infix binary
-    'MLTS'       : 'MLTS',      # infix binary
-    'CONJS'      : 'CONJS',
-    'DOT'        : 'DOT',       # infix binary
-
-    # unified symbol
-    'ADJ'        : 'ADJ',
-    'SCR'        : 'SCR',
-    'ADD'        : 'ADD',
-
-    'KET'        : 'KET',
-    'MLTK'       : 'MLTK',      # infix binary
-    'TSRK'       : 'TSRK',      # infix binary
-
-    'BRA'        : 'BRA',
-    'MLTB'       : 'MLTB',      # infix binary
-    'TSRB'       : 'TSRB',      # infix binary
-
-    'OUTER'      : 'OUTER',     # infix binary
-    'MLTO'       : 'MLTO',      # infix binary
-    'TSRO'       : 'TSRO',      # infix binary
 
     ########################################
     # transpose
@@ -74,41 +50,19 @@ reserved = {
     'OUTERL'    : 'OUTERL',
 }
 
-tokens = [
-    # 'INT', 
-    'ID',
-    'ZEROX',
-    'ONEO',
-
-    # escape to complex scalar
-    'COMPLEXSCALAR_EXPR',
-
-    # escape to atomic base
-    'ATOMICBASE_EXPR',
-
-    ] + list(reserved.values())
+tokens = [] + list(reserved.values()) + dirac_lex.tokens
+reserved.update(dirac_lex.reserved)
 
 
-literals = ['(', ')', ',', '{', '}', ';' , ':', '.', '@', '[', ']', ';']
-
-t_ZEROX = '0X'
-t_ONEO = '1O'
+literals = ['(', ')', ',', '{', '}', ';' , ':', '.', '@', '[', ']'] + dirac_lex.literals
 
 
+# t_ID must be redesigned because reserved key words rely on it
 def t_ID(t):
     r'[a-zA-Z\_][a-zA-Z0-9\_]*'
     t.type = reserved.get(t.value, 'ID')
     return t
 
-def t_COMPLEXSCALAR_EXPR(t):
-    r'"[^"]*"'
-    t.value = t.value[1:-1]
-    return t
-
-def t_ATOMICBASE_EXPR(t):
-    r"'[^']*'"
-    t.value = t.value[1:-1]
-    return t
 
 # use // or /* */ to comment
 def t_COMMENT(t):
@@ -130,8 +84,3 @@ t_ignore = ' \t'
 
 def t_error(t):
     raise ValueError(f"Illegal character '{t.value[0]}'")
-    
-
-
-# Build the lexer
-lexer = lex.lex()

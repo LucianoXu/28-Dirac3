@@ -32,6 +32,9 @@ try:
     # out-of-box interface
     from .factory import normalize, eq_check
 
+    # ast
+    import ast
+
 
 except Exception as e:
     raise e

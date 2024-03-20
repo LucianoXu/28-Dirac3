@@ -15,7 +15,7 @@ from .components import wolU
 
 from .theory import dirac, delta_ext
 from .components import wolfram_simple
-from .theory.parser import construct_parser
+from .parser import construct_parser
 
 parser = construct_parser(
     wolfram_simple.WolframCScalar,
