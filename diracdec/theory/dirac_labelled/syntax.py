@@ -265,36 +265,6 @@ class Labelled2(LDiracNotation, StdTerm):
     def tex(self) -> str:
         return rf" \left ({self.args[0].tex()} \right )_{{ {self.args[1].tex()}; {self.args[2].tex()} }}"
 
-class AdjL(LDiracNotation, StdTerm):
-    fsymbol_print = "ADJL"
-    fsymbol = "ADJL"
-
-    def __init__(self, X: Term):
-        super().__init__(X)
-
-    def __str__(self) -> str:
-        return str(IndexBlock(str(self.args[0]), UR_index="†"))
-    
-    def tex(self) -> str:
-        return rf" {self.args[0].tex()}^\dagger"
-
-class ScalL(LDiracNotation, InfixBinary):
-    fsymbol_print = "."
-    fsymbol = "SCRL"
-
-    def __init__(self, S: Term, X: Term):
-        InfixBinary.__init__(self, S, X)
-
-    def tex(self) -> str:
-        return rf" {self.args[0].tex()} {self.args[1].tex()}"
-    
-class AddL(LDiracNotation, AC):
-    fsymbol_print = '+'
-    fsymbol = 'ADDL'
-
-    def __init__(self, *tup : Term):
-        AC.__init__(self, *tup)
-
 class KetApplyL(LDiracNotation, InfixBinary):
     fsymbol_print = "·"
     fsymbol = "MLTKL"

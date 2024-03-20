@@ -371,24 +371,6 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
         '''
         p[0] = Labelled2(p[1], p[3], p[5])
 
-    def p_diracnotationL3(p):
-        '''
-        diracnotationL  : ADJL '(' trs-term ')'
-        '''
-        p[0] = AdjL(p[3])
-
-    def p_diracnotationL4(p):
-        '''
-        diracnotationL  : trs-term SCRL trs-term
-        '''
-        p[0] = ScalL(p[1], p[3])
-
-    def p_diracnotationL5(p):
-        '''
-        diracnotationL  : trs-term ADDL trs-term
-        '''
-        p[0] = AddL(p[1], p[3])
-
 
     def p_dirac_ketL1(p):
         '''

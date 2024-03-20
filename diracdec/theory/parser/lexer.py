@@ -65,9 +65,6 @@ reserved = {
     ########################################
     # labeleld Dirac
     'DOTL'      : 'DOTL',
-    'ADJL'      : 'ADJL',
-    'SCRL'      : 'SCRL',
-    'ADDL'      : 'ADDL',
     'MLTKL'     : 'MLTKL',
     'TSRKL'     : 'TSRKL',
     'MLTBL'     : 'MLTBL',

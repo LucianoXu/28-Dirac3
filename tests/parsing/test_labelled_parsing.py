@@ -62,24 +62,6 @@ def test_labelled2():
         b = Labelled2(Var("X"), QRegPair(Var("r1"), Var("r2")), QRegFst(Var("x")))
         assert a == b
 
-def test_adjL():
-    with wolfram_backend.wolfram_session():
-        a = parse(r''' ADJL(X[r1; r2]) ''')
-        b = AdjL(Labelled2(Var("X"), Var("r1"), Var("r2")))
-        assert a == b
-
-def test_scalL():
-    with wolfram_backend.wolfram_session():
-        a = parse(r''' S SCRL X[r1; r2] ''')
-        b = ScalL(Var("S"), Labelled2(Var("X"), Var("r1"), Var("r2")))
-        assert a == b
-
-def test_addL():
-    with wolfram_backend.wolfram_session():
-        a = parse(r''' A ADDL X[r1; r2] ADDL B ''')
-        b = AddL(Var("A"), Labelled2(Var("X"), Var("r1"), Var("r2")), Var("B"))
-        assert a == b
-
 def test_ketapplyL():
     with wolfram_backend.wolfram_session():
         a = parse(r''' X[r1; r2] MLTKL K0[r1] ''')

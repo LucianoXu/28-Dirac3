@@ -85,6 +85,8 @@ This is implemented in the backend "wolfram_unique". We transform terms in simpl
 
 - Quantum register & register sets implemented, reducton rules implemented. The problem is the checking of register in/disjoint properties is a little bit complicated.
 
+- I implemented matching for AC/C symbols. It remains to see how much it will influence the efficiency.
+
 ## TODO
 - consider the case of teleportation after we have indices
 

@@ -66,7 +66,8 @@ def test_DELTA_2():
         b = parse(r''' DELTA(u, v) MLTS "2" ''')
         assert trs.normalize(a) == trs.normalize(b)
 
-
+###################################
+# tests involving C(a) are omitted.
 
 def test_SCR_COP_9():
     with wolfram_backend.wolfram_session():
