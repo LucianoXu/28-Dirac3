@@ -861,5 +861,114 @@ def construct_trs(
     )
     rules.append(LABEL_TEMP_5)
 
+
+    LABEL_TEMP_6 = CanonicalRule(
+        "LABEL-TEMP-6",
+        lhs = parse("(A ADD B) MLTOL C"),
+        rhs = parse("(A MLTOL C) ADD (B MLTOL C)")
+    )
+    rules.append(LABEL_TEMP_6)
+
+    LABEL_TEMP_7 = CanonicalRule(
+        "LABEL-TEMP-7",
+        lhs = parse("C MLTOL (A ADD B)"),
+        rhs = parse("(C MLTOL A) ADD (C MLTOL B)")
+    )
+    rules.append(LABEL_TEMP_7)
+
+    LABEL_TEMP_8 = CanonicalRule(
+        "LABEL-TEMP-8",
+        lhs = parse("1O MLTOL X"),
+        rhs = parse("X")
+    )
+    rules.append(LABEL_TEMP_8)
+
+
+    LABEL_TEMP_9 = CanonicalRule(
+        "LABEL-TEMP-9",
+        lhs = parse("X MLTOL 1O"),
+        rhs = parse("X")
+    )
+    rules.append(LABEL_TEMP_9)
+
+
+    LABEL_TEMP_10 = CanonicalRule(
+        "LABEL-TEMP-10",
+        lhs = parse("(S SCR A) MLTOL B"),
+        rhs = parse("S SCR (A MLTOL B)")
+    )
+    rules.append(LABEL_TEMP_10)
+
+
+    LABEL_TEMP_11 = CanonicalRule(
+        "LABEL-TEMP-11",
+        lhs = parse("A MLTOL (S SCR B)"),
+        rhs = parse("S SCR (A MLTOL B)")
+    )
+    rules.append(LABEL_TEMP_11)
+
+
+    LABEL_TEMP_12 = CanonicalRule(
+        "LABEL-TEMP-12",
+        lhs = parse("(S SCR A) DOTL B"),
+        rhs = parse("S SCR (A DOTL B)")
+    )
+    rules.append(LABEL_TEMP_12)
+
+
+    LABEL_TEMP_13 = CanonicalRule(
+        "LABEL-TEMP-13",
+        lhs = parse("A DOTL (S SCR B)"),
+        rhs = parse("S SCR (A DOTL B)")
+    )
+    rules.append(LABEL_TEMP_13)
+
+
+    LABEL_TEMP_12K = CanonicalRule(
+        "LABEL-TEMP-12K",
+        lhs = parse("(S SCR A) MLTKL B"),
+        rhs = parse("S SCR (A MLTKL B)")
+    )
+    rules.append(LABEL_TEMP_12K)
+
+
+    LABEL_TEMP_13K = CanonicalRule(
+        "LABEL-TEMP-13K",
+        lhs = parse("A MLTKL (S SCR B)"),
+        rhs = parse("S SCR (A MLTKL B)")
+    )
+    rules.append(LABEL_TEMP_13K)
+
+
+    LABEL_TEMP_12B = CanonicalRule(
+        "LABEL-TEMP-12B",
+        lhs = parse("(S SCR A) MLTBL B"),
+        rhs = parse("S SCR (A MLTBL B)")
+    )
+    rules.append(LABEL_TEMP_12B)
+
+
+    LABEL_TEMP_13B = CanonicalRule(
+        "LABEL-TEMP-13B",
+        lhs = parse("A MLTBL (S SCR B)"),
+        rhs = parse("S SCR (A MLTBL B)")
+    )
+    rules.append(LABEL_TEMP_13B)
+
+    LABEL_TEMP_14 = CanonicalRule(
+        "LABEL-TEMP-14",
+        lhs = parse("(S SCR A) OUTERL B"),
+        rhs = parse("S SCR (A OUTERL B)")
+    )
+    rules.append(LABEL_TEMP_14)
+
+
+    LABEL_TEMP_15 = CanonicalRule(
+        "LABEL-TEMP-15",
+        lhs = parse("A OUTERL (S SCR B)"),
+        rhs = parse("S SCR (A OUTERL B)")
+    )
+    rules.append(LABEL_TEMP_15)
+    
     # build the trs
     return TRS(rules)

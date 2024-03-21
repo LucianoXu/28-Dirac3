@@ -54,13 +54,13 @@ def test_if():
 def test_while():
     with wolfram_backend.wolfram_session():
         a = parse(r''' while [0] ADJ(ADJ(P[q])) do U; end; ''')
-        b = While(Adj(Adj(Labelled1(Var('P'), Var('q')))), 0, Unitary(Var('U')))
+        b = While(Adj(Adj(Labelled1(Var('P'), Var('q')))), IntTerm(0), Unitary(Var('U')))
         assert a == b
 
 def test_seq():
     with wolfram_backend.wolfram_session():
         a = parse(r''' while [1] ADJ(ADJ(P[q])) do U; end; skip;''')
-        b = While(Adj(Adj(Labelled1(Var('P'), Var('q')))), 1, Unitary(Var('U'))) @ Skip()
+        b = While(Adj(Adj(Labelled1(Var('P'), Var('q')))), IntTerm(1), Unitary(Var('U'))) @ Skip()
         assert a == b
 
         a = parse(r''' abort; abort; abort; abort;''')
@@ -83,7 +83,7 @@ def test_cfg():
 
         a = parse(r''' < while [2] ADJ(ADJ(P[q])) do U; end;, KET(a) OUTER BRA(a) > ''')
         b = Cfg(
-            While(Adj(Adj(Labelled1(Var('P'), Var('q')))), 2, Unitary(Var('U'))), 
+            While(Adj(Adj(Labelled1(Var('P'), Var('q')))), IntTerm(2), Unitary(Var('U'))), 
             OpOuter(KetBase(Var('a')), BraBase(Var('a')))
             )
         assert a == b

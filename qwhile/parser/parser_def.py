@@ -92,7 +92,7 @@ def p_statement(p):
 
     # while
     elif type_match(p, ("WHILE", "NUMBER", "trs-term", "DO", "statement", "END", ';')):
-        p[0] = While(p[3], p[2], p[5])
+        p[0] = While(p[3], IntTerm(p[2]), p[5])
        
 
 def p_error(p):

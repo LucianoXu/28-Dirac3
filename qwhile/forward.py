@@ -144,7 +144,7 @@ def construct_trs(
 
     def op_sem_while_rewrite(rule, trs, term):
         if isinstance(term, Cfg) and isinstance(term.args[0], While):
-            if term.args[0].step > 0:
+            if term.args[0].step.num > 0:
                 return Cfg(
                         If(
                             term.args[0].args[0],
@@ -152,7 +152,7 @@ def construct_trs(
                                 term.args[0].S,
                                 While(
                                     term.args[0].P, 
-                                    term.args[0].step-1, 
+                                    IntTerm(term.args[0].step.num-1), 
                                     term.args[0].S)
                             ),
                             Skip()

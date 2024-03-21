@@ -9,7 +9,7 @@ from typing import Type, Tuple
 
 from abc import abstractmethod, ABC
 
-from diracdec.theory.trs import Term
+from diracdec.theory.trs import Subst, Term, Var
 
 
 INDENT = "  "
@@ -118,13 +118,38 @@ class If(QWhileAst):
             "end;",
             h_align='l'))
     
+class IntTerm(Term):
+    def __init__(self, num: int):
+        super().__init__()
+        self.num = num
+
+    def __str__(self) -> str:
+        return f"[{self.num}]"
+    
+    def tex(self) -> str:
+        raise NotImplementedError()
+    
+    def __eq__(self, other: Term) -> bool:
+        return isinstance(other, IntTerm) and self.num == other.num
+    
+    def __repr__(self) -> str:
+        return str(self)
+    
+    def size(self) -> int:
+        return 1
+    
+    def variables(self) -> set[Var]:
+        return set()
+    
+    def subst(self, sigma: Subst | dict[Var, Term]) -> Term:
+        return self
 
 class While(QWhileAst):
     fsymbol_print = 'while'
     fsymbol = 'while'
 
-    def __init__(self, P : Term, step: int, S : QWhileAst):
-        super().__init__(P, S)
+    def __init__(self, P : Term, step: IntTerm, S : QWhileAst):
+        super().__init__(P, step, S)
         
         # the meta argument
         self.step = step
@@ -135,10 +160,7 @@ class While(QWhileAst):
     
     def __str__(self) -> str:
         return str(VSeqBlock(
-            HSeqBlock("while ", f"[{self.step}]", " ", str(self.P), " do", v_align='c'),
+            HSeqBlock("while ", str(self.step), " ", str(self.P), " do", v_align='c'),
             HSeqBlock(INDENT, str(self.S)),
             "end;",
             h_align='l'))
-    
-    def __eq__(self, other: Term) -> bool:
-        return isinstance(other, While) and self.P == other.P and self.S == other.S and self.step == other.step
