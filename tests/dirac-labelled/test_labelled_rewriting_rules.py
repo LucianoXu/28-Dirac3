@@ -455,3 +455,13 @@ def test_LABEL_TEMP_4():
         a = parse(r''' (A[R] TSRBL X) DOT B[R] ''')
         b = parse(r''' (A[R] DOT B[R]) SCR X ''')
         assert label_trs.normalize(a) == label_trs.normalize(b)
+
+def test_LABEL_TEMP_5():
+    with wolfram_backend.wolfram_session():
+        a = parse(r''' (A MLTOL B) MLTOL C ''')
+        b = parse(r''' A MLTOL (B MLTOL C) ''')
+        assert label_trs.normalize(a) == label_trs.normalize(b)
+
+        a = parse(r''' SUM(i, (A MLTOL B) MLTOL C) ''')
+        b = parse(r''' SUM(i, A MLTOL (B MLTOL C)) ''')
+        assert label_trs.normalize(a) == label_trs.normalize(b)

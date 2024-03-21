@@ -14,13 +14,15 @@ reserved = {
     'while'     : 'WHILE',
     'do'        : 'DO',
 
+    # special program for qwhile-configuration
+    'HALT'      : 'HALT'
 }
 
-tokens = ['ASSIGN0'] + list(reserved.values()) + dirac_syntax_lexer.tokens
+tokens = ['ASSIGN0', 'NUMBER'] + list(reserved.values()) + dirac_syntax_lexer.tokens
 reserved.update(dirac_syntax_lexer.reserved)
 
 
-literals = [';'] + dirac_syntax_lexer.literals
+literals = [';', '<', '>', ','] + dirac_syntax_lexer.literals
 
 t_ASSIGN0 = r":=0"
 
@@ -29,6 +31,11 @@ t_ASSIGN0 = r":=0"
 def t_ID(t):
     r'[a-zA-Z\_][a-zA-Z0-9\_]*'
     t.type = reserved.get(t.value, 'ID')
+    return t
+
+def t_NUMBER(t):
+    r'\[\d+\]'
+    t.value = int(t.value[1:-1])
     return t
 
 # use // or /* */ to comment

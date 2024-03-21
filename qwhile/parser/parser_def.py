@@ -2,14 +2,16 @@
 from __future__ import annotations
 from typing import Tuple
 
-from .ast import *
+from ..lang import *
+
+from ..forward import *
 
 from diracdec.parser import parser_def as dirac_syntax_parser
 
 
 from diracdec.parser.parser_def import p_dirac_add, p_dirac_adj, p_dirac_scal, p_dirac_zero, p_diracbase2, p_diracbase3, p_diracbase4, p_diracbra1, p_diracbra2, p_diracbra3, p_diracket1, p_diracket2, p_diracket3, p_diracop1, p_diracop2, p_diracop3, p_diracop4, p_diracscalar2, p_diracscalar3, p_diracscalar4, p_diracscalar5, p_diracscalar6, p_term, p_term_parentheses, p_trs_item, p_trs_var, p_abstract, p_apply, p_dirac_braL1, p_dirac_braL2, p_dirac_ketL1, p_dirac_ketL2, p_dirac_opL1, p_dirac_opL2, p_dirac_opL3, p_dirac_sum, p_dirac_sums, p_dirac_tp, p_diracnotationL1, p_diracnotationL2, p_diracscalar7, p_qreg1, p_qreg2, p_qreg3, p_qregset1, p_qregset2, p_qregset3, p_qregset4, p_set_eset, p_set_union, p_set_uset, p_sub, p_sub_list, p_term_append
 
-start = "statement"
+start = "qwhile-start"
 
 precedence = (
     ('right', ';'), # sequential composition is right-associated
@@ -28,19 +30,44 @@ def type_match(p, types: Tuple[str, ...]) -> bool:
             return False
     return True
 
+def p_qwhile_start(p):
+    '''
+    qwhile-start    : statement
+                    | qwhile-cfg
+                    | trs-item
+    '''
+    p[0] = p[1]
+
+def p_cfg_1(p):
+    '''
+    qwhile-cfg      : '<' statement ',' trs-term '>'
+    '''
+    p[0] = Cfg(p[2], p[4])
+
+def p_cfg_2(p):
+    '''
+    qwhile-cfg      : '<' HALT ',' trs-term '>'
+    '''
+    p[0] = Cfg(Halt(), p[4])
+
+
 def p_statement(p):
     '''
-    statement   : ABORT ';'
+    statement   : ID
+                | ABORT ';'
                 | SKIP ';'
                 | trs-term ASSIGN0 ';'
                 | trs-term ';'
                 | statement statement
                 | IF trs-term THEN statement ELSE statement END ';'
-                | WHILE trs-term DO statement END ';'
+                | WHILE NUMBER trs-term DO statement END ';'
     '''
 
+    if type_match(p, ('ID',)):
+        p[0] = Var(p[1])
+
     # abort
-    if type_match(p, ("ABORT", ';')):
+    elif type_match(p, ("ABORT", ';')):
         p[0] = Abort()
 
     # skip
@@ -64,8 +91,8 @@ def p_statement(p):
         p[0] = If(p[2], p[4], p[6])
 
     # while
-    elif type_match(p, ("WHILE", "trs-term", "DO", "statement", "END", ';')):
-        p[0] = While(p[2], p[4])
+    elif type_match(p, ("WHILE", "NUMBER", "trs-term", "DO", "statement", "END", ';')):
+        p[0] = While(p[3], p[2], p[5])
        
 
 def p_error(p):

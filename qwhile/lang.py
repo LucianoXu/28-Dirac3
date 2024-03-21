@@ -9,6 +9,8 @@ from typing import Type, Tuple
 
 from abc import abstractmethod, ABC
 
+from diracdec.theory.trs import Term
+
 
 INDENT = "  "
 
@@ -100,16 +102,16 @@ class If(QWhileAst):
     fsymbol_print = 'if'
     fsymbol = 'if'
 
-    def __init__(self, M : Term, S1 : QWhileAst, S0 : QWhileAst):
-        super().__init__(M, S1, S0)
+    def __init__(self, P : Term, S1 : QWhileAst, S0 : QWhileAst):
+        super().__init__(P, S1, S0)
         
-        self.M = M
+        self.P = P
         self.S1 = S1
         self.S0 = S0
     
     def __str__(self) -> str:
         return str(VSeqBlock(
-            HSeqBlock("if ", str(self.M), " then ", v_align='c'),
+            HSeqBlock("if ", str(self.P), " then ", v_align='c'),
             HSeqBlock(INDENT, str(self.S1)),
             "else",
             HSeqBlock(INDENT, str(self.S0)),
@@ -121,16 +123,22 @@ class While(QWhileAst):
     fsymbol_print = 'while'
     fsymbol = 'while'
 
-    def __init__(self, M : Term, S : QWhileAst):
-        super().__init__(M, S)
+    def __init__(self, P : Term, step: int, S : QWhileAst):
+        super().__init__(P, S)
         
-        self.M = M
+        # the meta argument
+        self.step = step
+
+        self.P = P
         self.S = S
 
     
     def __str__(self) -> str:
         return str(VSeqBlock(
-            HSeqBlock("while ", str(self.M), " do", v_align='c'),
+            HSeqBlock("while ", f"[{self.step}]", " ", str(self.P), " do", v_align='c'),
             HSeqBlock(INDENT, str(self.S)),
             "end;",
             h_align='l'))
+    
+    def __eq__(self, other: Term) -> bool:
+        return isinstance(other, While) and self.P == other.P and self.S == other.S and self.step == other.step

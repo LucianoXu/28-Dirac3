@@ -858,5 +858,12 @@ def construct_trs(
     rules.append(LABEL_TEMP_4)
 
 
+    LABEL_TEMP_5 = CanonicalRule(
+        "LABEL-TEMP-5",
+        lhs = parse("(A MLTOL B) MLTOL C"),
+        rhs = parse("A MLTOL (B MLTOL C)")
+    )
+    rules.append(LABEL_TEMP_5)
+
     # build the trs
     return TRS(rules)
