@@ -17,12 +17,9 @@ from .theory import dirac, delta_ext
 from .components import wolfram_simple
 from .parser import construct_parser
 
-parser = construct_parser(
+parse = construct_parser(
     wolfram_simple.WolframCScalar,
     wolfram_simple.WolframABase)
-
-def parse(s: str) -> Any:
-    return parser.parse(s)
 
 ### ALL WOLFRAM BACKEND
 
@@ -30,7 +27,7 @@ def parse(s: str) -> Any:
 dirac_trs = dirac.construct_trs(
     wolfram_simple.WolframCScalar,
     wolfram_simple.WolframABase, 
-    parser
+    parse
     )
 
 def dirac_cime2_file(path: str):
@@ -52,7 +49,7 @@ from .components import wolfram_simple
 dirac_bigop_trs, juxt = dirac_bigop.construct_trs(
     wolfram_simple.WolframCScalar, 
     wolfram_simple.WolframABase, 
-    parser
+    parse
     )
     
 ### with delta extensions
@@ -66,7 +63,7 @@ dirac_bigop_delta_trs = delta_ext.modify_trs(
 entry_trs = dirac_bigop.construct_entry_trs(
     wolfram_simple.WolframCScalar, 
     wolfram_simple.WolframABase, 
-    parser
+    parse
 )
 
 ###############################################
@@ -76,7 +73,7 @@ from .theory import dirac_labelled
 label_trs = dirac_labelled.construct_trs(
     wolfram_simple.WolframCScalar, 
     wolfram_simple.WolframABase, 
-    parser
+    parse
 )
 
 ###############################################

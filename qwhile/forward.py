@@ -70,10 +70,7 @@ class CfgSet(AC):
 
 
 def construct_trs(
-        parser: yacc.LRParser) -> TRS:
-    
-    def parse(s: str) -> Term:
-        return parser.parse(s)
+        parse: Callable[[str], Any]) -> TRS:
     
     # inherit the rules from dirac
     rules = []

@@ -4,7 +4,7 @@ try:
 
     from .lang import *
 
-    from .factory import parser, parse
+    from .factory import parse
 
     from .factory import forward_trs
 

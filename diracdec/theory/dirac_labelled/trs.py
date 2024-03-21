@@ -15,14 +15,10 @@ from ..complex_scalar import ComplexScalar
 def construct_trs(
         CScalar: Type[ComplexScalar], 
         ABase: Type[AtomicBase], 
-        parser: yacc.LRParser) -> TRS:
+        parse: Callable[[str], Any]) -> TRS:
     '''
     This trs only deals with label related rewritings.
     '''
-    
-    def parse(s: str) -> Term:
-        return parser.parse(s)
-
 
     # prepare the rules
     rules = []

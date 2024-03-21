@@ -18,19 +18,16 @@ from ..dirac.trs import construct_trs as dirac_construct_trs
 def construct_trs(
         CScalar: Type[ComplexScalar], 
         ABase: Type[AtomicBase], 
-        parser: yacc.LRParser) -> Tuple[TRS, Callable[[Term], Term]]:
+        parse: Callable[[str], Any]) -> Tuple[TRS, Callable[[Term], Term]]:
     '''
     Return:
         - the first TRS is the trs for the bigop theory
         - the second function transform the term to apply juxtapose rule once.
         - the thrid function applies the sumeq extension.
     '''
-
-    def parse(s: str) -> Term:
-        return parser.parse(s)
     
     # inherit the rules from dirac
-    dirac_trs = dirac_construct_trs(CScalar, ABase, parser)
+    dirac_trs = dirac_construct_trs(CScalar, ABase, parse)
     rules = []
 
     #####################################################
@@ -661,16 +658,13 @@ def construct_trs(
 def construct_entry_trs(
         CScalar: Type[ComplexScalar], 
         ABase: Type[AtomicBase], 
-        parser: yacc.LRParser) -> TRS:
+        parse: Callable[[str], Any]) -> TRS:
     '''
     Return:
         - the first TRS is the trs for the bigop theory
         - the second function transform the term to apply juxtapose rule once.
         - the thrid function applies the sumeq extension.
     '''
-    
-    def parse(s: str) -> Term:
-        return parser.parse(s)
     
     rules = []
 

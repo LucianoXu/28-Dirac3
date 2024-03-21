@@ -25,7 +25,7 @@ from .parser_def import *
 from diracdec.theory.atomic_base import AtomicBase
 from diracdec.theory.complex_scalar import ComplexScalar
 
-def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> yacc.LRParser:
+def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> Callable[[str], Any]:
 
     def p_diracbase1(p):
         '''
@@ -43,4 +43,8 @@ def construct_parser(CScalar: Type[ComplexScalar], ABase: Type[AtomicBase]) -> y
     # Build the parser
     parser = yacc.yacc()
 
-    return parser
+    def parse(s: str) -> Any:
+        return parser.parse(s, lexer = lexer)
+
+    return parse
+    

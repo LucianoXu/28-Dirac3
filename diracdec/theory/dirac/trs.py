@@ -18,11 +18,7 @@ from ..complex_scalar import ComplexScalar
 def construct_trs(
         CScalar: Type[ComplexScalar], 
         ABase: Type[AtomicBase], 
-        parser: yacc.LRParser) -> TRS:
-    
-    def parse(s: str) -> Term:
-        return parser.parse(s)
-
+        parse: Callable[[str], Any]) -> TRS:
 
     # prepare the rules
     rules = []
