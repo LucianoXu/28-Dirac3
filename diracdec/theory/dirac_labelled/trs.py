@@ -777,6 +777,13 @@ def construct_trs(
     )
     rules.append(LABEL_TEMP_1B)
 
+    LABEL_TEMP_1C = CanonicalRule(
+        "LABEL-TEMP-1C",
+        lhs = parse("B[R] MLTBL (K[R] OUTERL X)"),
+        rhs = parse("(B DOT K) SCR X"),
+    )
+    rules.append(LABEL_TEMP_1C)
+
     def label_temp_2_rewrite(rule, trs, term):
         if (isinstance(term, KetApplyL) and isinstance(term.args[0], OpTensorL) or isinstance(term, BraApplyL) and isinstance(term.args[0], BraTensorL) or isinstance(term, OpApplyL) and isinstance(term.args[0], OpTensorL)) and isinstance(term.args[1], Labelled1) :
             for i, t in enumerate(term.args[0].args):
@@ -819,6 +826,14 @@ def construct_trs(
         rewrite_method = label_temp_2b_rewrite
     )
     rules.append(LABEL_TEMP_2B)
+
+    LABEL_TEMP_2C = CanonicalRule(
+        "LABEL-TEMP-2C",
+        lhs = parse("(X OUTERL B[R]) MLTKL K[R]"),
+        rhs = parse("(B DOT K) SCR X")
+    )
+    rules.append(LABEL_TEMP_2C)
+
 
     def label_temp_3_rewrite(rule, trs, term):
         if isinstance(term, ScalarDot) and isinstance(term.args[0], Labelled1) and isinstance(term.args[1], KetTensorL):
@@ -876,18 +891,27 @@ def construct_trs(
     )
     rules.append(LABEL_TEMP_7)
 
-    LABEL_TEMP_8 = CanonicalRule(
+    def label_temp_8_rewrite(rule, trs, term):
+        if isinstance(term, (KetApplyL, BraApplyL, OpApplyL)) and isinstance(term.args[0], OpOne):
+            return term.args[1]
+
+    LABEL_TEMP_8 = Rule(
         "LABEL-TEMP-8",
-        lhs = parse("1O MLTOL X"),
-        rhs = parse("X")
+        lhs = "1O {MLTOL/MLTBL/MLTKL} X",
+        rhs = "X",
+        rewrite_method=label_temp_8_rewrite
     )
     rules.append(LABEL_TEMP_8)
 
-
-    LABEL_TEMP_9 = CanonicalRule(
+    def label_temp_9_rewrite(rule, trs, term):
+        if isinstance(term, (KetApplyL, BraApplyL, OpApplyL)) and isinstance(term.args[1], OpOne):
+            return term.args[0]
+        
+    LABEL_TEMP_9 = Rule(
         "LABEL-TEMP-9",
-        lhs = parse("X MLTOL 1O"),
-        rhs = parse("X")
+        lhs = "X {MLTOL/MLTBL/MLTKL} 1O",
+        rhs = "X",
+        rewrite_method=label_temp_9_rewrite
     )
     rules.append(LABEL_TEMP_9)
 
@@ -969,6 +993,62 @@ def construct_trs(
         rhs = parse("S SCR (A OUTERL B)")
     )
     rules.append(LABEL_TEMP_15)
+
+    def label_temp_16_rewrite(rule, trs, term):
+        if isinstance(term, (KetApplyL, BraApplyL, OpApplyL, ScalarDotL)) and isinstance(term.args[1], Add):
+            return Add(*tuple(type(term)(term.args[0], t) for t in term.args[1].args))
+        
+    LABEL_TEMP_16 = Rule(
+        "LABEL-TEMP-16",
+        lhs = "A {MLTOL/MLTKL/MLTBL/MLTO/DOTL} (B ADD C)",
+        rhs = "A {MLTOL/MLTKL/MLTBL/MLTO/DOTL} B ADD A {MLTOL/MLTKL/MLTBL/MLTO/DOTL} C",
+        rewrite_method=label_temp_16_rewrite
+    )
+    rules.append(LABEL_TEMP_16)
+
+    def label_temp_17_rewrite(rule, trs, term):
+        if isinstance(term, (KetApplyL, BraApplyL, OpApplyL, ScalarDotL)) and isinstance(term.args[0], Add):
+            return Add(*tuple(type(term)(t, term.args[1]) for t in term.args[0].args))
+        
+    LABEL_TEMP_17 = Rule(
+        "LABEL-TEMP-17",
+        lhs = "(A ADD B) {MLTOL/MLTKL/MLTBL/MLTO/DOTL} C",
+        rhs = "A {MLTOL/MLTKL/MLTBL/MLTO/DOTL} C ADD B {MLTOL/MLTKL/MLTBL/MLTO/DOTL} C",
+        rewrite_method=label_temp_17_rewrite
+    )
+    rules.append(LABEL_TEMP_17)
+
+    def label_temp_18_rewrite(rule, trs, term):
+        if isinstance(term, (OpTensorL, BraTensorL, KetTensorL, OpOuterL)) and (isinstance(term.args[1], Zero) or isinstance(term.args[0], Zero)):
+            return Zero()
+    LABEL_TEMP_18 = Rule(
+        "LABEL-TEMP-18",
+        lhs = " 0X {TSR} X / X {TSR} 0X",
+        rhs = " 0X ",
+        rewrite_method = label_temp_18_rewrite
+    )
+    rules.append(LABEL_TEMP_18)
+
+    def label_temp_18B_rewrite(rule, trs, term):
+        if isinstance(term, (KetApplyL, BraApplyL, OpApplyL)) and (isinstance(term.args[1], Zero) or isinstance(term.args[0], Zero)):
+            return Zero()
+    
+    LABEL_TEMP_18B = Rule(
+        "LABEL-TEMP-18B",
+        lhs = " 0X {DOT} X / X {DOT} 0X",
+        rhs = " 0X ",
+        rewrite_method = label_temp_18B_rewrite
+    )
+    rules.append(LABEL_TEMP_18B)
+
+
+    LABEL_TEMP_19 = CanonicalRule(
+        "LABEL-TEMP-19",
+        lhs = parse(''' ADJ(A OUTERL B) '''),
+        rhs = parse(''' ADJ(B) OUTERL ADJ(A) ''')
+    )   
+    rules.append(LABEL_TEMP_19)
+
     
     # build the trs
     return TRS(rules)
