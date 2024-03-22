@@ -815,7 +815,7 @@ class Rule:
 
     def __str__(self) -> str:
         return str(HSeqBlock(
-            str(self.lhs), ' → ', str(self.rhs),
+            self.rule_name, " ", str(self.lhs), ' → ', str(self.rhs),
             v_align='c'))
 
     def __repr__(self) -> str:
@@ -825,6 +825,20 @@ class Rule:
         str_lhs = self.lhs if isinstance(self.lhs, str) else repr(self.lhs)
         str_rhs = self.rhs if isinstance(self.rhs, str) else repr(self.rhs)
         return f'{str_lhs} -> {str_rhs} ;'
+    
+    def subst(self, sigma : Subst|dict[Var, Term]) -> Rule:
+        if isinstance(sigma, dict):
+            sigma = Subst(sigma)
+
+        new_lhs = self.lhs.subst(sigma) if isinstance(self.lhs, Term) else self.lhs
+        new_rhs = self.rhs.subst(sigma) if isinstance(self.rhs, Term) else self.rhs
+        return Rule(
+            self.rule_name, 
+            new_lhs, 
+            new_rhs, 
+            self.rewrite_method, 
+            self.rule_repr)
+
     
 ##################################################################
 # canonical rewriting rule
@@ -857,36 +871,121 @@ class CanonicalRule(Rule):
         self.rewrite_method = canonical_rewrite
 
         
-# define rule for AC symbols by defining new class
-        
+    def subst(self, sigma : Subst|dict[Var, Term]) -> CanonicalRule:
+        if isinstance(sigma, dict):
+            sigma = Subst(sigma)
+
+        return CanonicalRule(
+            self.rule_name, 
+            self.lhs.subst(sigma), 
+            self.rhs.subst(sigma))
+    
+
 
 ######################################################################
 # term rewriting system
         
 class TRS:
 
-    def __init__(self, 
-                 rules: List[Rule], 
-                 ):
+    def __init__(self, rules: Sequence[Rule]):
         '''
         side_info_procs provides methods to preprocess side informations (executed in sequence)
         '''
-        self.rules : List[Rule] = rules
-        self.extended_rules = []
+        self.rules : List[Rule] = []
+        self.extended_rules : List[Rule] = []
 
-        # add the extended rules
+        # the rule sequence that will be check during the rewriting. the order maters.
+        self.rule_seq : List[Rule] = []
+
+        self.rule_seq_name = []
+
         for rule in rules:
-            self.extended_rules.append(rule)
+            self.append(rule)
 
-            # extend the rules automatically
-            if isinstance(rule, CanonicalRule) and isinstance(rule.lhs, AC):
-                varX = new_var(rule.lhs.variables() | rule.rhs.variables(), "X")
-                ext_rule = CanonicalRule(
-                    rule.rule_name + "-EXT",
-                    lhs = type(rule.lhs)(rule.lhs, varX),
-                    rhs = type(rule.lhs)(rule.rhs, varX)
-                )
-                self.extended_rules.append(ext_rule)
+    def copy(self) -> TRS:
+        res = TRS([])
+        res.rules = self.rules.copy()
+        res.extended_rules = self.extended_rules.copy()
+        res.rule_seq = self.rule_seq.copy()
+        res.rule_seq_name = self.rule_seq_name.copy()
+        return res
+
+    
+    def __getitem__(self, __rule_name: str) -> Rule|None:
+        '''
+        return the rule with the given name
+        '''
+        for rule in self.extended_rules:
+            if rule.rule_name == __rule_name:
+                return rule
+        return None
+
+
+    def append(self, rule: Rule) -> None:
+        '''
+        append a rule to the TRS
+        '''
+        
+        # check whether the same rule already exists
+        if self[rule.rule_name] is not None:
+            raise ValueError(f"The rule with the name {rule.rule_name} already exists.")
+
+        self.rules.append(rule)
+        self.extended_rules.append(rule)
+        self.rule_seq.append(rule)
+        self.rule_seq_name.append(rule.rule_name)
+
+        # extend the rules automatically
+        if isinstance(rule, CanonicalRule) and isinstance(rule.lhs, AC):
+            varX = new_var(rule.lhs.variables() | rule.rhs.variables(), "X")
+            ext_rule = CanonicalRule(
+                rule.rule_name + "-EXT",
+                lhs = type(rule.lhs)(rule.lhs, varX),
+                rhs = type(rule.lhs)(rule.rhs, varX)
+            )
+            self.extended_rules.append(ext_rule)
+            self.rule_seq.append(ext_rule)
+            self.rule_seq_name.append(ext_rule.rule_name)
+
+    def set_rule_seq(self, rule_seq: List[str]) -> None:
+        '''
+        set the rule sequence that will be check during the rewriting. the order maters.
+        '''
+        new_seq = []
+
+        for name in rule_seq:
+            rule = self[name]
+            if rule is None:
+                raise ValueError(f"The rule with the name {name} does not exist.")
+            new_seq.append(rule)
+            self.rule_seq.remove(rule)
+
+        # append the remaining part
+        self.rule_seq = new_seq + self.rule_seq
+
+        self.rule_seq_name = rule_seq.copy()
+
+    def subtrs(self, rule_names: List[str]) -> TRS:
+        '''
+        return the sub TRS with the rules with the given names
+        '''
+        result = TRS([rule for rule in self.rules if rule.rule_name in rule_names])
+        result.set_rule_seq(rule_names)
+        return result
+    
+
+    def __str__(self) -> str:
+        res = ""
+        for rule in self.extended_rules:
+            res += str(rule) + "\n"
+        return res
+
+    def ordered_str(self) -> str:
+        res = ""
+        for rule in self.rule_seq:
+            res += str(rule) + "\n"
+        return res
+    
     def __add__(self, other: TRS) -> TRS:
         return TRS(self.rules + other.rules)
 
@@ -908,7 +1007,7 @@ class TRS:
         res = ""
 
         # print the rules
-        for rule in self.extended_rules:
+        for rule in self.rule_seq:
             res += repr(rule) + "\n"
         return res
     
@@ -917,12 +1016,12 @@ class TRS:
         Apply the substitution on the TRS. Return the result.
         '''
         new_rules = []
-        for rule in self.extended_rules:
-            new_lhs = rule.lhs.subst(sigma) if isinstance(rule.lhs, Term) else rule.lhs
-            new_rhs = rule.rhs.subst(sigma) if isinstance(rule.rhs, Term) else rule.rhs
-            new_rules.append(Rule(rule.rule_name, new_lhs, new_rhs, rule.rewrite_method, rule.rule_repr))
+        for rule in self.rules:
+            new_rules.append(rule.subst(sigma))
 
-        return TRS(new_rules)
+        res = TRS(new_rules)
+        res.set_rule_seq(self.rule_seq_name)
+        return res
 
     def normalize(self, 
             term : Term, 
@@ -988,7 +1087,7 @@ class TRS:
         '''
 
         # try to rewrite the term using the rules
-        for rule in self.extended_rules:
+        for rule in self.rule_seq:
             new_term = rule.rewrite_method(rule, self, term)
             if new_term is not None:
                 # output information
@@ -1054,7 +1153,7 @@ class TRS:
 
 
         # try to rewrite the term using the rules
-        for rule in self.extended_rules:
+        for rule in self.rule_seq:
             new_term = rule.rewrite_method(rule, self, term)
             if new_term is not None:
                 # output information

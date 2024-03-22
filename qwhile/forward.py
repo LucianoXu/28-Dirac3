@@ -224,5 +224,4 @@ def construct_trs(
     
 
     # build the trs
-    rules = rules + rules
     return TRS(rules)
