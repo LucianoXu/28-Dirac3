@@ -41,6 +41,12 @@ def test_wolfram_variables():
         a = parse(''' 'HoldForm[Sum[(1/2)^i, {i, 1, Infinity}]]' ''')
         assert a.variables() == set(["i"])
 
+        a = parse(''' 'a' ''')
+        assert a.variables() == set(['a'])
+
+        a = parse(''' "a" ''')
+        assert a.variables() == set(['a'])
+
 
 def test_wolfram_substitute():
     with wolfram_backend.wolfram_session():

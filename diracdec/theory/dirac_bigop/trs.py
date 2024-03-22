@@ -192,7 +192,7 @@ def construct_trs(
                 else:
                     continue
             
-                if v[0].name not in s.variables() and v[1] == UniversalSet():
+                if v[0] not in s.variables() and v[1] == UniversalSet():
                     new_bind_vars = term.bind_vars[:i]+term.bind_vars[i+1:]
                     return SumS(new_bind_vars, CScalar.one())
                         
@@ -215,7 +215,7 @@ def construct_trs(
                         else:
                             continue
                         
-                        if v[0].name not in s.variables() and v[1] == UniversalSet():
+                        if v[0] not in s.variables() and v[1] == UniversalSet():
                             new_bind_vars = term.bind_vars[:j]+term.bind_vars[j+1:]
 
                             sub = Subst({v[0] : s})
@@ -241,7 +241,7 @@ def construct_trs(
                 else:
                     continue
                 
-                if v[0].name not in s.variables() and v[1] == UniversalSet():
+                if v[0] not in s.variables() and v[1] == UniversalSet():
                     new_bind_vars = term.bind_vars[:i]+term.bind_vars[i+1:]
 
                     sub = Subst({v[0] : s})
@@ -268,7 +268,7 @@ def construct_trs(
                         else:
                             continue
                         
-                        if v[0].name not in s.variables() and v[1] == UniversalSet():
+                        if v[0] not in s.variables() and v[1] == UniversalSet():
                             new_bind_vars = term.bind_vars[:j]+term.bind_vars[j+1:]
 
                             sub = Subst({v[0] : s})
@@ -288,7 +288,7 @@ def construct_trs(
     def sum_dist_1_rewrite(rule, trs, term):
         if isinstance(term, SumS) and isinstance(term.body, ScalarMlt):
             for i, item in enumerate(term.body.args):
-                if set(v[0].name for v in term.bind_vars) & item.variables() == set():
+                if set(v[0] for v in term.bind_vars) & item.variables() == set():
                     rest_body = ScalarMlt(*term.body.remained_terms(i))
                     return ScalarMlt(item, SumS(term.bind_vars, rest_body))
     trs.append(Rule(
@@ -335,7 +335,7 @@ def construct_trs(
 
     def sum_dist_5_rewrite(rule, trs, term):
         if isinstance(term, Sum) and isinstance(term.body, Scal) and \
-            set(v[0].name for v in term.bind_vars) & term.body.args[0].variables() == set():
+            set(v[0] for v in term.bind_vars) & term.body.args[0].variables() == set():
             return Scal(term.body.args[0], Sum(term.bind_vars, term.body.args[1]))
     trs.append(Rule(
         "SUM-DIST-5",
@@ -346,7 +346,7 @@ def construct_trs(
 
     def sum_dist_6_rewrite(rule, trs, term):
         if isinstance(term, Sum) and isinstance(term.body, Scal) and \
-            set(v[0].name for v in term.bind_vars) & term.body.args[1].variables() == set():
+            set(v[0] for v in term.bind_vars) & term.body.args[1].variables() == set():
             return Scal(SumS(term.bind_vars, term.body.args[0]), term.body.args[1])
     trs.append(Rule(
         "SUM-DIST-6",
@@ -360,7 +360,7 @@ def construct_trs(
 
     def sum_dist_7_rewrite(rule, trs, term):
         if isinstance(term, Sum) and isinstance(term.body, (ScalarDot, KetApply, BraApply, OpApply)) and \
-            set(v[0].name for v in term.bind_vars) & term.body.args[1].variables() == set():
+            set(v[0] for v in term.bind_vars) & term.body.args[1].variables() == set():
             return type(term.body)(Sum(term.bind_vars, term.body.args[0]), term.body.args[1])
     trs.append(Rule(
         "SUM-DIST-7",
@@ -371,7 +371,7 @@ def construct_trs(
 
     def sum_dist_8_rewrite(rule, trs, term):
         if isinstance(term, Sum) and isinstance(term.body, (ScalarDot, KetApply, BraApply, OpApply)) and \
-            set(v[0].name for v in term.bind_vars) & term.body.args[0].variables() == set():
+            set(v[0] for v in term.bind_vars) & term.body.args[0].variables() == set():
             return type(term.body)(term.body.args[0], Sum(term.bind_vars, term.body.args[1]))
     trs.append(Rule(
         "SUM-DIST-8",
@@ -383,7 +383,7 @@ def construct_trs(
 
     def sum_dist_9_rewrite(rule, trs, term):
         if isinstance(term, Sum) and isinstance(term.body, (KetTensor, BraTensor, OpOuter, OpTensor)) and \
-            set(v[0].name for v in term.bind_vars) & term.body.args[1].variables() == set():
+            set(v[0] for v in term.bind_vars) & term.body.args[1].variables() == set():
             return type(term.body)(Sum(term.bind_vars, term.body.args[0]), term.body.args[1])     
     trs.append(Rule(
         "SUM-DIST-9",
@@ -395,7 +395,7 @@ def construct_trs(
 
     def sum_dist_10_rewrite(rule, trs, term):
         if isinstance(term, Sum) and isinstance(term.body, (KetTensor, BraTensor, OpOuter, OpTensor)) and \
-            set(v[0].name for v in term.bind_vars) & term.body.args[0].variables() == set():
+            set(v[0] for v in term.bind_vars) & term.body.args[0].variables() == set():
             return type(term.body)(term.body.args[0], Sum(term.bind_vars, term.body.args[1]))
     trs.append(Rule(
         "SUM-DIST-10",
@@ -486,7 +486,7 @@ def construct_trs(
 
     def sum_comp_5_rewrite(rule, trs, term):
         if isinstance(term, SumS) and \
-            set(v[0].name for v in term.bind_vars) & term.body.variables() == set():
+            set(v[0] for v in term.bind_vars) & term.body.variables() == set():
             if term.body != CScalar.one():
                 return ScalarMlt(SumS(term.bind_vars, CScalar.one()), term.body)
 
@@ -500,7 +500,7 @@ def construct_trs(
 
     def sum_comp_6_rewrite(rule, trs, term):
         if isinstance(term, Sum) and \
-            set(v[0].name for v in term.bind_vars) & term.body.variables() == set():
+            set(v[0] for v in term.bind_vars) & term.body.variables() == set():
             return Scal(SumS(term.bind_vars, CScalar.one()), term.body)
 
     trs.append(Rule(
@@ -519,10 +519,10 @@ def construct_trs(
     #                     if isinstance(itemB, SumS):
     #                         new_bind_var = Var(new_var(itemA.variables() | itemB.variables()))
     #                         subA = Subst({
-    #                             itemA.bind_var.name: new_bind_var,
+    #                             itemA.bind_var: new_bind_var,
     #                         })
     #                         subB = Subst({
-    #                             itemB.bind_var.name: new_bind_var,
+    #                             itemB.bind_var: new_bind_var,
     #                         })
     #                         return type(term)(
     #                             SumS(new_bind_var, ScalarAdd(
@@ -548,10 +548,10 @@ def construct_trs(
     #                     if isinstance(itemB, Sum):
     #                         new_bind_var = Var(new_var(itemA.variables() | itemB.variables()))
     #                         subA = Subst({
-    #                             itemA.bind_var.name: new_bind_var,
+    #                             itemA.bind_var: new_bind_var,
     #                         })
     #                         subB = Subst({
-    #                             itemB.bind_var.name: new_bind_var,
+    #                             itemB.bind_var: new_bind_var,
     #                         })
     #                         return type(term)(
     #                             Sum(new_bind_var, Add(

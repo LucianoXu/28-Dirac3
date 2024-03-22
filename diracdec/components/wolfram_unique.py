@@ -79,7 +79,7 @@ class WolABaseUnique(AtomicBase):
         Notice: the "Global`" prefix is removed
         '''
         return set(Var(v.name.replace("Global`", ""))
-                   for v in session.evaluate(wl.Cases(self.expr, wl.Blank(wl.Symbol), wl.Infinity)) 
+                   for v in session.evaluate(wl.Cases(wl.List(self.expr), wl.Blank(wl.Symbol), wl.Infinity)) 
                    if isinstance(v, WLSymbol)
                    )
 
@@ -197,7 +197,7 @@ class WolCScalarUnique(ComplexScalar):
         Special symbols like "Inifinity" will also match _Symbol, and we rule them out.
         '''
         return set(Var(v.name.replace("Global`", ""))
-                   for v in session.evaluate(wl.Cases(self.expr, wl.Blank(wl.Symbol), wl.Infinity)) 
+                   for v in session.evaluate(wl.Cases(wl.List(self.expr), wl.Blank(wl.Symbol), wl.Infinity)) 
                    if isinstance(v, WLSymbol)
                    )
 
