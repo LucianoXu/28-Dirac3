@@ -798,7 +798,7 @@ class Matching:
 
 class Rule:
     def __init__(self, 
-                 rule_name:str,
+                 rule_name: str,
                  lhs: Term|str, 
                  rhs: Term|str,
                  rewrite_method : Callable[[Rule, TRS, Term], Term|None],
@@ -844,18 +844,18 @@ class Rule:
 # canonical rewriting rule
 
 def canonical_rewrite(rule: CanonicalRule, trs : TRS, term : Term) -> Term | None:
-        '''
-        The rewrite method for canonical rules.
+    '''
+    The rewrite method for canonical rules.
 
-        try rewriting the term using this rule. Return the result if successful, otherwise return None.
+    try rewriting the term using this rule. Return the result if successful, otherwise return None.
 
-        (The parameter [trs] is necessary to be consistent with customized rewriting methods.)
-        '''
-        subst = Matching.single_match(rule.lhs, term)
-        if len(subst) == 0:
-            return None
-        else:
-            return subst[0](rule.rhs)
+    (The parameter [trs] is necessary to be consistent with customized rewriting methods.)
+    '''
+    subst = Matching.single_match(rule.lhs, term)
+    if len(subst) == 0:
+        return None
+    else:
+        return subst[0](rule.rhs)
         
 class CanonicalRule(Rule):
     def __init__(self, 
@@ -1022,6 +1022,21 @@ class TRS:
         res = TRS(new_rules)
         res.set_rule_seq(self.rule_seq_name)
         return res
+    
+    def avoid_vars(self, var_set: set[Var]) -> TRS:
+        # check the variable conincidence
+        overlap = var_set & self.variables()
+        if len(overlap) > 0:
+
+            subst = {}
+            for var in overlap:
+                subst[var] = new_var(overlap|set(subst.keys()), var.name)
+            
+            return self.subst(Subst(subst))
+
+        else:
+            return self
+
 
     def normalize(self, 
             term : Term, 
@@ -1031,27 +1046,15 @@ class TRS:
             alg: str = "inner_most") -> Term:
 
         # check the variable conincidence
-        overlap = term.variables() & self.variables()
-        if len(overlap) > 0:
-            if verbose:
-                stream.write("Renaming rule variables...\n")
-
-            subst = {}
-            for var in overlap:
-                subst[var] = new_var(overlap|set(subst.keys()), var.name)
-            
-            renamed_trs = self.subst(Subst(subst))
-
-        else:
-            renamed_trs = self
+        renamed_trs = self.avoid_vars(term.variables())
 
         current_term = term          
 
         # choose the algorithm
         if alg == "outer_most":
-            rewrite = self.rewrite_outer_most  
+            rewrite = renamed_trs.rewrite_outer_most  
         elif alg == "inner_most":
-            rewrite = self.rewrite_inner_most
+            rewrite = renamed_trs.rewrite_inner_most
 
         step=0
         while True:

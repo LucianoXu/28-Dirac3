@@ -28,3 +28,82 @@ def test_bind_substitute():
     b = BindVarTerm(Var("y"), Var("z"))
     assert sub(a) == b
 
+
+from diracdec.theory.typed_trs import *
+
+def test_typing_mechanism():
+
+    class Add(StdTerm):
+        fsymbol_print = '+'
+        fsymbol = 'ADD'
+
+        def __init__(self, a: Term, b: Term):
+            super().__init__(a, b)
+            self.a = a
+            self.b = b
+
+        def __str__(self) -> str:
+            return str(ParenBlock(HSeqBlock(
+                str(self.a), " + ", str(self.b),
+                v_align='c'
+            )))
+
+        def __repr__(self) -> str:
+            return rf'({repr(self.a)} + {repr(self.b)})'
+
+        def tex(self) -> str:
+            return rf' \left ( {self.a} + {self.b} \right )'
+
+        def __eq__(self, __value: Term) -> bool:
+            return isinstance(__value, Add) and self.a == __value.a and self.b == __value.b
+
+        def size(self) -> int:
+            return self.a.size() + self.b.size() + 1
+
+        def variables(self) -> set[Var]:
+            return self.a.variables() | self.b.variables()
+
+        def subst(self, sigma: Subst | dict[Var, Term]) -> Term:
+            return Add(self.a.subst(sigma), self.b.subst(sigma))
+        
+    class Sca(TypeTerm, StdTerm):
+        fsymbol_print = 'sca'
+        fsymbol = 'S'
+
+        def __init__(self):
+            super().__init__()
+
+        def tex(self) -> str:
+            raise NotImplementedError()
+        
+        def subst(self, sigma: Subst | dict[Var, Term]) -> TypeTerm:
+            return StdTerm.subst(self, sigma) # type: ignore
+
+    typing_trs = TypeChecker([])
+
+    typing_trs.append(
+        TypingRule(
+            "TYPING-ADD",
+            lhs = Add(Typing(Var('a'), Sca()), Typing(Var('b'), Sca())),
+            rhs = Typing(Add(Typing(Var('a'), Sca()), Typing(Var('b'), Sca())), Sca())
+        )
+    )
+
+    a = Add(Typing(Var('a'), Sca()), Typing(Var('b'), Sca()))
+    b = Typing(Add(Typing(Var('a'), Sca()), Typing(Var('b'), Sca())), Sca())
+    assert typing_trs.normalize(a) == b
+
+    a = Add(Typing(Var('a'), Sca()), Add(Typing(Var('a'), Sca()), Typing(Var('b'), Sca())))
+    b = Typing(
+            Add(Typing(Var('a'), Sca()), 
+                Typing(
+                    Add(
+                        Typing(Var('a'), Sca()), 
+                        Typing(Var('b'), Sca())),
+                    Sca()
+                    )
+                ), 
+            Sca()
+        )
+    assert typing_trs.normalize(a) == b
+
