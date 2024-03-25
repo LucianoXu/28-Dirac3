@@ -29,8 +29,6 @@ def test_bind_substitute():
     assert sub(a) == b
 
 
-from diracdec.theory.typed_trs import *
-
 def test_typing_mechanism():
 
     class Add(StdTerm):
@@ -79,6 +77,20 @@ def test_typing_mechanism():
         def subst(self, sigma: Subst | dict[Var, Term]) -> TypeTerm:
             return StdTerm.subst(self, sigma) # type: ignore
 
+
+    class Zero(TypeTerm, StdTerm):
+        fsymbol_print = '0'
+        fsymbol = 'Z'
+
+        def __init__(self):
+            super().__init__()
+
+        def tex(self) -> str:
+            raise NotImplementedError()
+        
+        def subst(self, sigma: Subst | dict[Var, Term]) -> TypeTerm:
+            return StdTerm.subst(self, sigma) # type: ignore
+    
     typing_trs = TypeChecker([])
 
     typing_trs.append(
@@ -88,6 +100,16 @@ def test_typing_mechanism():
             rhs = Typing(Add(Typing(Var('a'), Sca()), Typing(Var('b'), Sca())), Sca())
         )
     )
+
+
+    typing_trs.append(
+        TypingRule(
+            "TYPING-ZERO",
+            lhs = Zero(),
+            rhs = Typing(Zero(), Sca())
+        )
+    )
+
 
     a = Add(Typing(Var('a'), Sca()), Typing(Var('b'), Sca()))
     b = Typing(Add(Typing(Var('a'), Sca()), Typing(Var('b'), Sca())), Sca())
@@ -106,4 +128,22 @@ def test_typing_mechanism():
             Sca()
         )
     assert typing_trs.normalize(a) == b
+
+    # typed trs
+    trs = TypedTRS(typing_trs, [])
+
+    trs.append(
+        CanonicalRule(
+            "ADD-0",
+            lhs = Add(Typing(Var('a'), Sca()), Zero()),
+            rhs = Typing(Var('a'), Sca())
+        )
+    )
+
+    a = Add(Typing(Var('a'), Sca()), Zero())
+    checked_a = trs.type_checking(a)
+    assert trs.normalize(checked_a, verbose=True) == Typing(Var('a'), Sca())
+
+
+
 
