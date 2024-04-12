@@ -71,12 +71,11 @@ class Term(ABC):
         '''
         pass
 
-    @abstractmethod
     def tex(self) -> str:
         '''
         return the texcode of the term.
         '''
-        pass
+        raise NotImplementedError()
 
     @abstractmethod
     def __eq__(self, __value: Term) -> bool:
@@ -1195,11 +1194,25 @@ class TypeTerm(Term):
     '''
     fsymbol_print = 'type-term'
     fsymbol = 'TYPE-TERM'
-    ...
 
     @abstractmethod
     def subst(self, sigma: Subst | dict[Var, Term]) -> TypeTerm:
-        raise NotImplementedError()
+        pass
+
+class StdTypeTerm(TypeTerm, StdTerm):
+    '''
+    The standard type term.
+    '''
+
+    fsymbol_print = 'std-type-term'
+    fsymbol = 'STD-TYPE-TERM'
+    
+    def __init__(self, *args: Term):
+        StdTerm.__init__(self, *args)
+
+    def subst(self, sigma: Subst | dict[Var, Term]) -> TypeTerm:
+        return StdTerm.subst(self, sigma) # type: ignore
+
 
 class Typing(Term):
     '''
@@ -1392,9 +1405,14 @@ class TypingRule(Rule):
             assert not isinstance(lhs, Typing), "the LHS should not be typed already"
 
             if isinstance(lhs, StdTerm):
-                assert all(isinstance(arg, Typing) for arg in lhs.args), "the LHS parameters should start with typed terms"
+                # this is disabled because sometimes we need to use the typing symbol as the first parameter
+
+                # assert all(isinstance(arg, Typing) for arg in lhs.args), "the LHS parameters should start with typed terms"
+
+                pass
             
             # type inferrence of AC symbol does not go into the canonical treatment by unifcation, because we want the typing to be flattened, and the well typed conditions needs to be checked across all parameters.
+            
             if isinstance(lhs, AC):
                 raise NotImplementedError("AC is not supported yet.")
         
