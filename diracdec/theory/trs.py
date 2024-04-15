@@ -4,7 +4,7 @@ The architecture of the term rewriting system
 
 from __future__ import annotations
 import sys
-from typing import Callable, Set, TextIO, Tuple, Any, Dict, List, Sequence, Container
+from typing import Callable, Set, TextIO, Tuple, Any, Dict, List, Sequence, Container, Type
 
 from abc import ABC, abstractmethod
 
@@ -160,6 +160,7 @@ class Var(Term):
 class StdTerm(Term):
     fsymbol_print = 'std'
     fsymbol = 'STD'
+    arity = 0
 
     def __init__(self, *args: Term):
         self.args = args
@@ -179,6 +180,8 @@ class StdTerm(Term):
             ))
 
     def __repr__(self) -> str:
+        if len(self.args) == 0:
+            return self.fsymbol
         return f'{self.fsymbol}({", ".join(map(repr, self.args))})'
 
     def __eq__(self, other: Term) -> bool:
@@ -408,6 +411,7 @@ class MultiBindTerm(Term):
 # other specified terms (Commutative, AC, infix binary, ...)
     
 class InfixBinary(StdTerm):
+    arity = 2
     def __init__(self, L : Term, R : Term):
         super().__init__(L, R)
 
@@ -426,6 +430,8 @@ class CommBinary(StdTerm):
     '''
     (not infix)
     '''
+    arity = 2
+
     def __init__(self, L : Any, R : Any):
         super().__init__(L, R)
 
@@ -445,6 +451,8 @@ class CommBinary(StdTerm):
         return super().subst(sigma)
     
 class Assoc(StdTerm):
+    arity = 2
+
     def __new__(cls, *tup: Any):
         '''
         return the element directly when tuple has only one element
@@ -507,6 +515,7 @@ class Assoc(StdTerm):
         return tuple(self.args[i] for i in range(len(self.args)) if i not in idx)
 
 class AC(StdTerm):
+    arity = 2
 
     def __new__(cls, *tup: Any):
         '''
@@ -813,6 +822,8 @@ class Rule:
         '''
         note: the rewrite_method checks whether the current rule can rewrite the given term (not including subterms)
         '''
+
+        assert isinstance(rule_repr, (str, type(None))), "The rule_repr should be a string or None."
     
         self.rule_name = rule_name
         self.lhs = lhs
@@ -822,7 +833,12 @@ class Rule:
 
     def __str__(self) -> str:
         return str(HSeqBlock(
-            self.rule_name, " ", str(self.lhs), ' → ', str(self.rhs),
+            f"(* {self.rule_name} *)", 
+            " ", 
+            str(self.lhs), 
+            ' -> ', 
+            str(self.rhs),
+            ' ;',
             v_align='c'))
 
     def __repr__(self) -> str:
@@ -831,7 +847,7 @@ class Rule:
         
         str_lhs = self.lhs if isinstance(self.lhs, str) else repr(self.lhs)
         str_rhs = self.rhs if isinstance(self.rhs, str) else repr(self.rhs)
-        return f'{str_lhs} -> {str_rhs} ;'
+        return f'(* {self.rule_name} *)\t\t{str_lhs} -> {str_rhs} ;'
     
     def subst(self, sigma : Subst|dict[Var, Term]) -> Rule:
         if isinstance(sigma, dict):
@@ -874,7 +890,7 @@ class CanonicalRule(Rule):
         self.rule_name = rule_name
         self.lhs = lhs
         self.rhs = rhs
-        self.rule_repr = repr
+        self.rule_repr = rule_repr
         self.rewrite_method = canonical_rewrite
 
         
@@ -887,6 +903,71 @@ class CanonicalRule(Rule):
             self.lhs.subst(sigma), 
             self.rhs.subst(sigma))
     
+
+#############################################################
+# a signature
+
+class Signature:
+    def __init__(self, symbols: Sequence[Type[Term]]):
+        self.symbols = list(symbols)
+
+    def append(self, symbol: Type[Term]):
+        self.symbols.append(symbol)
+
+    @staticmethod
+    def cime2_repr_single(std_type: Type[Term]) -> str:
+        '''
+        The description of a symbol in the signature language of CiME2.
+        '''
+        prefix = f"(* {std_type.__name__} *)\t{std_type.fsymbol} \t\t:"
+        if issubclass(std_type, AC):
+            sort = f" AC ;"
+        
+        elif issubclass(std_type, InfixBinary):
+            sort = f" infix binary ;"
+        
+        elif issubclass(std_type, CommBinary):
+            sort = f" commutative ;"
+        
+        elif issubclass(std_type, StdTerm):
+            if std_type.arity == 0:
+                sort = f" constant ;"
+            
+            elif std_type.arity == 1:
+                sort = f" unary ;"
+            
+            elif std_type.arity == 2:
+                sort = f" binary ;"
+            
+            else:
+                sort = f" {std_type.arity} ;"
+
+        elif issubclass(std_type, Typing):
+            sort = f" infix binary ;"
+        
+        else:
+            raise ValueError("The symbol is not supported in CiME2.")
+
+        return prefix + sort
+        
+
+    def cime2_repr(self) -> str:
+        '''
+        The representation is intended for CiME2 signature.
+        '''
+        res = '''
+let F = signature
+"
+'''
+        for symbol in self.symbols:
+            res += self.cime2_repr_single(symbol) + "\n"
+        
+        res += '''
+";
+'''
+        return res
+
+        
 
 
 ######################################################################
@@ -943,7 +1024,7 @@ class TRS:
         self.rule_seq_name.append(rule.rule_name)
 
         # extend the rules automatically
-        if isinstance(rule, CanonicalRule) and isinstance(rule.lhs, AC):
+        if isinstance(rule, (CanonicalRule, TypingRule)) and isinstance(rule.lhs, AC) and isinstance(rule.rhs, Term):
             varX = new_var(rule.lhs.variables() | rule.rhs.variables(), "X")
             ext_rule = CanonicalRule(
                 rule.rule_name + "-EXT",
@@ -986,6 +1067,35 @@ class TRS:
         for rule in self.extended_rules:
             res += str(rule) + "\n"
         return res
+    
+    def __repr__(self) -> str:
+        '''
+        This representation is intended for CiME2 checking.
+        '''
+        res = ""
+        for rule in self.extended_rules:
+            res += repr(rule) + "\n"
+        return res
+    
+    def cime_vars_repr(self) -> str:
+        '''
+        The description of the variables in the signature language of CiME2.
+        '''
+        res = f'''
+let X = vars " {' '.join(map(str, list(self.variables()))) + " x0 x1 x2 x3 x4 x5 x6 x7"} ";
+'''
+        return res
+    
+    def cime_trs_repr(self) -> str:
+        '''
+        The description of the TRS in the signature language of CiME2.
+        '''
+        res = f'''
+let R = TRS F X "
+{repr(self)}
+";
+'''     
+        return res
 
     def ordered_str(self) -> str:
         res = ""
@@ -1005,17 +1115,6 @@ class TRS:
         for rule in self.extended_rules:
             if isinstance(rule.lhs, Term) and isinstance(rule.rhs, Term):
                 res |= rule.lhs.variables() | rule.rhs.variables()
-        return res
-    
-    def CiME2_rules(self) -> str:
-        '''
-        output the TRS rules for CiME2 as a string
-        '''
-        res = ""
-
-        # print the rules
-        for rule in self.rule_seq:
-            res += repr(rule) + "\n"
         return res
     
     def subst(self, sigma : Subst) -> TRS:
@@ -1219,7 +1318,7 @@ class Typing(Term):
     The symbol that represents a typing relation.
     '''
     fsymbol_print = 'typing'
-    fsymbol = 'TYPING'
+    fsymbol = '$'
 
     def __init__(self, term: Term, type: TypeTerm):
 
@@ -1235,7 +1334,7 @@ class Typing(Term):
         )))
     
     def __repr__(self) -> str:
-        return rf'({repr(self.term)} : {repr(self.type)})'
+        return rf'({repr(self.term)} $ {repr(self.type)})'
     
     def tex(self) -> str:
         return rf' \left ( {self.term} : {self.type} \right )'
@@ -1286,106 +1385,19 @@ class FunType(TypeTerm):
     
     def subst(self, sigma: Subst | dict[Var, Term]) -> Term:
         return type(self)(self.arg_type.subst(sigma), self.ret_type.subst(sigma))
-
-
-class TypingMatching:
-    '''
-    A matching for type checking
-    '''
-    def __init__(self, ineqs : List[Tuple[Term, Term]]):
-        self.ineqs = ineqs
-
-    def __str__(self) -> str:
-        
-        return "{" + ", ".join([f"{lhs} ≲? {rhs}" for lhs, rhs in self.ineqs]) + "}"
-    
-    @property
-    def variables(self) -> set[Var]:
-        res = set()
-        for lhs, rhs in self.ineqs:
-            res |= lhs.variables() | rhs.variables()
-        return res        
     
 
-    def solve(self) -> Subst | None:
-        return self.solve_matching(self.ineqs)
-
-    @staticmethod
-    def solve_matching(ineqs: List[Tuple[Term, Term]]) -> Subst | None:
-
-        subst : dict[Var, Term] = {}
-
-        while len(ineqs) > 0:
-            lhs, rhs = ineqs[0]
-
-            if isinstance(lhs, Var):
-                if lhs in subst.keys():
-                    if Subst(subst)(lhs) == rhs:
-                        ineqs = ineqs[1:]
-                        continue
-                    else:
-                        return None
-                else:
-                    subst[lhs] = rhs
-                    ineqs = ineqs[1:]
-                    continue
-
-            # being function constructions
-            elif isinstance(lhs, StdTerm):
-                if isinstance(rhs, Var):
-                    return None
-            
-                elif isinstance(rhs, StdTerm):
-                    if type(lhs) == type(rhs):
-                        ineqs = ineqs[1:]
-                        for i in range(len(lhs.args)):
-                            ineqs.append((lhs.args[i], rhs.args[i]))
-                        continue
-
-                    else:
-                        return None
-                    
-                    
-                else:
-                    return None
-
-            elif isinstance(rhs, Typing):
-                if type(lhs) == type(rhs):
-                    assert isinstance(lhs, Typing)
-                    ineqs = ineqs[1:]
-                    ineqs.append((lhs.term, rhs.term))
-                    ineqs.append((lhs.type, rhs.type))
-                    continue
-
-                else:
-                    return None                    
-                
-            # if there are terms outside the term rewriting system
-            else:
-                if lhs == rhs:
-                    ineqs = ineqs[1:]
-                    continue
-                else:
-                    return None
-                    
-        return Subst(subst)
-
-
-    @staticmethod
-    def single_match(lhs : Term, rhs : Term) -> Subst | None:
-        return TypingMatching.solve_matching([(lhs, rhs)])
-    
 
 def canonical_typing(rule: TypingRule, trs: TRS, term: Term) -> Term|None:
     
     assert isinstance(rule.lhs, Term)
     assert isinstance(rule.rhs, Typing)
 
-    subst = TypingMatching.single_match(rule.lhs, term)
-    if subst is None:
+    subst = Matching.single_match(rule.lhs, term)
+    if len(subst) == 0:
         return None
     else:
-        return subst(rule.rhs)
+        return subst[0](rule.rhs)
 
 class TypingRule(Rule):
     '''
@@ -1399,10 +1411,12 @@ class TypingRule(Rule):
                  rhs: Typing|str,
                  rewrite_method : Callable[[TypingRule, TRS, Term], Term|None] = canonical_typing,
                  rule_repr: str|None = None):
+        
+        if isinstance(rhs, TypeTerm):
+            assert isinstance(rhs, Typing), "the RHS should be a typing symbol"
 
         # check whether the rule is well-formed
         if isinstance(lhs, Term):
-            assert not isinstance(lhs, Typing), "the LHS should not be typed already"
 
             if isinstance(lhs, StdTerm):
                 # this is disabled because sometimes we need to use the typing symbol as the first parameter
@@ -1411,13 +1425,15 @@ class TypingRule(Rule):
 
                 pass
             
-            # type inferrence of AC symbol does not go into the canonical treatment by unifcation, because we want the typing to be flattened, and the well typed conditions needs to be checked across all parameters.
-            
-            if isinstance(lhs, AC):
-                raise NotImplementedError("AC is not supported yet.")
-        
-        if isinstance(rhs, TypeTerm):
+
+        # if type inferrence of AC symbol want to go into the canonical treatment by unifcation, we want the typing to be flattened. The constraint is that the RHS typing and the LHS argument typing should be the same. And we need an extension rule to ``flatten'' the typing of AC symbol.
+
+        if isinstance(lhs, AC):
             assert isinstance(rhs, Typing), "the RHS should be a typing symbol"
+
+            assert lhs.args[0].type == rhs.type and lhs.args[1].type == rhs.type, "the typing of the AC symbol should be the same as the RHS"
+                
+
         
         self.rule_name = rule_name
         self.lhs = lhs
@@ -1426,6 +1442,9 @@ class TypingRule(Rule):
         self.rule_repr = rule_repr
 
     def subst(self, sigma: Subst | dict[Var, Term]) -> TypingRule:
+        if isinstance(sigma, dict):
+            sigma = Subst(sigma)
+            
         new_lhs = self.lhs.subst(sigma) if isinstance(self.lhs, Term) else self.lhs
         new_rhs = self.rhs.subst(sigma) if isinstance(self.rhs, Typing) else self.rhs
         return type(self)(self.rule_name, new_lhs, new_rhs, self.rewrite_method, self.rule_repr)
@@ -1439,6 +1458,50 @@ class TypeChecker(TRS):
     def __init__(self, rules: Sequence[Rule]):
         super().__init__(rules)
 
+
+    def append(self, rule: Rule) -> None:
+        super().append(rule)
+
+        # add the flatten rule
+        if isinstance(rule.lhs, AC) and isinstance(rule.rhs, Typing):
+            ac = type(rule.lhs)
+            T = rule.rhs.type
+            varX1, varX2, varX3 = new_var_ls(rule.lhs.variables() | rule.rhs.variables(), 3, "X")
+
+            flt_rule = TypingRule(
+                rule.rule_name + "-FLT",
+
+                # lhs = [((A:S) + (B:S):S) + X]:S
+                lhs = Typing(
+                    ac(
+                        Typing(
+                            ac(
+                                Typing(varX1, T),
+                                Typing(varX2, T)
+                            ),
+                            T
+                        ),
+                        varX3
+                    ),
+                    T
+                ),
+
+                # rhs = (A:S) + (B:S) + X :S
+                rhs = Typing(
+                    ac(
+                        Typing(varX1, T),
+                        Typing(varX2, T),
+                        varX3
+                    ),
+                    T
+                )
+            )
+            self.extended_rules.append(flt_rule)
+            self.rule_seq.append(flt_rule)
+            self.rule_seq_name.append(flt_rule.rule_name)
+
+
+    
     
     def copy(self) -> TypeChecker:
         res = TypeChecker([])
@@ -1465,7 +1528,8 @@ class TypeChecker(TRS):
             term: Term, 
             verbose: bool = False, 
             stream: TextIO = sys.stdout, 
-            step_limit: int | None = None) -> Term:
+            step_limit: int | None = None,
+            well_typed_check: bool = True) -> Term:
         '''
         Conduct the type checking and inferrence.
         '''
@@ -1499,8 +1563,9 @@ class TypeChecker(TRS):
             current_term = new_term
 
         # check the final term
-        if not isinstance(current_term, Typing):
-            raise ValueError("The term is not well-typed.")
+        if well_typed_check:
+            if not isinstance(current_term, Typing):
+                raise ValueError(f"The term {current_term} is not well-typed.")
 
         return current_term
 
@@ -1573,13 +1638,13 @@ class TypedTRS(TRS):
         res.type_checker = self.type_checker.copy()
         return res
     
-    def rule_type_checking(self, rule: Rule) -> Rule:
+    def rule_type_checking(self, rule: Rule, well_typed_check: bool = True) -> Rule:
         '''
         Apply type inference and type checking on the canonical rule.
         '''
         if isinstance(rule, CanonicalRule):
-            new_lhs = self.type_checker.normalize(rule.lhs)
-            new_rhs = self.type_checker.normalize(rule.rhs)
+            new_lhs = self.type_checker.normalize(rule.lhs, well_typed_check = well_typed_check)
+            new_rhs = self.type_checker.normalize(rule.rhs, well_typed_check = well_typed_check)
 
             return CanonicalRule(rule.rule_name, new_lhs, new_rhs)
 
@@ -1605,19 +1670,80 @@ class TypedTRS(TRS):
         self.rule_seq_name.append(type_checked_rule.rule_name)
 
         # extend the rules automatically
-        if isinstance(untyped_rule, CanonicalRule) and isinstance(untyped_rule.lhs, AC):
-            varX = new_var(untyped_rule.lhs.variables() | untyped_rule.rhs.variables(), "X")
+        if isinstance(type_checked_rule.lhs, Typing) and isinstance(type_checked_rule.lhs.term, AC) and isinstance(type_checked_rule.rhs, Typing):
+            varX = new_var(type_checked_rule.lhs.variables() | type_checked_rule.rhs.variables(), "X")
+
+            ac = type(type_checked_rule.lhs.term)
+            T = type_checked_rule.rhs.type
+            
             ext_rule = CanonicalRule(
                 untyped_rule.rule_name + "-EXT",
-                lhs = type(untyped_rule.lhs)(untyped_rule.lhs, varX),
-                rhs = type(untyped_rule.lhs)(untyped_rule.rhs, varX)
+                lhs = Typing(
+                        ac(
+                            type_checked_rule.lhs.term,
+                            Typing(varX, T)
+                        ),
+                        T
+                    ),
+                rhs = Typing(
+                        ac(
+                            type_checked_rule.rhs,
+                            varX
+                        ),
+                        T
+                    )
             )
-            
-            type_checked_ext_rule = self.rule_type_checking(ext_rule)
 
-            self.extended_rules.append(type_checked_ext_rule)
-            self.rule_seq.append(type_checked_ext_rule)
-            self.rule_seq_name.append(type_checked_ext_rule.rule_name)
+            self.extended_rules.append(ext_rule)
+            self.rule_seq.append(ext_rule)
+            self.rule_seq_name.append(ext_rule.rule_name)
+
+        # add the flatten rule
+        if isinstance(type_checked_rule.lhs, Typing) and isinstance(type_checked_rule.lhs.term, AC) and isinstance(type_checked_rule.rhs, Typing):
+
+            ac = type(type_checked_rule.lhs.term)
+            T = type_checked_rule.rhs.type
+            varX1, varX2, varX3 = new_var_ls(type_checked_rule.lhs.variables() | type_checked_rule.rhs.variables(), 3, "X")
+
+            flt_rule = TypingRule(
+                type_checked_rule.rule_name + "-FLT",
+
+                # lhs = [((A:S) + (B:S):S) + X]:S
+                lhs = Typing(
+                    ac(
+                        Typing(
+                            ac(
+                                Typing(varX1, T),
+                                varX2,
+                            ),
+                            T
+                        ),
+                        varX3
+                    ),
+                    T
+                ),
+
+                # rhs = (A:S) + (B:S) + X :S
+                rhs = Typing(
+                    ac(
+                        Typing(varX1, T),
+                        varX2,
+                        varX3
+                    ),
+                    T
+                )
+            )
+            self.extended_rules.append(flt_rule)
+            self.rule_seq.append(flt_rule)
+            self.rule_seq_name.append(flt_rule.rule_name)
+
+
+    def append_canonical(self, 
+                        rule_name:str,
+                        lhs: Term, 
+                        rhs: Term,
+                        rule_repr: str|None = None) -> None:
+        self.append(CanonicalRule(rule_name, lhs, rhs, rule_repr))
 
     def subst(self, sigma : Subst) -> TypedTRS:
         '''
@@ -1637,3 +1763,24 @@ class TypedTRS(TRS):
         Conduct the type checking and inferrence.
         '''
         return self.type_checker.normalize(term)
+    
+    def normalize(self, term: Term, verbose: bool = False, stream: TextIO = sys.stdout, step_limit: int | None = None, alg: str = "inner_most") -> Term:
+
+        # check the type first
+        type_checked_term = self.type_checking(term)
+
+        return super().normalize(type_checked_term, verbose, stream, step_limit, alg)
+    
+    def original_rules_repr(self) -> str:
+        res = ""
+        for rule in self.rules:
+            res += repr(rule) + "\n"
+        return res
+    
+    def subtrs(self, rule_names: List[str]) -> TypedTRS:
+        '''
+        return the sub TRS with the rules with the given names
+        '''
+        result = TypedTRS(self.type_checker, [rule for rule in self.rules if rule.rule_name in rule_names])
+        result.set_rule_seq(rule_names)
+        return result

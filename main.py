@@ -2,8 +2,24 @@ from diracdec.theory.typeddirac import *
 
 if __name__ == "__main__":
 
-    a = parse("PAIR(PAIR((a : X), (b : Y)), (c : Z))")
-    lhs = parse("0K(T)")
-    rhs = parse("(0K : K(T))")
-    print(repr(a))
-    print(typing_trs.normalize(a, verbose=True))
+    print(signature.cime2_repr())
+    # print(type_checker.cime_vars_repr())
+    # print(type_checker.cime_trs_repr())
+    print(typed_trs.cime_vars_repr())
+
+    # print(typed_trs.original_rules_repr())
+
+    print(typed_trs.cime_trs_repr())    
+
+    b = parse('''
+              < s : U ^ V | 
+              @ (
+                    
+                        (
+                            (o1 : O(U, W)) & 
+                            (o2 : O(V, R))
+                        ) @ (k : K(W ^ R))
+              )
+              ''')
+    # print(type_checker.normalize(b))
+

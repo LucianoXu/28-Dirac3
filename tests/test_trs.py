@@ -91,9 +91,9 @@ def test_typing_mechanism():
         def subst(self, sigma: Subst | dict[Var, Term]) -> TypeTerm:
             return StdTerm.subst(self, sigma) # type: ignore
     
-    typing_trs = TypeChecker([])
+    type_checker = TypeChecker([])
 
-    typing_trs.append(
+    type_checker.append(
         TypingRule(
             "TYPING-ADD",
             lhs = Add(Typing(Var('a'), Sca()), Typing(Var('b'), Sca())),
@@ -102,7 +102,7 @@ def test_typing_mechanism():
     )
 
 
-    typing_trs.append(
+    type_checker.append(
         TypingRule(
             "TYPING-ZERO",
             lhs = Zero(),
@@ -113,7 +113,7 @@ def test_typing_mechanism():
 
     a = Add(Typing(Var('a'), Sca()), Typing(Var('b'), Sca()))
     b = Typing(Add(Typing(Var('a'), Sca()), Typing(Var('b'), Sca())), Sca())
-    assert typing_trs.normalize(a) == b
+    assert type_checker.normalize(a) == b
 
     a = Add(Typing(Var('a'), Sca()), Add(Typing(Var('a'), Sca()), Typing(Var('b'), Sca())))
     b = Typing(
@@ -127,10 +127,10 @@ def test_typing_mechanism():
                 ), 
             Sca()
         )
-    assert typing_trs.normalize(a) == b
+    assert type_checker.normalize(a) == b
 
     # typed trs
-    trs = TypedTRS(typing_trs, [])
+    trs = TypedTRS(type_checker, [])
 
     trs.append(
         CanonicalRule(

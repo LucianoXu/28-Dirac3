@@ -11,6 +11,8 @@ precedence = (
     ('left', '@'),
     ('left', '&'),
     ('left', '^'),
+    ('left', 'CADD'),
+    ('left', 'CMUL'),
 )
 
 start = 'trs-item'
@@ -46,6 +48,12 @@ def p_type_3(p):
     '''
     p[0] = ProdType(p[1], p[3])
 
+def p_type_CS(p):
+    '''
+    term    : CS
+    '''
+    p[0] = ComplexScalar()
+
 def p_type_4(p):
     '''
     term    : S
@@ -69,6 +77,42 @@ def p_type_7(p):
     term    : O '(' term ',' term ')'
     '''
     p[0] = Opt(p[3], p[5])
+
+def p_term_C1(p):
+    '''
+    term    : C '(' term ')'
+    '''
+    p[0] = Complex(p[3])
+
+def p_term_C2(p):
+    '''
+    term    : term CADD term
+    '''
+    p[0] = CompAdd(p[1], p[3])
+
+def p_term_C3(p):
+    '''
+    term    : term CMUL term
+    '''
+    p[0] = CompMul(p[1], p[3])
+
+def p_term_C4(p):
+    '''
+    term    : C0
+    '''
+    p[0] = CompZero()
+
+def p_term_C5(p):
+    '''
+    term    : C1
+    '''
+    p[0] = CompOne()
+
+def p_term_C6(p):
+    '''
+    term    : CADJ '(' term ')'
+    '''
+    p[0] = CompAdj(p[3])
 
 
 def p_term_B1(p):

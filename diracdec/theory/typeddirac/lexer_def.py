@@ -2,10 +2,18 @@
 from ply import lex
 
 reserved = {
+    'CS': 'CS',
     'S' : 'S',
     'K' : 'K',
     'B' : 'B',
     'O' : 'O',
+
+    'CADD'  : 'CADD',
+    'CMUL'  : 'CMUL',
+    'C0'    : 'C0',
+    'C1'    : 'C1',
+    'CADJ'  : 'CADJ',
+    'C' : 'C',
 
     'PAIR'  : 'PAIR',
     'FST'   : 'FST',
